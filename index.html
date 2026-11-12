@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FitPet 精靈遠征">
+  <title>FitPet 精靈遠征養成</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    [v-cloak] { display: none !important; }
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+    }
+    body {
+      background: linear-gradient(135deg, #FDF6EC 0%, #F5EFE6 50%, #EFE8DC 100%);
+      color: #292524;
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    }
+    .app-shell {
+      height: 100vh;
+      height: 100dvh;
+      padding-top: var(--sat);
+    }
+    .safe-bottom {
+      padding-bottom: calc(8px + var(--sab));
+    }
+    .meadow-offset {
+      bottom: calc(64px + var(--sab));
+    }
+    input, textarea, select { user-select: text; }
+    ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 24px -6px rgba(120, 90, 60, 0.08), 0 2px 6px -1px rgba(120, 90, 60, 0.04);
+    }
+    @keyframes petWaddle {
+      0%, 100% { transform: translateY(0px) rotate(-4deg); }
+      50% { transform: translateY(-6px) rotate(4deg); }
+    }
+    .pet-walk { animation: petWaddle 0.5s ease-in-out infinite; }
+    @keyframes petIdle {
+      0%, 100% { transform: scaleY(1) translateY(0); }
+      50% { transform: scaleY(0.93) translateY(2px); }
+    }
+    .pet-idle { animation: petIdle 2.1s ease-in-out infinite; }
+    @keyframes petJump {
+      0%, 100% { transform: translateY(0) scale(1); }
+      40% { transform: translateY(-20px) scale(1.15); }
+    }
+    .pet-jump { animation: petJump 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes hitShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px) rotate(-4deg); }
+      40% { transform: translateX(8px) rotate(4deg); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+    .hit-shake { animation: hitShake 0.35s ease-in-out; }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(0.85); opacity: 1; }
+      100% { transform: translateY(-30px) scale(1.15); opacity: 0; }
+    }
+    .dmg-float { animation: floatUp 0.75s ease-out forwards; }
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .pop-in { animation: popIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  </style>
+  <script>
+    (function() {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, 512, 512);
+      g.addColorStop(0, '#FDBA74'); g.addColorStop(1, '#F472B6');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.roundRect(0, 0, 512, 512, 128); ctx.fill();
+      ctx.font = '240px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('🐉', 256, 270);
+      const iconUrl = c.toDataURL('image/png');
+      const link = document.createElement('link');
+      link.rel = 'apple-touch-icon'; link.href = iconUrl;
+      document.head.appendChild(link);
+      const manifest = {
+        name: 'FitPet 精靈遠征養成',
+        short_name: 'FitPet',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#FFFBF5',
+        theme_color: '#FDBA74',
+        icons: [{ src: iconUrl, sizes: '512x512', type: 'image/png' }]
+      };
+      const mLink = document.createElement('link');
+      mLink.rel = 'manifest';
+      mLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
+      document.head.appendChild(mLink);
+    })();
+  </script>
+</head>
+<body class="overflow-hidden">
+  <div id="app" v-cloak class="app-shell flex flex-col max-w-md mx-auto w-full bg-[#FFFBF5] sm:shadow-2xl sm:border-x sm:border-stone-200/60 relative overflow-hidden">
+
+    <!-- Ambient Element Aura Background -->
+    <div class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl opacity-35 transition-colors duration-700" :style="{ backgroundColor: activePet.auraColor }"></div>
+    <div class="pointer-events-none absolute top-40 -left-24 w-64 h-64 rounded-full blur-3xl opacity-25 bg-amber-200"></div>
+
+    <!-- Floating Toast -->
+    <div v-if="toast.show" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900/95 text-white px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-2xl flex items-center gap-2 backdrop-blur-md max-w-[92vw] pop-in border border-white/10">
+      <span class="text-base shrink-0">{{ toast.icon }}</span>
+      <span class="truncate">{{ toast.msg }}</span>
+    </div>
+
+    <!-- Hatch Result Modal -->
+    <div v-if="hatchedPet" class="fixed inset-0 z-50 bg-stone-900/75 backdrop-blur-md flex items-center justify-center p-5">
+      <div class="bg-white w-full max-w-sm rounded-[36px] p-6 text-center shadow-2xl space-y-4 pop-in border-2 border-amber-300 relative overflow-hidden">
+        <div class="inline-block text-xs font-black px-3.5 py-1 rounded-full" :class="rarityBadgeClass(hatchedPet.rarity)">
+          {{ hatchedPet.rarity }} 級新夥伴誕生！ · No.{{ String(hatchedPet.id).padStart(3, '0') }}
+        </div>
+        <div class="w-28 h-28 mx-auto rounded-full bg-gradient-to-b from-amber-100 to-orange-50 flex items-center justify-center shadow-inner">
+          <span class="text-7xl pet-jump">{{ hatchedPet.emoji }}</span>
+        </div>
+        <div>
+          <h3 class="text-xl font-black text-stone-800">{{ hatchedPet.name }}</h3>
+          <p class="text-xs font-bold text-amber-600 mt-1">{{ hatchedPet.elIcon }} {{ hatchedPet.element }}系 · {{ hatchedPet.roleLabel }}</p>
+          <p class="text-[11px] text-stone-500 mt-1">{{ hatchedPet.passiveDesc }}</p>
+        </div>
+        <div class="flex gap-2.5 pt-2">
+          <button @click="hatchedPet = null" class="flex-1 bg-stone-100 text-stone-700 font-bold py-3.5 rounded-2xl text-sm active:scale-95 transition">收入圖鑑</button>
+          <button @click="equipPet(hatchedPet.id); hatchedPet = null" class="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-3.5 rounded-2xl text-sm shadow-md active:scale-95 transition">切換培育！</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portion Selection Modal -->
+    <div v-if="pendingFood" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-md rounded-t-[36px] sm:rounded-[36px] p-6 shadow-2xl space-y-4 pop-in safe-bottom">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-extrabold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-full">🛡️ 已含 +15% 誤差安全緩衝</span>
+            <h3 class="font-black text-stone-800 text-lg mt-1.5">{{ pendingFood.isPhoto ? '📸 ' : '✨ ' }}{{ pendingFood.name }}</h3>
+          </div>
+          <button @click="pendingFood = null" class="w-8 h-8 rounded-full bg-stone-100 text-stone-400 font-bold text-sm">✕</button>
+        </div>
+
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/70 flex justify-between items-center">
+          <div class="text-xs text-stone-500 space-y-0.5">
+            <div>整份基準：<b class="text-stone-700">{{ pendingFood.cal }} kcal</b></div>
+            <div class="text-[11px]">蛋白 {{ pendingFood.p }}g · 碳水 {{ pendingFood.c }}g · 脂 {{ pendingFood.f }}g</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[11px] font-bold text-orange-500">實際攝取</div>
+            <div class="text-2xl font-black text-stone-900">{{ Math.round(pendingFood.cal * portionRatio) }} <span class="text-xs font-bold">kcal</span></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-extrabold text-stone-600 block mb-2">🍽️ 請選擇實際享用份量（共食分攤）：</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button v-for="opt in portionOptions" :key="opt.val" type="button" @click="portionRatio = opt.val"
+              class="py-2.5 px-2 rounded-2xl border text-center transition active:scale-95"
+              :class="portionRatio === opt.val ? 'bg-orange-500 text-white border-orange-500 font-black shadow-sm' : 'bg-white text-stone-700 border-stone-200 font-bold'">
+              <div class="text-xs">{{ opt.label }}</div>
+              <div class="text-[10px] opacity-80">{{ Math.round(opt.val * 100) }}%</div>
+            </button>
+          </div>
+        </div>
+
+        <button @click="confirmPendingFood" class="w-full bg-stone-900 text-white font-extrabold py-3.5 rounded-2xl text-base shadow-lg active:scale-[0.98] transition">
+          ✅ 餵食給「{{ activePet.shortName }}」並賺屬性點
+        </button>
+      </div>
+    </div>
+
+    <!-- TDEE Modal -->
+    <div v-if="showTdeeModal" class="fixed inset-0 z-40 bg-stone-900/55 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-white w-full max-w-md rounded-t-[36px] sm:rounded-[36px] max-h-[90dvh] flex flex-col shadow-2xl overflow-hidden pop-in">
+        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 flex items-center justify-between shrink-0 border-b border-amber-100/60">
+          <div>
+            <h2 class="font-extrabold text-stone-800 text-lg">✨ 能量與赤字戰力設定</h2>
+            <p class="text-xs text-stone-500">精算 BMR 與 TDEE，健康飲食才會觸發赤字暴擊！</p>
+          </div>
+          <button v-if="state.profile.completed" @click="showTdeeModal = false" class="w-8 h-8 rounded-full bg-white text-stone-400 flex items-center justify-center text-sm font-bold shadow-sm">✕</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-bold text-stone-500 block mb-1">性別</label>
+              <select v-model="state.profile.gender" class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+                <option value="male">👦 男生</option>
+                <option value="female">👧 女生</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-stone-500 block mb-1">年齡 (歲)</label>
+              <input v-model.number="state.profile.age" type="number" inputmode="numeric" class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-stone-500 block mb-1">身高 (cm)</label>
+              <input v-model.number="state.profile.height" type="number" step="0.5" inputmode="decimal" class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-stone-500 block mb-1">目前體重 (kg)</label>
+              <input v-model.number="state.profile.weight" type="number" step="0.1" inputmode="decimal" class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-bold text-stone-500 block mb-1">體脂率 % (選填)</label>
+              <input v-model.number="state.profile.bodyFat" type="number" step="0.1" inputmode="decimal" placeholder="例如 22" class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+            </div>
+            <div>
+              <label class="text-xs font-bold text-stone-500 block mb-1">平常活動量</label>
+              <select v-model.number="state.profile.activity" class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+                <option :value="1.2">🛋️ 幾乎久坐</option>
+                <option :value="1.375">🚶 偶爾運動 (1-3天)</option>
+                <option :value="1.55">🏃 規律運動 (3-5天)</option>
+                <option :value="1.725">🔥 運動狂人 (6-7天)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-orange-50/70 p-4 rounded-3xl border border-orange-100 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-stone-700">🎯 啟用體重 / 體脂目標規劃</span>
+              <input type="checkbox" v-model="state.profile.hasGoal" class="w-5 h-5 accent-orange-500 rounded">
+            </div>
+            <div v-if="state.profile.hasGoal" class="space-y-2.5">
+              <div class="grid grid-cols-2 gap-2.5">
+                <input v-model.number="state.profile.targetWeight" type="number" step="0.1" inputmode="decimal" placeholder="目標體重 kg" class="w-full bg-white border border-orange-200 rounded-2xl px-3 py-2 text-base text-stone-800">
+                <input v-model.number="state.profile.targetBodyFat" type="number" step="0.1" inputmode="decimal" placeholder="目標體脂 %" class="w-full bg-white border border-orange-200 rounded-2xl px-3 py-2 text-base text-stone-800">
+              </div>
+              <select v-model.number="state.profile.deficitStrategy" class="w-full bg-white border border-orange-200 rounded-2xl px-3 py-2.5 text-base text-stone-800">
+                <option :value="-300">🌱 輕鬆減脂 (-300卡/日)</option>
+                <option :value="-500">🔥 標準減脂 (-500卡/日)</option>
+                <option :value="0">⚖️ 維持健康 (0卡)</option>
+                <option :value="250">💪 增肌長肉 (+250卡/日)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-br from-amber-400 to-orange-500 text-white p-4 rounded-3xl shadow-md space-y-1">
+            <div class="text-xs font-bold">基礎代謝 BMR: {{ tdeeReport.bmr }} · 總消耗 TDEE: {{ tdeeReport.tdee }} kcal</div>
+            <div class="text-2xl font-black">建議攝取 {{ tdeeReport.recommendedCal }} kcal / 日</div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-white border-t border-stone-100 shrink-0 safe-bottom">
+          <button @click="applyTdeePlan" class="w-full bg-stone-900 text-white font-bold py-3.5 rounded-2xl text-base shadow-lg active:scale-[0.98] transition">
+            ✅ 儲存並開始冒險
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Header: Active Pet Independent Level, CP, Coins & Settings -->
+    <header class="px-4 pt-3 pb-2 shrink-0 bg-[#FFFBF5]/85 backdrop-blur-xl z-20 border-b border-stone-200/50">
+      <div class="flex items-center justify-between mb-1.5">
+        <div @click="activeTab = 'dex'" class="flex items-center gap-1.5 min-w-0 cursor-pointer active:opacity-80">
+          <div class="w-7 h-7 rounded-xl bg-white shadow-xs border border-stone-200/70 flex items-center justify-center text-base shrink-0">
+            {{ activePet.emoji }}
+          </div>
+          <span class="font-black text-xs text-stone-800 truncate">{{ activePet.name }}</span>
+          <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full shrink-0" :class="rarityBadgeClass(activePet.rarity)">
+            Lv.{{ activePetLevel }}
+          </span>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="bg-orange-100/90 text-orange-800 font-black text-[11px] px-2 py-1 rounded-full">
+            ⚔️ {{ totalCP }}
+          </span>
+          <button @click="activeTab = 'dex'" class="bg-yellow-100/90 text-yellow-800 font-black text-[11px] px-2 py-1 rounded-full flex items-center gap-0.5 active:scale-95 transition">
+            <span>🪙</span><span>{{ state.coins }}</span>
+          </button>
+          <button @click="activeTab = 'settings'" class="w-7 h-7 rounded-full bg-white border border-stone-200/80 flex items-center justify-center text-xs shadow-xs active:scale-95 transition">
+            ⚙️
+          </button>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex-1 h-1.5 bg-stone-200/70 rounded-full overflow-hidden">
+          <div class="h-full rounded-full transition-all duration-500" :class="activePetRecord.isSick ? 'bg-purple-400' : 'bg-gradient-to-r from-amber-400 to-orange-500'" :style="{ width: activePetXpPercent + '%' }"></div>
+        </div>
+        <span class="text-[10px] font-bold text-stone-400">圖鑑 {{ state.unlockedPetIds.length }}/750</span>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Content -->
+    <main class="flex-1 overflow-y-auto px-4 sm:px-5 py-3 space-y-3.5 z-10" :class="activeTab === 'home' ? 'pb-36' : 'pb-24'">
+
+      <!-- TAB 1: HOME (DATE SWITCHER + SVG CALORIE RING + WATER + STATS + AI FOOD) -->
+      <template v-if="activeTab === 'home'">
+        <!-- Date Time-Machine Bar -->
+        <div class="flex items-center justify-between bg-white/75 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-stone-200/60">
+          <button @click="shiftDate(-1)" class="w-7 h-7 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 font-black text-xs flex items-center justify-center active:scale-90 transition">◀</button>
+          <div class="text-xs font-extrabold text-stone-700 flex items-center gap-1.5">
+            <span>📅 {{ selectedDate === todayStr ? '今天 (' + selectedDate.slice(5) + ')' : selectedDate }}</span>
+            <button v-if="selectedDate !== todayStr" @click="selectedDate = todayStr" class="text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded-full">回今天</button>
+          </div>
+          <button @click="shiftDate(1)" :disabled="selectedDate >= todayStr" class="w-7 h-7 rounded-xl bg-stone-100 text-stone-600 font-black text-xs flex items-center justify-center active:scale-90 transition disabled:opacity-30">▶</button>
+        </div>
+
+        <!-- Sickness Alert -->
+        <div v-if="activePetRecord.isSick" @click="activeTab = 'dex'" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3.5 rounded-3xl shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">🤒</span>
+            <div>
+              <p class="font-extrabold text-xs">「{{ activePet.shortName }}」虛弱生病（戰力減半）！</p>
+              <p class="text-[11px] text-purple-200">餵食一餐或買「💊 治癒藥水」即可康復</p>
+            </div>
+          </div>
+          <span class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold shrink-0">去治療 →</span>
+        </div>
+
+        <!-- Apple Health Style Radial Calorie Ring & Macros Card -->
+        <section class="glass-card rounded-[32px] p-4 sm:p-5 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold px-2.5 py-1 rounded-full" :class="isHealthyDeficitActive ? 'bg-emerald-100/80 text-emerald-700' : 'bg-amber-100/80 text-amber-700'">
+              {{ isHealthyDeficitActive ? `🔥 健康赤字覺醒 (+${deficitAtkBonus} 攻)` : `🍽️ 需吃滿2餐且達 ${minHealthyIntake} 卡` }}
+            </span>
+            <button @click="showTdeeModal = true" class="text-[11px] font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 px-2.5 py-1 rounded-full transition">
+              目標 {{ state.targetCal }} ✎
+            </button>
+          </div>
+
+          <!-- Radial Gauge + Side Breakdown -->
+          <div class="flex items-center justify-between gap-3">
+            <div class="relative w-28 h-28 shrink-0 flex items-center justify-center">
+              <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#F5F5F4" stroke-width="10" />
+                <circle cx="50" cy="50" r="40" fill="none" :stroke="calPercent > 100 ? '#F43F5E' : '#10B981'" stroke-width="10"
+                  stroke-linecap="round" :stroke-dasharray="251.2" :stroke-dashoffset="251.2 - (Math.min(calPercent, 100) / 100) * 251.2"
+                  class="transition-all duration-700" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="text-[10px] font-bold text-stone-400">剩餘可用</span>
+                <span class="text-xl font-black tracking-tight leading-none mt-0.5" :class="remainingCal >= 0 ? 'text-stone-800' : 'text-rose-500'">
+                  {{ remainingCal }}
+                </span>
+                <span class="text-[9px] font-bold text-stone-400 mt-0.5">kcal</span>
+              </div>
+            </div>
+
+            <div class="flex-1 space-y-2">
+              <div class="flex justify-between items-center bg-stone-50/90 px-3 py-1.5 rounded-2xl text-xs">
+                <span class="text-stone-500 font-bold">🍱 飲食攝取</span>
+                <span class="font-black text-stone-800">{{ dateIntake }} 卡</span>
+              </div>
+              <div class="flex justify-between items-center bg-sky-50/90 px-3 py-1.5 rounded-2xl text-xs">
+                <span class="text-sky-700 font-bold">🏃 運動消耗</span>
+                <span class="font-black text-sky-600">+{{ dateBurned }} 卡</span>
+              </div>
+              <div class="flex justify-between items-center bg-emerald-50/90 px-3 py-1.5 rounded-2xl text-xs">
+                <span class="text-emerald-700 font-bold">🔥 預估赤字</span>
+                <span class="font-black text-emerald-600">{{ dateDeficit }} 卡</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Macro Pills -->
+          <div class="grid grid-cols-3 gap-2 pt-1">
+            <div class="bg-sky-50/70 rounded-2xl p-2 text-center border border-sky-100/60">
+              <div class="text-[10px] font-bold text-sky-700">🥩 蛋白質</div>
+              <div class="text-xs font-black text-stone-800 mt-0.5">{{ dateMacros.p }}/{{ targetMacros.p }}g</div>
+            </div>
+            <div class="bg-amber-50/70 rounded-2xl p-2 text-center border border-amber-100/60">
+              <div class="text-[10px] font-bold text-amber-700">🍚 碳水</div>
+              <div class="text-xs font-black text-stone-800 mt-0.5">{{ dateMacros.c }}/{{ targetMacros.c }}g</div>
+            </div>
+            <div class="bg-purple-50/70 rounded-2xl p-2 text-center border border-purple-100/60">
+              <div class="text-[10px] font-bold text-purple-700">🥑 好油脂</div>
+              <div class="text-xs font-black text-stone-800 mt-0.5">{{ dateMacros.f }}/{{ targetMacros.f }}g</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Compact Hydration Tracker Card -->
+        <section class="glass-card rounded-[28px] px-4 py-3 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-lg shrink-0">💧</div>
+            <div class="min-w-0">
+              <div class="text-xs font-extrabold text-stone-800 truncate">今日飲水 {{ dateWater }} / {{ targetWater }} ml</div>
+              <div class="w-24 h-1.5 bg-stone-200/70 rounded-full overflow-hidden mt-1">
+                <div class="h-full bg-cyan-500 rounded-full transition-all duration-300" :style="{ width: Math.min(100, (dateWater / targetWater) * 100) + '%' }"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <button @click="addWater(250)" class="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200/70 font-extrabold text-xs px-2.5 py-2 rounded-xl active:scale-95 transition">+250ml</button>
+            <button @click="addWater(500)" class="bg-cyan-500 text-white font-extrabold text-xs px-2.5 py-2 rounded-xl shadow-xs active:scale-95 transition">+500ml</button>
+          </div>
+        </section>
+
+        <!-- Independent Pet RPG Stat Card -->
+        <section class="glass-card rounded-[32px] p-4 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="text-sm">{{ activePet.elIcon }}</span>
+              <span class="text-xs font-black text-stone-800 truncate">{{ activePet.element }}·{{ activePet.roleLabel }}</span>
+              <span class="text-[10px] font-bold bg-amber-100/80 text-amber-800 px-2 py-0.5 rounded-full shrink-0">{{ activePet.passiveDesc }}</span>
+            </div>
+            <span v-if="activePetRecord.unspentPoints > 0" class="bg-rose-500 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full animate-bounce shrink-0">
+              剩 {{ activePetRecord.unspentPoints }} 點!
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-rose-50/80 px-3 py-2 rounded-2xl flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-bold text-rose-700">❤️ 體力 HP</div>
+                <div class="text-sm font-black text-stone-800">{{ finalStats.hp }}</div>
+              </div>
+              <button v-if="activePetRecord.unspentPoints > 0" @click="allocateStat('hp')" class="w-7 h-7 rounded-xl bg-rose-500 text-white font-black text-sm active:scale-90 transition">+</button>
+            </div>
+            <div class="bg-orange-50/80 px-3 py-2 rounded-2xl flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-bold text-orange-700">⚔️ 攻擊 ATK</div>
+                <div class="text-sm font-black text-stone-800">{{ finalStats.atk }}</div>
+              </div>
+              <button v-if="activePetRecord.unspentPoints > 0" @click="allocateStat('atk')" class="w-7 h-7 rounded-xl bg-orange-500 text-white font-black text-sm active:scale-90 transition">+</button>
+            </div>
+            <div class="bg-sky-50/80 px-3 py-2 rounded-2xl flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-bold text-sky-700">🛡️ 防禦 DEF</div>
+                <div class="text-sm font-black text-stone-800">{{ finalStats.def }}</div>
+              </div>
+              <button v-if="activePetRecord.unspentPoints > 0" @click="allocateStat('def')" class="w-7 h-7 rounded-xl bg-sky-500 text-white font-black text-sm active:scale-90 transition">+</button>
+            </div>
+            <div class="bg-emerald-50/80 px-3 py-2 rounded-2xl flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-bold text-emerald-700">💨 閃避 DODGE</div>
+                <div class="text-sm font-black text-stone-800">{{ finalStats.dodge }}%</div>
+              </div>
+              <button v-if="activePetRecord.unspentPoints > 0" @click="allocateStat('dodge')" class="w-7 h-7 rounded-xl bg-emerald-500 text-white font-black text-sm active:scale-90 transition">+</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- AI Food Logger -->
+        <section class="glass-card rounded-[32px] p-4 sm:p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-stone-800 text-sm sm:text-base">🍽️ 餵食「{{ activePet.shortName }}」</h2>
+            <span class="text-[10px] font-bold text-amber-700 bg-amber-100/80 px-2.5 py-0.5 rounded-full">含+15%誤差緩衝</span>
+          </div>
+
+          <form @submit.prevent="analyzeAndAddFood" class="space-y-2.5">
+            <div v-if="foodImagePreview" class="relative rounded-2xl overflow-hidden border border-stone-200">
+              <img :src="foodImagePreview" class="w-full h-36 object-cover">
+              <button type="button" @click="foodImagePreview = ''" class="absolute top-2 right-2 bg-stone-900/75 text-white text-xs px-2.5 py-1 rounded-full font-bold">✕ 換一張</button>
+            </div>
+
+            <div class="flex gap-2">
+              <input v-model.trim="foodInput" type="text" :placeholder="foodImagePreview ? '補充菜色說明 (選填)...' : '吃了什麼？打字或拍張照...'" class="flex-1 bg-white border border-stone-200 rounded-2xl px-4 py-3 text-base text-stone-800 focus:outline-none focus:border-orange-400">
+              <label class="w-12 h-12 shrink-0 bg-orange-100 hover:bg-orange-200 text-orange-600 rounded-2xl flex items-center justify-center text-xl cursor-pointer active:scale-95 transition">
+                📷
+                <input type="file" accept="image/*" @change="handleFoodPhoto" class="hidden">
+              </label>
+            </div>
+
+            <button type="submit" :disabled="isEstimating || (!foodInput && !foodImagePreview)" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold py-3 rounded-2xl text-base shadow-md active:scale-[0.98] transition disabled:opacity-40">
+              <span v-if="isEstimating">🔮 AI 精算營養與屬性點...</span>
+              <span v-else>{{ foodImagePreview ? '📸 辨識照片並選份量' : '✨ AI 估算並選份量' }}</span>
+            </button>
+          </form>
+
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <button v-for="p in foodPresets" :key="p.name" @click="openPortionModal(p, false)" class="text-xs bg-white hover:bg-amber-50 text-stone-600 font-semibold border border-stone-200/80 px-2.5 py-1.5 rounded-full active:scale-95 transition">
+              {{ p.icon }} {{ p.name }}
+            </button>
+          </div>
+        </section>
+
+        <!-- Selected Date Meals -->
+        <section v-if="dateMeals.length > 0" class="glass-card rounded-[32px] p-4 sm:p-5 space-y-2">
+          <h3 class="font-extrabold text-stone-700 text-xs">{{ selectedDate === todayStr ? '今日' : selectedDate }} 進食紀錄 ({{ dateMeals.length }})</h3>
+          <div v-for="meal in dateMeals" :key="meal.id" class="flex items-center justify-between p-3 bg-white/80 rounded-2xl border border-stone-100">
+            <div class="min-w-0 pr-2">
+              <div class="font-bold text-stone-800 text-sm truncate">{{ meal.isPhoto ? '📸 ' : '' }}{{ meal.name }}</div>
+              <div class="text-[11px] text-stone-400">蛋白 {{ meal.p }}g · 碳水 {{ meal.c }}g · 脂 {{ meal.f }}g</div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="font-black text-stone-700 text-sm">{{ meal.cal }} 卡</span>
+              <button @click="removeMeal(meal.id)" class="text-stone-300 hover:text-rose-500 text-sm px-1">✕</button>
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <!-- TAB 2: VISUAL DUNGEON RAID (1,200 MONSTERS + AUTO COUNTER PICKER) -->
+      <template v-if="activeTab === 'raid'">
+        <section class="bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 text-white rounded-[32px] p-5 shadow-xl space-y-4 relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold bg-amber-400/20 text-amber-300 px-3 py-1 rounded-full">
+              🏰 遠征第 {{ state.dungeonStage }} 關
+            </span>
+            <span class="text-xs font-bold text-emerald-300">
+              🎟️ 出征券：{{ remainingRaidTickets }}/3
+            </span>
+          </div>
+
+          <!-- Visual VS Battle Arena -->
+          <div class="bg-black/30 rounded-3xl p-4 border border-white/10 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex-1 text-center relative" :class="petHitAnim ? 'hit-shake' : ''">
+                <div v-if="petFloatText" class="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-black text-rose-400 whitespace-nowrap dmg-float z-10">
+                  {{ petFloatText }}
+                </div>
+                <div class="text-4xl mb-1">{{ activePet.emoji }}</div>
+                <div class="text-[11px] font-black text-amber-200 truncate">{{ activePet.name }}</div>
+                <div class="text-[10px] text-slate-300">{{ activePet.elIcon }} {{ activePet.element }} · Lv.{{ activePetLevel }}</div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-1.5">
+                  <div class="h-full bg-emerald-400 transition-all duration-300" :style="{ width: Math.max(0, (arenaPetHp / finalStats.hp) * 100) + '%' }"></div>
+                </div>
+                <div class="text-[10px] font-bold text-emerald-300 mt-0.5">{{ arenaPetHp }}/{{ finalStats.hp }}</div>
+              </div>
+
+              <div class="text-center shrink-0 px-1">
+                <div class="text-sm font-black text-amber-400">VS</div>
+                <span v-if="elementMultiplier > 1" class="inline-block mt-1 text-[9px] font-black bg-emerald-500 text-slate-950 px-1.5 py-0.5 rounded-full animate-pulse">
+                  ⚡克制1.35x
+                </span>
+                <span v-else-if="elementMultiplier < 1" class="inline-block mt-1 text-[9px] font-bold bg-rose-500/30 text-rose-300 px-1.5 py-0.5 rounded-full">
+                  被克0.85x
+                </span>
+                <span v-else class="inline-block mt-1 text-[9px] text-slate-400">均勢1.0x</span>
+              </div>
+
+              <div class="flex-1 text-center relative" :class="bossHitAnim ? 'hit-shake' : ''">
+                <div v-if="bossFloatText" class="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-black text-amber-300 whitespace-nowrap dmg-float z-10">
+                  {{ bossFloatText }}
+                </div>
+                <div class="text-4xl mb-1">{{ currentBoss.emoji }}</div>
+                <div class="text-[11px] font-black text-rose-200 truncate">{{ currentBoss.name }}</div>
+                <div class="text-[10px] text-slate-300">{{ currentBoss.elIcon }} {{ currentBoss.element }} · #{{ currentBoss.monsterNo }}</div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden mt-1.5">
+                  <div class="h-full bg-rose-500 transition-all duration-300" :style="{ width: Math.max(0, (arenaBossHp / currentBoss.hp) * 100) + '%' }"></div>
+                </div>
+                <div class="text-[10px] font-bold text-rose-300 mt-0.5">{{ arenaBossHp }}/{{ currentBoss.hp }}</div>
+              </div>
+            </div>
+
+            <!-- One-Tap Smart Counter Pet Switcher -->
+            <div v-if="bestCounterPet && bestCounterPet.id !== state.activePetId" class="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+              <span class="text-[11px] text-amber-200 truncate">💡 軍師建議：派「{{ bestCounterPet.name }}」可克制！</span>
+              <button @click="equipPet(bestCounterPet.id)" class="bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/40 text-[11px] font-extrabold px-2.5 py-1 rounded-xl shrink-0 active:scale-95 transition">
+                ⚡ 一鍵換將
+              </button>
+            </div>
+          </div>
+
+          <!-- Anti-Starvation / Healthy Deficit Status -->
+          <div v-if="isHealthyDeficitActive" class="bg-emerald-500/15 border border-emerald-400/30 rounded-2xl p-3 space-y-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-emerald-300">🔥 健康熱量赤字覺醒加成</span>
+              <span class="font-black text-emerald-300">+{{ deficitAtkBonus }} 攻擊力</span>
+            </div>
+            <p class="text-[11px] text-slate-300">
+              今日已均衡進食 {{ todayMeals.length }} 餐並創造 <b>{{ todayDeficit }} kcal</b> 健康赤字，精靈戰意高昂！
+            </p>
+          </div>
+          <div v-else class="bg-rose-500/20 border border-rose-400/40 rounded-2xl p-3 space-y-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-black text-rose-300">🍽️ 飢餓低血糖狀態（攻擊 -30%）</span>
+            </div>
+            <p class="text-[11px] text-rose-100/90 leading-relaxed">
+              今日需紀錄<b>至少 2 餐</b>且總熱量達基礎代謝 50%（<b>{{ minHealthyIntake }} kcal</b>，目前 {{ todayIntake }} 卡），才能啟動赤字加成！
+            </p>
+          </div>
+
+          <button @click="startDungeonBattle" :disabled="isBattling || remainingRaidTickets <= 0 || activePetRecord.isSick"
+            class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-stone-950 font-black py-3.5 rounded-2xl text-base shadow-lg active:scale-[0.98] transition disabled:opacity-40">
+            <span v-if="isBattling">⚔️ 回合激戰中...</span>
+            <span v-else-if="activePetRecord.isSick">🤒 「{{ activePet.shortName }}」生病中無法出征</span>
+            <span v-else-if="remainingRaidTickets <= 0">今日出征券已用完 (明日重置)</span>
+            <span v-else>⚔️ 派 {{ activePet.name }} 出征討伐！</span>
+          </button>
+
+          <div v-if="battleLogs.length > 0" class="bg-black/40 rounded-2xl p-3 space-y-1 max-h-36 overflow-y-auto text-xs font-medium">
+            <div v-for="(line, i) in battleLogs" :key="i" :class="line.highlight ? 'text-amber-300 font-black' : 'text-slate-200'">
+              {{ line.text }}
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <!-- TAB 3: WORKOUT & BODY METRICS (WITH BMI & GOAL PROGRESS) -->
+      <template v-if="activeTab === 'move'">
+        <section class="glass-card rounded-[32px] p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-extrabold text-stone-800 text-base">🏃 運動消耗 (擴大熱量赤字)</h2>
+              <p class="text-[11px] text-stone-400">依體重 <b>{{ currentWeight }} kg</b> 精算 · 上限 ({{ dateWorkouts.length }}/6 筆)</p>
+            </div>
+            <div class="flex bg-stone-100 p-1 rounded-xl">
+              <button v-for="mins in [30, 45, 60]" :key="mins" @click="workoutDuration = mins"
+                class="px-2 py-1 rounded-lg text-[11px] font-extrabold transition"
+                :class="workoutDuration === mins ? 'bg-white text-sky-600 shadow-xs' : 'text-stone-400'">
+                {{ mins }}分
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button v-for="w in computedWorkouts" :key="w.name" @click="quickWorkout(w)" :disabled="dateWorkouts.length >= 6"
+              class="p-3 bg-sky-50/80 hover:bg-sky-100/80 border border-sky-100 rounded-2xl text-left active:scale-95 transition disabled:opacity-40">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">{{ w.icon }}</span>
+                <span class="text-[10px] font-bold text-sky-600 bg-white px-2 py-0.5 rounded-full">{{ workoutDuration }}分鐘</span>
+              </div>
+              <div class="font-extrabold text-stone-800 text-sm mt-1">{{ w.name }}</div>
+              <div class="text-xs font-black text-sky-600">+{{ w.cal }} 卡赤字</div>
+            </button>
+          </div>
+
+          <form @submit.prevent="addCustomWorkout" class="flex gap-2 pt-1">
+            <input v-model.trim="workoutForm.name" type="text" placeholder="自訂運動" :disabled="dateWorkouts.length >= 6" class="flex-1 bg-white border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800 disabled:opacity-50">
+            <input v-model.number="workoutForm.cal" type="number" inputmode="numeric" placeholder="大卡" :disabled="dateWorkouts.length >= 6" class="w-24 bg-white border border-stone-200 rounded-2xl px-3 py-2.5 text-base text-stone-800 disabled:opacity-50">
+            <button type="submit" :disabled="dateWorkouts.length >= 6 || !workoutForm.name || !workoutForm.cal" class="bg-sky-500 text-white font-bold px-4 rounded-2xl text-sm disabled:opacity-40">紀錄</button>
+          </form>
+
+          <div v-if="dateWorkouts.length > 0" class="space-y-2 pt-2 border-t border-stone-100">
+            <div v-for="w in dateWorkouts" :key="w.id" class="flex justify-between items-center text-xs bg-white/80 px-3.5 py-2.5 rounded-xl border border-stone-100">
+              <span class="font-bold text-stone-700">{{ w.name }}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-sky-600">+{{ w.cal }} kcal</span>
+                <button @click="removeWorkout(w.id)" class="text-stone-300 hover:text-rose-500">✕</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Body Metrics + BMI + Goal Bar -->
+        <section class="glass-card rounded-[32px] p-5 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-extrabold text-stone-800 text-base">⚖️ 體重與體脂打卡</h2>
+              <p class="text-[11px] text-stone-400">目前 BMI <b>{{ currentBMI }}</b> ({{ bmiLabel }})</p>
+            </div>
+            <span class="text-[11px] font-bold text-pink-600 bg-pink-50 px-2.5 py-0.5 rounded-full">
+              {{ hasLoggedBodyToday ? '✅ 今日已打卡' : '+30 XP · +2 屬性點' }}
+            </span>
+          </div>
+
+          <form @submit.prevent="logBodyMetric" class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-white p-3 rounded-2xl border border-stone-200/80">
+                <label class="text-[11px] font-bold text-stone-400 block">體重 (kg)</label>
+                <input v-model.number="bodyForm.weight" type="number" step="0.1" inputmode="decimal" placeholder="65.0" class="w-full bg-transparent text-xl font-black text-stone-800 focus:outline-none mt-0.5">
+              </div>
+              <div class="bg-white p-3 rounded-2xl border border-stone-200/80">
+                <label class="text-[11px] font-bold text-stone-400 block">體脂率 (%)</label>
+                <input v-model.number="bodyForm.fat" type="number" step="0.1" inputmode="decimal" placeholder="20.0" class="w-full bg-transparent text-xl font-black text-stone-800 focus:outline-none mt-0.5">
+              </div>
+            </div>
+            <button type="submit" :disabled="!bodyForm.weight" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-extrabold py-3 rounded-2xl text-base shadow-md active:scale-[0.98] transition disabled:opacity-40">
+              📌 完成今日體態紀錄
+            </button>
+          </form>
+
+          <div v-if="recentBodyLogs.length >= 2" class="pt-2">
+            <div class="text-xs font-bold text-stone-400 mb-2">近期體重變化曲線</div>
+            <svg viewBox="0 0 300 80" class="w-full h-20 overflow-visible">
+              <polyline fill="none" stroke="#F43F5E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" :points="weightChartPoints" />
+              <circle v-for="(pt, idx) in weightChartCoords" :key="idx" :cx="pt.x" :cy="pt.y" r="4.5" fill="#FFF" stroke="#F43F5E" stroke-width="3" />
+            </svg>
+            <div class="flex justify-between text-[11px] font-bold text-stone-400 mt-1">
+              <span>{{ recentBodyLogs[0].weight }} kg</span>
+              <span v-if="state.profile.hasGoal && state.profile.targetWeight" class="text-pink-500">目標 {{ state.profile.targetWeight }} kg</span>
+              <span>最新 {{ recentBodyLogs[recentBodyLogs.length-1].weight }} kg</span>
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <!-- TAB 4: SHOP (POTIONS & EGGS) + 750 SPECIES INDEPENDENT DEX -->
+      <template v-if="activeTab === 'dex'">
+        <section class="bg-gradient-to-r from-amber-400 to-yellow-500 text-stone-900 rounded-[32px] p-4 shadow-md flex items-center justify-between">
+          <div>
+            <div class="text-xs font-extrabold text-amber-950/80">🪙 待機巡邏金庫 ({{ idleCoinsPerHour }}/時)</div>
+            <div class="text-2xl font-black mt-0.5">可領取 {{ pendingIdleCoins }} 枚金幣</div>
+          </div>
+          <button @click="collectIdleCoins" :disabled="pendingIdleCoins <= 0" class="bg-stone-900 text-white font-extrabold px-4 py-3 rounded-2xl text-xs shadow-md active:scale-95 transition disabled:opacity-40">
+            💰 全部領取
+          </button>
+        </section>
+
+        <section class="glass-card rounded-[32px] p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-stone-800 text-base">🏪 藥水與精靈蛋商店</h2>
+            <span class="text-xs font-black text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full">持有 🪙 {{ state.coins }}</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button v-for="item in shopCatalog" :key="item.id" @click="buyShopItem(item)" :disabled="state.coins < item.price"
+              class="p-3.5 rounded-2xl border text-left transition active:scale-95 disabled:opacity-45"
+              :class="item.id === 'potion_heal' && activePetRecord.isSick ? 'bg-purple-50 border-purple-400 ring-2 ring-purple-400' : 'bg-white/90 border-stone-200/80 hover:bg-amber-50'">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-2xl">{{ item.icon }}</span>
+                <span class="text-xs font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">🪙 {{ item.price }}</span>
+              </div>
+              <div class="font-extrabold text-stone-800 text-sm">{{ item.name }}</div>
+              <div class="text-[11px] text-stone-500 mt-0.5 leading-snug">{{ item.desc }}</div>
+            </button>
+          </div>
+        </section>
+
+        <!-- Inspected Pet Independent Detail Card -->
+        <section v-if="inspectedPet" class="bg-gradient-to-br from-amber-50 to-orange-50/90 rounded-[32px] p-4 border border-amber-200/90 shadow-sm space-y-2.5 pop-in">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="text-4xl shrink-0">{{ inspectedPet.emoji }}</span>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-black text-sm text-stone-800 truncate">{{ inspectedPet.name }}</span>
+                  <span class="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0" :class="rarityBadgeClass(inspectedPet.rarity)">{{ inspectedPet.rarity }}</span>
+                </div>
+                <div class="text-[11px] font-bold text-amber-700 truncate">
+                  {{ inspectedPet.elIcon }} {{ inspectedPet.element }}系 · {{ inspectedPet.roleLabel }} · Lv.{{ getPetLevel(inspectedPet.id) }}
+                </div>
+              </div>
+            </div>
+            <button v-if="state.activePetId !== inspectedPet.id" @click="equipPet(inspectedPet.id)" class="bg-stone-900 text-white text-xs font-extrabold px-3 py-2 rounded-xl shrink-0 active:scale-95 transition">
+              派牠出戰
+            </button>
+            <span v-else class="bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-xl shrink-0">出戰中</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 text-center bg-white/90 p-2 rounded-2xl text-[11px]">
+            <div><span class="text-stone-400 block">體力</span><b>{{ getPetComputedStats(inspectedPet.id).hp }}</b></div>
+            <div><span class="text-stone-400 block">攻擊</span><b>{{ getPetComputedStats(inspectedPet.id).atk }}</b></div>
+            <div><span class="text-stone-400 block">防禦</span><b>{{ getPetComputedStats(inspectedPet.id).def }}</b></div>
+            <div><span class="text-stone-400 block">閃避</span><b>{{ getPetComputedStats(inspectedPet.id).dodge }}%</b></div>
+          </div>
+        </section>
+
+        <!-- 750-Species Pokédex with Owned Filter -->
+        <section class="glass-card rounded-[32px] p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-stone-800 text-base">📖 750 種神獸全圖鑑</h2>
+            <button @click="onlyOwnedDex = !onlyOwnedDex" class="text-xs font-extrabold px-2.5 py-1 rounded-full border transition"
+              :class="onlyOwnedDex ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-emerald-50 text-emerald-700 border-emerald-200'">
+              {{ onlyOwnedDex ? '只看已擁有' : `已收集 ${state.unlockedPetIds.length}/750` }}
+            </button>
+          </div>
+
+          <div class="flex gap-1.5 overflow-x-auto pb-1">
+            <button v-for="el in ['全部', '烈焰', '深海', '森靈', '雷鳴', '暗影', '聖光', '寒冰', '大地', '疾風', '星辰']" :key="el" @click="dexFilter = el"
+              class="px-3 py-1.5 rounded-full text-xs font-extrabold shrink-0 transition"
+              :class="dexFilter === el ? 'bg-stone-900 text-white' : 'bg-white text-stone-500 border border-stone-200/70'">
+              {{ el }}
+            </button>
+          </div>
+
+          <div class="grid grid-cols-4 gap-2 max-h-80 overflow-y-auto pr-0.5">
+            <div v-for="pet in filteredDex" :key="pet.id" @click="pet.unlocked && (inspectedPetId = pet.id)"
+              class="p-2 rounded-2xl border text-center transition relative"
+              :class="pet.unlocked ? (state.activePetId === pet.id ? 'bg-amber-100 border-amber-500 ring-2 ring-amber-400 cursor-pointer' : (inspectedPetId === pet.id ? 'bg-orange-50 border-orange-300 cursor-pointer' : 'bg-white border-stone-200 cursor-pointer active:scale-95')) : 'bg-stone-100/50 border-stone-100 opacity-40'">
+              <div class="flex justify-between items-center text-[8px] font-black text-stone-400 px-0.5">
+                <span>#{{ String(pet.id).padStart(3, '0') }}</span>
+                <span v-if="pet.unlocked" class="text-amber-700">Lv.{{ getPetLevel(pet.id) }}</span>
+              </div>
+              <div class="text-2xl my-0.5">{{ pet.unlocked ? pet.emoji : '❓' }}</div>
+              <div class="text-[10px] font-extrabold text-stone-800 truncate">{{ pet.unlocked ? pet.shortName : '未發現' }}</div>
+              <span v-if="pet.unlocked" class="inline-block text-[8px] font-black px-1.5 rounded mt-0.5" :class="rarityBadgeClass(pet.rarity)">{{ pet.rarity }}</span>
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <!-- TAB 5: SETTINGS -->
+      <template v-if="activeTab === 'settings'">
+        <section class="glass-card rounded-[32px] p-5 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-stone-800 text-base">🧠 AI 辨識引擎設定</h2>
+            <span class="text-[11px] bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold">{{ activeEngineCount }} 組備援中</span>
+          </div>
+          <p class="text-xs text-stone-500 leading-relaxed">
+            填寫免費 API Key 可開啟「拍照辨識美食」。同時填多組時，若機房滿載會**自動秒切下一個引擎**：
+          </p>
+
+          <div>
+            <label class="text-xs font-bold text-stone-600 block mb-1">首選主力引擎</label>
+            <select v-model="state.aiProvider" class="w-full bg-white border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+              <option value="groq">⚡ Groq 免費極速引擎 (最推薦)</option>
+              <option value="openrouter">🌐 OpenRouter 免費分流</option>
+              <option value="gemini">✨ Google Gemini</option>
+            </select>
+          </div>
+
+          <div class="space-y-2.5">
+            <input v-model.trim="state.groqKey" type="password" placeholder="1. Groq Key (gsk_... 免費申請)" class="w-full bg-white border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+            <input v-model.trim="state.openrouterKey" type="password" placeholder="2. OpenRouter Key (sk-or-v1-... 免費)" class="w-full bg-white border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+            <input v-model.trim="state.apiKey" type="password" placeholder="3. Google Gemini Key (AIzaSy...)" class="w-full bg-white border border-stone-200 rounded-2xl px-3.5 py-2.5 text-base text-stone-800">
+          </div>
+        </section>
+
+        <section class="glass-card rounded-[32px] p-5 space-y-3">
+          <h2 class="font-extrabold text-stone-800 text-base">💾 存檔備份與還原</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <button @click="exportData" class="bg-stone-800 text-white py-3 rounded-2xl text-xs font-extrabold active:scale-95 transition">📤 匯出備份檔</button>
+            <label class="bg-white border border-stone-200 text-stone-700 py-3 rounded-2xl text-xs font-extrabold text-center cursor-pointer active:scale-95 transition">
+              📥 匯入還原
+              <input type="file" accept=".json" @change="importData" class="hidden">
+            </label>
+          </div>
+        </section>
+      </template>
+
+    </main>
+
+    <!-- ENCHANTED ROAMING PET STAGE AT BOTTOM OF HOME SCREEN -->
+    <div v-if="activeTab === 'home'" class="fixed meadow-offset left-1/2 -translate-x-1/2 w-full max-w-md h-24 pointer-events-none z-20 overflow-hidden">
+      <div class="absolute bottom-0 inset-x-0 h-7 bg-gradient-to-t from-emerald-300/80 via-emerald-100/60 to-transparent border-b border-emerald-300/60 flex items-center justify-around px-6 text-[11px] opacity-90">
+        <span>🌱</span><span>🌼</span><span>🍀</span><span>🍄</span><span>🌿</span><span>🌷</span>
+      </div>
+
+      <div @click="handleRoamingPetTap"
+        class="absolute bottom-2 pointer-events-auto cursor-pointer select-none flex flex-col items-center"
+        :style="{ left: petX + '%', transition: petAction === 'walk' ? 'left 1.8s linear' : 'left 0.3s ease-out' }">
+
+        <div v-if="pendingIdleCoins > 0" class="mb-1 bg-yellow-400 text-stone-900 text-[11px] font-black px-2.5 py-1 rounded-full shadow-md border border-yellow-500 whitespace-nowrap animate-bounce">
+          🪙 +{{ pendingIdleCoins }} 點擊領取!
+        </div>
+        <div v-else-if="petBubbleText" class="mb-1 bg-white/95 text-stone-700 text-[11px] font-extrabold px-3 py-1 rounded-2xl shadow-md border border-amber-200/90 whitespace-nowrap max-w-[220px] truncate pop-in">
+          {{ petBubbleText }}
+        </div>
+
+        <div v-if="petHeartBurst" class="absolute -top-6 text-base animate-ping">💖</div>
+
+        <div class="relative flex items-center justify-center" :class="petJumpAnim ? 'pet-jump' : ''">
+          <div :style="{ transform: `scaleX(${petDir})` }" class="relative inline-block">
+            <span v-if="petAction === 'sleep' && !activePetRecord.isSick" class="absolute -top-3 -right-3 text-xs font-bold text-indigo-500 animate-pulse">💤</span>
+            <span class="text-4xl inline-block drop-shadow-md"
+              :class="activePetRecord.isSick ? 'hit-shake' : (petAction === 'walk' ? 'pet-walk' : 'pet-idle')">
+              {{ activePetRecord.isSick ? '🤒' : activePet.emoji }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom 4-Tab Navigation with Safe Area -->
+    <nav class="bg-white/95 backdrop-blur-xl border-t border-stone-200/60 px-5 pt-2 safe-bottom flex justify-between items-center shrink-0 z-30">
+      <button @click="activeTab = 'home'" class="flex flex-col items-center gap-0.5 relative transition" :class="activeTab === 'home' ? 'text-orange-500 scale-105 font-black' : 'text-stone-400 font-bold'">
+        <span v-if="activePetRecord.unspentPoints > 0" class="w-2 h-2 bg-rose-500 rounded-full absolute top-0 right-1 animate-ping"></span>
+        <span class="text-xl">🐣</span>
+        <span class="text-[11px]">餵食養成</span>
+      </button>
+      <button @click="activeTab = 'raid'" class="flex flex-col items-center gap-0.5 relative transition" :class="activeTab === 'raid' ? 'text-indigo-600 scale-105 font-black' : 'text-stone-400 font-bold'">
+        <span v-if="remainingRaidTickets > 0 && !activePetRecord.isSick" class="w-2 h-2 bg-amber-500 rounded-full absolute top-0 right-1"></span>
+        <span class="text-xl">⚔️</span>
+        <span class="text-[11px]">赤字副本</span>
+      </button>
+      <button @click="activeTab = 'move'" class="flex flex-col items-center gap-0.5 relative transition" :class="activeTab === 'move' ? 'text-pink-500 scale-105 font-black' : 'text-stone-400 font-bold'">
+        <span v-if="!hasLoggedBodyToday" class="w-2 h-2 bg-rose-500 rounded-full absolute top-0 right-1"></span>
+        <span class="text-xl">🏃</span>
+        <span class="text-[11px]">運動體態</span>
+      </button>
+      <button @click="activeTab = 'dex'" class="flex flex-col items-center gap-0.5 relative transition" :class="activeTab === 'dex' ? 'text-amber-600 scale-105 font-black' : 'text-stone-400 font-bold'">
+        <span v-if="activePetRecord.isSick || pendingIdleCoins >= 10" class="w-2 h-2 bg-yellow-500 rounded-full absolute top-0 right-1 animate-ping"></span>
+        <span class="text-xl">🥚</span>
+        <span class="text-[11px]">商店圖鑑</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    const { createApp, ref, reactive, computed, watch, onMounted, onUnmounted } = Vue;
+
+    const ELEMENTS = [
+      { name: '烈焰', icon: '🔥', auraColor: '#FED7AA', passiveDesc: '攻擊 +12%', statBonus: 'atk', counters: ['森靈', '寒冰'] },
+      { name: '深海', icon: '💧', auraColor: '#BAE6FD', passiveDesc: '防禦 +12%', statBonus: 'def', counters: ['烈焰', '大地'] },
+      { name: '森靈', icon: '🌿', auraColor: '#BBF7D0', passiveDesc: '體力 +15%', statBonus: 'hp', counters: ['深海', '大地'] },
+      { name: '雷鳴', icon: '⚡', auraColor: '#FEF08A', passiveDesc: '閃避 +5%', statBonus: 'dodge', counters: ['深海', '疾風'] },
+      { name: '暗影', icon: '🌑', auraColor: '#DDD6FE', passiveDesc: '攻擊 +15%', statBonus: 'atk', counters: ['聖光'] },
+      { name: '聖光', icon: '☀️', auraColor: '#FDE68A', passiveDesc: '全屬性 +5%', statBonus: 'all', counters: ['暗影'] },
+      { name: '寒冰', icon: '❄️', auraColor: '#CFFAFE', passiveDesc: '防禦 +14%', statBonus: 'def', counters: ['森靈', '疾風'] },
+      { name: '大地', icon: '🪨', auraColor: '#E7E5E4', passiveDesc: '體力 +18%', statBonus: 'hp', counters: ['烈焰', '雷鳴'] },
+      { name: '疾風', icon: '🌪️', auraColor: '#A7F3D0', passiveDesc: '閃避 +6%', statBonus: 'dodge', counters: ['森靈', '大地'] },
+      { name: '星辰', icon: '🌌', auraColor: '#FBCFE8', passiveDesc: '全屬性 +8%', statBonus: 'all', counters: ['烈焰', '深海', '森靈', '雷鳴', '暗影', '聖光', '寒冰', '大地', '疾風'] }
+    ];
+
+    const TIERS = [
+      { name: '萌芽', rarity: 'N', mult: 1.0 },
+      { name: '覺醒', rarity: 'SR', mult: 1.2 },
+      { name: '創世', rarity: 'UR', mult: 1.45 }
+    ];
+
+    const CREATURES = [
+      { name: '靈羽雞', emoji: '🐥', role: '敏捷型', base: { hp: 105, atk: 18, def: 10, dodge: 8 } },
+      { name: '幻影貓', emoji: '🐱', role: '高閃避', base: { hp: 100, atk: 19, def: 9, dodge: 11 } },
+      { name: '忠犬寶', emoji: '🐶', role: '均衡型', base: { hp: 120, atk: 18, def: 13, dodge: 6 } },
+      { name: '閃電豹', emoji: '🐆', role: '疾速暴擊', base: { hp: 105, atk: 23, def: 9, dodge: 10 } },
+      { name: '榮耀獅', emoji: '🦁', role: '狂戰士', base: { hp: 130, atk: 24, def: 12, dodge: 5 } },
+      { name: '月影兔', emoji: '🐰', role: '靈巧型', base: { hp: 100, atk: 17, def: 10, dodge: 12 } },
+      { name: '翡翠蛇', emoji: '🐍', role: '刺客型', base: { hp: 95, atk: 24, def: 8, dodge: 11 } },
+      { name: '鐵甲牛', emoji: '🐂', role: '重裝坦克', base: { hp: 155, atk: 16, def: 18, dodge: 3 } },
+      { name: '福氣豬', emoji: '🐷', role: '高血量', base: { hp: 165, atk: 15, def: 15, dodge: 4 } },
+      { name: '疾風馬', emoji: '🐴', role: '突擊型', base: { hp: 125, atk: 21, def: 12, dodge: 8 } },
+      { name: '獨角獸', emoji: '🦄', role: '聖靈神獸', base: { hp: 140, atk: 22, def: 15, dodge: 9 } },
+      { name: '森之鹿', emoji: '🦌', role: '守護神獸', base: { hp: 135, atk: 18, def: 16, dodge: 9 } },
+      { name: '雲朵羊', emoji: '🐏', role: '軟綿防禦', base: { hp: 140, atk: 15, def: 17, dodge: 6 } },
+      { name: '蒼穹龍', emoji: '🐉', role: '傳說霸主', base: { hp: 155, atk: 27, def: 16, dodge: 7 } },
+      { name: '深淵鯨', emoji: '🐋', role: '巨獸泰坦', base: { hp: 180, atk: 19, def: 18, dodge: 2 } },
+      { name: '狂怒鯊', emoji: '🦈', role: '嗜血猛攻', base: { hp: 120, atk: 26, def: 11, dodge: 7 } },
+      { name: '玄武龜', emoji: '🐢', role: '絕對防禦', base: { hp: 150, atk: 14, def: 22, dodge: 2 } },
+      { name: '碧波豚', emoji: '🐬', role: '海之精靈', base: { hp: 115, atk: 19, def: 12, dodge: 11 } },
+      { name: '衝鋒犀', emoji: '🦏', role: '鋼鐵裝甲', base: { hp: 160, atk: 20, def: 19, dodge: 3 } },
+      { name: '泰坦象', emoji: '🐘', role: '不動如山', base: { hp: 175, atk: 21, def: 18, dodge: 2 } },
+      { name: '不死鳳凰', emoji: '🦅', role: '涅槃神鳥', base: { hp: 135, atk: 26, def: 13, dodge: 10 } },
+      { name: '九尾靈狐', emoji: '🦊', role: '妖狐幻術', base: { hp: 115, atk: 22, def: 11, dodge: 10 } },
+      { name: '銀月戰狼', emoji: '🐺', role: '狩獵精英', base: { hp: 125, atk: 23, def: 12, dodge: 8 } },
+      { name: '太極熊貓', emoji: '🐼', role: '武道宗師', base: { hp: 145, atk: 20, def: 16, dodge: 6 } },
+      { name: '白虎神獸', emoji: '🐯', role: '西方戰神', base: { hp: 135, atk: 25, def: 14, dodge: 8 } }
+    ];
+
+    const ALL_750_PETS = [];
+    let petIdCounter = 1;
+    for (const el of ELEMENTS) {
+      for (const tier of TIERS) {
+        for (const cr of CREATURES) {
+          ALL_750_PETS.push({
+            id: petIdCounter++,
+            name: `${el.name}·${tier.name}${cr.name}`,
+            shortName: `${tier.name}${cr.name}`,
+            emoji: cr.emoji,
+            element: el.name,
+            elIcon: el.icon,
+            auraColor: el.auraColor,
+            rarity: tier.rarity,
+            roleLabel: cr.role,
+            passiveDesc: el.passiveDesc,
+            statBonus: el.statBonus,
+            counters: el.counters,
+            baseStats: {
+              hp: Math.round(cr.base.hp * tier.mult),
+              atk: Math.round(cr.base.atk * tier.mult),
+              def: Math.round(cr.base.def * tier.mult),
+              dodge: Math.min(25, Math.round(cr.base.dodge + (tier.mult - 1) * 8))
+            }
+          });
+        }
+      }
+    }
+
+    const BOSS_TITLES = [
+      '貪吃', '宵夜', '高糖', '油炸', '重鹹', '熬夜', '懶惰', '暴食', '肥宅', '精緻澱粉',
+      '反式脂肪', '手搖飲', '吃到飽', '熱量炸彈', '膽固醇', '久坐', '假日放縱', '甜點控', '邪惡宵夜', '混沌卡路里'
+    ];
+    const BOSS_ARCHETYPES = [
+      { name: '珍奶史萊姆', emoji: '🧋' },
+      { name: '炸雞小惡魔', emoji: '🍗' },
+      { name: '泡麵大怪獸', emoji: '🍜' },
+      { name: '甜甜圈魔王', emoji: '🍩' },
+      { name: '披薩巨無霸', emoji: '🍕' },
+      { name: '沙發懶惰王', emoji: '🛋️' }
+    ];
+
+    createApp({
+      setup() {
+        const STORAGE_KEY = 'fitquest_app_data_v1';
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const activeTab = ref('home');
+        const selectedDate = ref(todayStr);
+        const showTdeeModal = ref(false);
+        const dexFilter = ref('全部');
+        const onlyOwnedDex = ref(false);
+        const inspectedPetId = ref(3);
+        const foodInput = ref('');
+        const foodImagePreview = ref('');
+        const isEstimating = ref(false);
+        const toast = reactive({ show: false, msg: '', icon: '✨' });
+        const hatchedPet = ref(null);
+
+        const petX = ref(42);
+        const petDir = ref(1);
+        const petAction = ref('idle');
+        const petBubbleText = ref('');
+        const petHeartBurst = ref(false);
+        const petJumpAnim = ref(false);
+        const nowTick = ref(Date.now());
+        let roamTimer = null;
+        let bubbleTimer = null;
+        let clockTimer = null;
+
+        const pendingFood = ref(null);
+        const portionRatio = ref(1);
+        const portionOptions = [
+          { label: '一人獨享', val: 1 },
+          { label: '吃 2/3 份', val: 0.67 },
+          { label: '兩人分食', val: 0.5 },
+          { label: '三人分食', val: 0.33 },
+          { label: '四人分食', val: 0.25 },
+          { label: '淺嚐一口', val: 0.15 }
+        ];
+
+        const workoutDuration = ref(30);
+        const workoutForm = reactive({ name: '', cal: null });
+        const bodyForm = reactive({ weight: null, fat: null });
+
+        const isBattling = ref(false);
+        const battleLogs = ref([]);
+        const arenaPetHp = ref(120);
+        const arenaBossHp = ref(180);
+        const petHitAnim = ref(false);
+        const bossHitAnim = ref(false);
+        const petFloatText = ref('');
+        const bossFloatText = ref('');
+
+        const createDefaultPetRecord = (petId) => {
+          const spec = ALL_750_PETS.find(p => p.id === petId) || ALL_750_PETS[0];
+          return {
+            xp: 0,
+            stats: { ...spec.baseStats },
+            unspentPoints: 3,
+            isSick: false
+          };
+        };
+
+        const defaultProfile = {
+          completed: false,
+          gender: 'male',
+          age: 30,
+          height: 170,
+          weight: 68,
+          bodyFat: null,
+          activity: 1.375,
+          hasGoal: true,
+          targetWeight: 63,
+          targetBodyFat: 18,
+          deficitStrategy: -500
+        };
+
+        const defaultState = {
+          coins: 120,
+          targetCal: 1800,
+          aiProvider: 'groq',
+          groqKey: '',
+          openrouterKey: '',
+          apiKey: '',
+          lastActiveDate: todayStr,
+          lastCoinCollectTime: Date.now() - 3600 * 1000 * 2,
+          activePetId: 3,
+          unlockedPetIds: [1, 2, 3],
+          petProfiles: {
+            1: createDefaultPetRecord(1),
+            2: createDefaultPetRecord(2),
+            3: createDefaultPetRecord(3)
+          },
+          waterLogs: {},
+          dungeonStage: 1,
+          raidUsedToday: { date: todayStr, count: 0 },
+          profile: { ...defaultProfile },
+          meals: [],
+          workouts: [],
+          bodyLogs: []
+        };
+
+        const loadState = () => {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return { ...defaultState, profile: { ...defaultProfile } };
+            const parsed = JSON.parse(raw);
+            const activeId = Number(parsed.activePetId) || 3;
+            const unlocked = Array.isArray(parsed.unlockedPetIds) && parsed.unlockedPetIds.length ? parsed.unlockedPetIds : [1, 2, 3];
+            const profiles = parsed.petProfiles && typeof parsed.petProfiles === 'object' ? { ...parsed.petProfiles } : {};
+
+            if (!profiles[activeId]) {
+              const base = createDefaultPetRecord(activeId);
+              profiles[activeId] = {
+                xp: Number(parsed.xp) || base.xp,
+                stats: parsed.stats ? { ...base.stats, ...parsed.stats } : base.stats,
+                unspentPoints: parsed.unspentPoints !== undefined ? Number(parsed.unspentPoints) : 3,
+                isSick: Boolean(parsed.isSick)
+              };
+            }
+            unlocked.forEach(id => {
+              if (!profiles[id]) profiles[id] = createDefaultPetRecord(id);
+            });
+
+            return {
+              coins: parsed.coins !== undefined ? Number(parsed.coins) : 120,
+              targetCal: Number(parsed.targetCal) || 1800,
+              aiProvider: parsed.aiProvider || 'groq',
+              groqKey: parsed.groqKey || '',
+              openrouterKey: parsed.openrouterKey || '',
+              apiKey: parsed.apiKey || '',
+              lastActiveDate: parsed.lastActiveDate || todayStr,
+              lastCoinCollectTime: Number(parsed.lastCoinCollectTime) || Date.now(),
+              activePetId: activeId,
+              unlockedPetIds: unlocked,
+              petProfiles: profiles,
+              waterLogs: parsed.waterLogs && typeof parsed.waterLogs === 'object' ? parsed.waterLogs : {},
+              dungeonStage: Number(parsed.dungeonStage) || 1,
+              raidUsedToday: parsed.raidUsedToday?.date === todayStr ? parsed.raidUsedToday : { date: todayStr, count: 0 },
+              profile: { ...defaultProfile, ...(parsed.profile || {}) },
+              meals: Array.isArray(parsed.meals) ? parsed.meals : [],
+              workouts: Array.isArray(parsed.workouts) ? parsed.workouts : [],
+              bodyLogs: Array.isArray(parsed.bodyLogs) ? parsed.bodyLogs : []
+            };
+          } catch (e) {
+            return { ...defaultState, profile: { ...defaultProfile } };
+          }
+        };
+
+        const state = reactive(loadState());
+
+        const ensurePetRecord = (petId) => {
+          if (!state.petProfiles[petId]) {
+            state.petProfiles[petId] = createDefaultPetRecord(petId);
+          }
+          return state.petProfiles[petId];
+        };
+
+        watch(state, (newVal) => {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(newVal));
+          } catch (e) {
+            showToast('儲存空間已滿，請先匯出備份', '⚠️');
+          }
+        }, { deep: true });
+
+        let toastTimer = null;
+        const showToast = (msg, icon = '✨') => {
+          toast.msg = msg;
+          toast.icon = icon;
+          toast.show = true;
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => { toast.show = false; }, 3200);
+        };
+
+        const sayBubble = (text, duration = 3200) => {
+          petBubbleText.value = text;
+          clearTimeout(bubbleTimer);
+          bubbleTimer = setTimeout(() => { petBubbleText.value = ''; }, duration);
+        };
+
+        const shiftDate = (days) => {
+          const d = new Date(selectedDate.value + 'T00:00:00');
+          d.setDate(d.getDate() + days);
+          const nextStr = d.toISOString().split('T')[0];
+          if (nextStr <= todayStr) selectedDate.value = nextStr;
+        };
+
+        const checkInactivityPenalty = () => {
+          if (!state.lastActiveDate) { state.lastActiveDate = todayStr; return; }
+          const last = new Date(state.lastActiveDate + 'T00:00:00');
+          const now = new Date(todayStr + 'T00:00:00');
+          const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24));
+          if (diffDays >= 2) {
+            const rec = ensurePetRecord(state.activePetId);
+            rec.isSick = true;
+            const penalty = Math.min(rec.xp, (diffDays - 1) * 100);
+            rec.xp = Math.max(0, rec.xp - penalty);
+            showToast(`已經 ${diffDays} 天沒登入，出戰精靈虛弱生病了！`, '🤒');
+          }
+          state.lastActiveDate = todayStr;
+        };
+
+        const getPetLevel = (petId) => {
+          const rec = state.petProfiles[petId];
+          return rec ? Math.floor((Number(rec.xp) || 0) / 200) + 1 : 1;
+        };
+
+        const getPetComputedStats = (petId) => {
+          const spec = ALL_750_PETS.find(p => p.id === petId) || ALL_750_PETS[0];
+          const rec = state.petProfiles[petId] || createDefaultPetRecord(petId);
+          const b = spec.statBonus;
+          const sickMult = rec.isSick ? 0.5 : 1;
+          const hp = Math.round(rec.stats.hp * (b === 'hp' ? 1.15 : (b === 'all' ? 1.05 : 1)) * sickMult);
+          const atk = Math.round(rec.stats.atk * (b === 'atk' ? 1.15 : (b === 'all' ? 1.05 : 1)) * sickMult);
+          const def = Math.round(rec.stats.def * (b === 'def' ? 1.12 : (b === 'all' ? 1.05 : 1)) * sickMult);
+          const dodge = Math.min(60, Math.round(rec.stats.dodge + (b === 'dodge' ? 5 : (b === 'all' ? 2 : 0))));
+          return { hp, atk, def, dodge };
+        };
+
+        const activePet = computed(() => ALL_750_PETS.find(p => p.id === state.activePetId) || ALL_750_PETS[2]);
+        const activePetRecord = computed(() => ensurePetRecord(state.activePetId));
+        const activePetLevel = computed(() => getPetLevel(state.activePetId));
+        const activePetXpPercent = computed(() => Math.round(((activePetRecord.value.xp % 200) / 200) * 100));
+        const finalStats = computed(() => getPetComputedStats(state.activePetId));
+
+        const totalCP = computed(() => {
+          const s = finalStats.value;
+          return Math.round(s.hp * 0.25 + s.atk * 3 + s.def * 2.5 + s.dodge * 4);
+        });
+
+        const inspectedPet = computed(() => {
+          if (!state.unlockedPetIds.includes(inspectedPetId.value)) return null;
+          return ALL_750_PETS.find(p => p.id === inspectedPetId.value) || null;
+        });
+
+        const allocateStat = (key) => {
+          const rec = activePetRecord.value;
+          if (rec.unspentPoints <= 0) return;
+          rec.unspentPoints--;
+          if (key === 'hp') rec.stats.hp += 25;
+          if (key === 'atk') rec.stats.atk += 4;
+          if (key === 'def') rec.stats.def += 3;
+          if (key === 'dodge') rec.stats.dodge = Math.min(55, rec.stats.dodge + 1);
+          arenaPetHp.value = finalStats.value.hp;
+          sayBubble(`${activePet.value.shortName} 的專屬能力提升了！✨`);
+        };
+
+        const streak = computed(() => {
+          const dates = new Set([...state.meals.map(m => m.date), ...state.workouts.map(w => w.date), ...state.bodyLogs.map(b => b.date)]);
+          if (dates.size === 0) return 0;
+          let count = 0, d = new Date();
+          while (true) {
+            const ds = d.toISOString().split('T')[0];
+            if (dates.has(ds)) { count++; d.setDate(d.getDate() - 1); }
+            else if (ds === todayStr) { d.setDate(d.getDate() - 1); }
+            else break;
+          }
+          return count;
+        });
+
+        const idleCoinsPerHour = computed(() => {
+          const base = Math.max(8, Math.floor(totalCP.value / 6));
+          const rosterBonus = Math.floor(state.unlockedPetIds.length * 0.5);
+          const streakMult = 1 + Math.min(0.5, streak.value * 0.1);
+          return Math.round((base + rosterBonus) * streakMult);
+        });
+
+        const pendingIdleCoins = computed(() => {
+          if (activePetRecord.value.isSick) return 0;
+          const elapsedMs = Math.max(0, nowTick.value - state.lastCoinCollectTime);
+          const cappedHours = Math.min(24, elapsedMs / (1000 * 60 * 60));
+          return Math.floor(cappedHours * idleCoinsPerHour.value);
+        });
+
+        const collectIdleCoins = () => {
+          const amount = pendingIdleCoins.value;
+          if (amount <= 0) return;
+          state.coins += amount;
+          state.lastCoinCollectTime = Date.now();
+          nowTick.value = Date.now();
+          showToast(`領取精靈巡邏金幣 +${amount} 枚！`, '🪙');
+          sayBubble(`巡邏辛苦啦，把 ${amount} 金幣交給主人！🪙`);
+        };
+
+        const startPetRoaming = () => {
+          roamTimer = setInterval(() => {
+            if (activeTab.value !== 'home' || activePetRecord.value.isSick) { petAction.value = 'idle'; return; }
+            const roll = Math.random();
+            if (roll < 0.6) {
+              const targetX = Math.floor(Math.random() * 72) + 8;
+              petDir.value = targetX >= petX.value ? 1 : -1;
+              petAction.value = 'walk';
+              petX.value = targetX;
+              setTimeout(() => { if (petAction.value === 'walk') petAction.value = 'idle'; }, 1800);
+            } else if (roll < 0.85) {
+              petAction.value = 'idle';
+            } else {
+              petAction.value = 'sleep';
+            }
+          }, 2500);
+          clockTimer = setInterval(() => { nowTick.value = Date.now(); }, 15000);
+        };
+
+        const handleRoamingPetTap = () => {
+          petJumpAnim.value = false;
+          requestAnimationFrame(() => { petJumpAnim.value = true; });
+          petHeartBurst.value = true;
+          setTimeout(() => { petHeartBurst.value = false; }, 700);
+
+          if (pendingIdleCoins.value > 0) {
+            collectIdleCoins();
+            return;
+          }
+          if (activePetRecord.value.isSick) {
+            sayBubble('咳咳...快去商店買「💊 治癒藥水」救救我！');
+          } else if (!isHealthyDeficitActive.value) {
+            sayBubble(`肚子餓沒力氣打怪！今天要吃滿 2 餐達 ${minHealthyIntake.value} 卡喔！`);
+          } else {
+            const lines = [
+              `我是${activePet.value.roleLabel}，目前 Lv.${activePetLevel.value}！✨`,
+              `健康赤字覺醒中！攻擊力額外 +${deficitAtkBonus.value}！🔥`,
+              '多喝水能提升代謝，還能幫我累積經驗值喔！💧'
+            ];
+            sayBubble(lines[Math.floor(Math.random() * lines.length)]);
+          }
+        };
+
+        // TDEE, Weight, BMI & Hydration
+        const currentWeight = computed(() => {
+          const last = state.bodyLogs[state.bodyLogs.length - 1];
+          return last ? Number(last.weight) : (Number(state.profile.weight) || 65);
+        });
+
+        const currentBMI = computed(() => {
+          const hM = (Number(state.profile.height) || 170) / 100;
+          return (currentWeight.value / (hM * hM)).toFixed(1);
+        });
+
+        const bmiLabel = computed(() => {
+          const b = Number(currentBMI.value);
+          if (b < 18.5) return '體重過輕';
+          if (b < 24) return '健康標準';
+          if (b < 27) return '輕度過重';
+          return '需積極減脂';
+        });
+
+        const targetWater = computed(() => Math.round(currentWeight.value * 35));
+        const dateWater = computed(() => Number(state.waterLogs[selectedDate.value]) || 0);
+
+        const addWater = (ml) => {
+          state.waterLogs[selectedDate.value] = dateWater.value + ml;
+          activePetRecord.value.xp += 5;
+          showToast(`補充水分 +${ml}ml！「${activePet.value.shortName}」+5 XP`, '💧');
+        };
+
+        const tdeeReport = computed(() => {
+          const p = state.profile;
+          const w = Number(p.weight) || 65, h = Number(p.height) || 170, a = Number(p.age) || 30, bf = Number(p.bodyFat);
+          const bmr = (bf && bf > 3 && bf < 60)
+            ? Math.round(370 + 21.6 * (w * (1 - bf / 100)))
+            : Math.round(10 * w + 6.25 * h - 5 * a + (p.gender === 'male' ? 5 : -161));
+          const tdee = Math.round(bmr * (Number(p.activity) || 1.375));
+          const delta = p.hasGoal ? (Number(p.deficitStrategy) || 0) : 0;
+          const recommendedCal = Math.max(1200, tdee + delta);
+          return { bmr, tdee, recommendedCal };
+        });
+
+        const applyTdeePlan = () => {
+          state.targetCal = tdeeReport.value.recommendedCal;
+          state.profile.completed = true;
+          showTdeeModal.value = false;
+          showToast(`能量基準已更新為 ${state.targetCal} kcal！`, '🎯');
+        };
+
+        // Selected Date Computations (Supports historical view & logging)
+        const dateMeals = computed(() => state.meals.filter(m => m.date === selectedDate.value));
+        const dateIntake = computed(() => dateMeals.value.reduce((s, m) => s + (Number(m.cal) || 0), 0));
+        const dateWorkouts = computed(() => state.workouts.filter(w => w.date === selectedDate.value));
+        const dateBurned = computed(() => dateWorkouts.value.reduce((s, w) => s + (Number(w.cal) || 0), 0));
+        const netCalories = computed(() => dateIntake.value - dateBurned.value);
+        const remainingCal = computed(() => state.targetCal - netCalories.value);
+        const calPercent = computed(() => Math.max(0, Math.round((netCalories.value / state.targetCal) * 100)));
+        const dateDeficit = computed(() => Math.max(0, tdeeReport.value.tdee - netCalories.value));
+
+        // Today-specific metrics for Dungeon Raid Anti-Starvation check
+        const todayMeals = computed(() => state.meals.filter(m => m.date === todayStr));
+        const todayIntake = computed(() => todayMeals.value.reduce((s, m) => s + (Number(m.cal) || 0), 0));
+        const todayWorkouts = computed(() => state.workouts.filter(w => w.date === todayStr));
+        const todayBurned = computed(() => todayWorkouts.value.reduce((s, w) => s + (Number(w.cal) || 0), 0));
+        const todayNet = computed(() => todayIntake.value - todayBurned.value);
+
+        const minHealthyIntake = computed(() => Math.round(tdeeReport.value.bmr * 0.5));
+        const isHealthyDeficitActive = computed(() => todayMeals.value.length >= 2 && todayIntake.value >= minHealthyIntake.value);
+        const todayDeficit = computed(() => isHealthyDeficitActive.value ? Math.max(0, tdeeReport.value.tdee - todayNet.value) : 0);
+        const deficitAtkBonus = computed(() => isHealthyDeficitActive.value ? Math.round(todayDeficit.value * 0.04) : 0);
+
+        const dateMacros = computed(() => dateMeals.value.reduce((acc, m) => ({
+          p: acc.p + (Number(m.p) || 0),
+          c: acc.c + (Number(m.c) || 0),
+          f: acc.f + (Number(m.f) || 0)
+        }), { p: 0, c: 0, f: 0 }));
+
+        const targetMacros = computed(() => ({
+          p: Math.round((state.targetCal * 0.3) / 4),
+          c: Math.round((state.targetCal * 0.45) / 4),
+          f: Math.round((state.targetCal * 0.25) / 9)
+        }));
+
+        // 1,200 Procedural Dungeon Bosses & Element Counter System
+        const currentBoss = computed(() => {
+          const st = state.dungeonStage;
+          const monsterNo = ((st * 137) % 1200) + 1;
+          const el = ELEMENTS[(st * 3 + 1) % ELEMENTS.length];
+          const title = BOSS_TITLES[(st * 7) % BOSS_TITLES.length];
+          const arch = BOSS_ARCHETYPES[(st - 1) % BOSS_ARCHETYPES.length];
+          return {
+            monsterNo: String(monsterNo).padStart(4, '0'),
+            name: `${title}${arch.name}`,
+            emoji: arch.emoji,
+            element: el.name,
+            elIcon: el.icon,
+            counters: el.counters,
+            hp: Math.round(145 + st * 48),
+            atk: Math.round(16 + st * 4.5),
+            def: Math.round(8 + st * 2.5)
+          };
+        });
+
+        const elementMultiplier = computed(() => {
+          const petEl = activePet.value;
+          const bossEl = currentBoss.value;
+          if (petEl.counters.includes(bossEl.element)) return 1.35;
+          if (bossEl.counters.includes(petEl.element)) return 0.85;
+          return 1.0;
+        });
+
+        // Smart Counter Pet Recommender
+        const bestCounterPet = computed(() => {
+          const bossEl = currentBoss.value.element;
+          const candidates = state.unlockedPetIds
+            .map(id => ALL_750_PETS.find(p => p.id === id))
+            .filter(p => p && p.counters.includes(bossEl) && !ensurePetRecord(p.id).isSick);
+          if (candidates.length === 0) return null;
+          candidates.sort((a, b) => getPetLevel(b.id) - getPetLevel(a.id));
+          return candidates[0];
+        });
+
+        const remainingRaidTickets = computed(() => {
+          if (state.raidUsedToday.date !== todayStr) return 3;
+          return Math.max(0, 3 - state.raidUsedToday.count);
+        });
+
+        watch([finalStats, currentBoss], () => {
+          if (!isBattling.value) {
+            arenaPetHp.value = finalStats.value.hp;
+            arenaBossHp.value = currentBoss.value.hp;
+          }
+        }, { immediate: true });
+
+        const triggerHitEffect = (target, text) => {
+          if (target === 'boss') {
+            bossHitAnim.value = false;
+            bossFloatText.value = text;
+            requestAnimationFrame(() => { bossHitAnim.value = true; });
+            setTimeout(() => { bossFloatText.value = ''; }, 700);
+          } else {
+            petHitAnim.value = false;
+            petFloatText.value = text;
+            requestAnimationFrame(() => { petHitAnim.value = true; });
+            setTimeout(() => { petFloatText.value = ''; }, 700);
+          }
+        };
+
+        const startDungeonBattle = () => {
+          if (isBattling.value || remainingRaidTickets.value <= 0 || activePetRecord.value.isSick) return;
+          if (state.raidUsedToday.date !== todayStr) state.raidUsedToday = { date: todayStr, count: 0 };
+          state.raidUsedToday.count++;
+          isBattling.value = true;
+          battleLogs.value = [];
+
+          let pHp = finalStats.value.hp;
+          const baseAtk = isHealthyDeficitActive.value
+            ? (finalStats.value.atk + deficitAtkBonus.value)
+            : Math.round(finalStats.value.atk * 0.7);
+          const pDef = finalStats.value.def;
+          const pDodge = finalStats.value.dodge;
+          const elMult = elementMultiplier.value;
+
+          const boss = currentBoss.value;
+          let bHp = boss.hp;
+          arenaPetHp.value = pHp;
+          arenaBossHp.value = bHp;
+
+          const statusNote = isHealthyDeficitActive.value
+            ? `健康赤字覺醒 (+${deficitAtkBonus.value}攻)`
+            : `飢餓低血糖虛弱 (攻擊-30%)`;
+          battleLogs.value.push({ text: `⚔️ ${activePet.value.name} 出征！[${statusNote}]`, highlight: true });
+
+          let turn = 1;
+          const timer = setInterval(() => {
+            const rawDmg = Math.max(5, Math.round((baseAtk - boss.def * 0.55) * elMult + (Math.random() * 6 - 3)));
+            bHp = Math.max(0, bHp - rawDmg);
+            arenaBossHp.value = bHp;
+            triggerHitEffect('boss', elMult > 1 ? `⚡-${rawDmg} 暴擊!` : `-${rawDmg}`);
+            battleLogs.value.push({ text: `第${turn}回合：造成 ${rawDmg} 點${elMult > 1 ? '屬性克制' : ''}傷害！(Boss 剩 ${bHp})` });
+
+            if (bHp <= 0) {
+              clearInterval(timer);
+              isBattling.value = false;
+              const clearedStage = state.dungeonStage;
+              state.dungeonStage++;
+              activePetRecord.value.xp += 85;
+              activePetRecord.value.unspentPoints += 3;
+              arenaBossHp.value = currentBoss.value.hp;
+              arenaPetHp.value = finalStats.value.hp;
+              battleLogs.value.push({ text: `🎉 討伐成功！「${activePet.value.shortName}」獲得 +85 XP 與 +3 屬性點！`, highlight: true });
+              showToast(`擊敗 ${boss.name}！+85 XP · +3 屬性點`, '🏆');
+
+              if (clearedStage % 5 === 0) {
+                battleLogs.value.push({ text: `🔮 突破第 ${clearedStage} 關，掉落一顆稀有精靈蛋！`, highlight: true });
+                hatchEggByTiers(['SR', 'UR']);
+              }
+              return;
+            }
+
+            if (Math.random() * 100 < pDodge) {
+              triggerHitEffect('pet', '💨 閃避!');
+              battleLogs.value.push({ text: `💨 ${activePet.value.name} 靈巧閃避了攻擊！` });
+            } else {
+              const dmgToPlayer = Math.max(3, Math.round(boss.atk - pDef * 0.65));
+              pHp = Math.max(0, pHp - dmgToPlayer);
+              arenaPetHp.value = pHp;
+              triggerHitEffect('pet', `-${dmgToPlayer}`);
+              battleLogs.value.push({ text: `💥 ${boss.name} 反擊造成 ${dmgToPlayer} 傷害 (我方剩 ${pHp})` });
+            }
+
+            if (pHp <= 0 || turn >= 15) {
+              clearInterval(timer);
+              isBattling.value = false;
+              activePetRecord.value.xp += 25;
+              arenaPetHp.value = finalStats.value.hp;
+              arenaBossHp.value = currentBoss.value.hp;
+              battleLogs.value.push({ text: `💦 體力耗盡撤退！獲得 +25 XP，記得吃滿2餐並強化屬性再戰！`, highlight: true });
+              showToast('雖敗猶榮！獲得 +25 XP', '🛡️');
+            }
+            turn++;
+          }, 420);
+        };
+
+        // Shop & Egg Hatching
+        const shopCatalog = [
+          { id: 'potion_heal', icon: '💊', name: '精靈治癒藥水', price: 40, desc: '立即治癒出戰精靈生病狀態' },
+          { id: 'potion_xp', icon: '🧪', name: '濃縮經驗秘藥', price: 60, desc: '出戰精靈經驗值 +160 XP' },
+          { id: 'potion_stat', icon: '💪', name: '潛能激發藥水', price: 90, desc: '出戰精靈獲得 +5 屬性點' },
+          { id: 'egg_common', icon: '🥚', name: '百獸普通精靈蛋', price: 100, desc: '孵化 N 級動物夥伴' },
+          { id: 'egg_rare', icon: '🔮', name: '星輝覺醒精靈蛋', price: 240, desc: '孵化 N / SR 級覺醒猛獸' },
+          { id: 'egg_legend', icon: '👑', name: '創世神話精靈蛋', price: 500, desc: '必出 SR / UR 傳說神獸！' }
+        ];
+
+        const hatchEggByTiers = (allowedRarities) => {
+          const pool = ALL_750_PETS.filter(p => allowedRarities.includes(p.rarity));
+          const unowned = pool.filter(p => !state.unlockedPetIds.includes(p.id));
+          const targetPool = unowned.length > 0 ? unowned : pool;
+          const picked = targetPool[Math.floor(Math.random() * targetPool.length)];
+          if (!state.unlockedPetIds.includes(picked.id)) {
+            state.unlockedPetIds.push(picked.id);
+            ensurePetRecord(picked.id);
+          } else {
+            activePetRecord.value.unspentPoints += 3;
+            showToast(`孵化出重複夥伴「${picked.name}」，轉化為 +3 屬性點！`, '✨');
+          }
+          inspectedPetId.value = picked.id;
+          hatchedPet.value = picked;
+        };
+
+        const buyShopItem = (item) => {
+          if (state.coins < item.price) return;
+          state.coins -= item.price;
+          if (item.id === 'potion_heal') {
+            activePetRecord.value.isSick = false;
+            showToast(`「${activePet.value.shortName}」已完全康復！`, '💖');
+          } else if (item.id === 'potion_xp') {
+            activePetRecord.value.xp += 160;
+            showToast(`「${activePet.value.shortName}」獲得 +160 XP！`, '🧪');
+          } else if (item.id === 'potion_stat') {
+            activePetRecord.value.unspentPoints += 5;
+            showToast(`「${activePet.value.shortName}」獲得 +5 屬性點！`, '💪');
+          } else if (item.id === 'egg_common') {
+            hatchEggByTiers(['N']);
+          } else if (item.id === 'egg_rare') {
+            hatchEggByTiers(['N', 'SR']);
+          } else if (item.id === 'egg_legend') {
+            hatchEggByTiers(['SR', 'UR']);
+          }
+        };
+
+        const equipPet = (id) => {
+          ensurePetRecord(id);
+          state.activePetId = id;
+          inspectedPetId.value = id;
+          const p = ALL_750_PETS.find(x => x.id === id);
+          if (p) showToast(`已切換出戰夥伴：${p.name} (Lv.${getPetLevel(id)})`, p.emoji);
+        };
+
+        const rarityBadgeClass = (r) => {
+          if (r === 'UR') return 'bg-gradient-to-r from-amber-400 to-rose-500 text-white';
+          if (r === 'SR') return 'bg-purple-100 text-purple-800';
+          return 'bg-stone-200 text-stone-700';
+        };
+
+        const filteredDex = computed(() => {
+          const unlockedSet = new Set(state.unlockedPetIds);
+          return ALL_750_PETS
+            .filter(p => dexFilter.value === '全部' || p.element === dexFilter.value)
+            .filter(p => !onlyOwnedDex.value || unlockedSet.has(p.id))
+            .map(p => ({ ...p, unlocked: unlockedSet.has(p.id) }));
+        });
+
+        // Food & AI Failover
+        const activeEngineCount = computed(() => [state.groqKey, state.openrouterKey, state.apiKey].filter(Boolean).length);
+
+        const foodPresets = [
+          { icon: '🍱', name: '健康雞胸餐', cal: 520, p: 42, c: 55, f: 12 },
+          { icon: '🍲', name: '共享小火鍋', cal: 850, p: 45, c: 60, f: 45 },
+          { icon: '🍕', name: '披薩大餐', cal: 980, p: 38, c: 110, f: 42 },
+          { icon: '☕', name: '無糖拿鐵', cal: 130, p: 7, c: 10, f: 7 },
+          { icon: '🥗', name: '凱撒雞肉沙拉', cal: 340, p: 28, c: 16, f: 18 }
+        ];
+
+        const handleFoodPhoto = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const MAX = 600;
+              let w = img.width, h = img.height;
+              if (w > h && w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
+              else if (h > MAX) { w = Math.round((w * MAX) / h); h = MAX; }
+              canvas.width = w; canvas.height = h;
+              canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              foodImagePreview.value = canvas.toDataURL('image/jpeg', 0.75);
+            };
+            img.src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+          e.target.value = '';
+        };
+
+        const openPortionModal = (item, isPhoto = false, applyBuffer = false) => {
+          const factor = applyBuffer ? 1.15 : 1.0;
+          pendingFood.value = {
+            name: item.name,
+            cal: Math.round((Number(item.cal) || 350) * factor),
+            p: Math.round((Number(item.p) || 15) * factor),
+            c: Math.round((Number(item.c) || 40) * factor),
+            f: Math.round((Number(item.f) || 12) * factor),
+            isPhoto
+          };
+          portionRatio.value = 1;
+        };
+
+        const confirmPendingFood = () => {
+          if (!pendingFood.value) return;
+          const f = pendingFood.value;
+          const r = portionRatio.value;
+          const actualP = Math.round(f.p * r);
+          const ratioLabel = r < 1 ? ` (${Math.round(r * 100)}%份)` : '';
+          state.meals.push({
+            id: Date.now() + Math.random(),
+            date: selectedDate.value,
+            name: f.name + ratioLabel,
+            cal: Math.round(f.cal * r),
+            p: actualP,
+            c: Math.round(f.c * r),
+            f: Math.round(f.f * r),
+            isPhoto: f.isPhoto
+          });
+
+          const earnedPoints = actualP >= 20 ? 2 : 1;
+          activePetRecord.value.unspentPoints += earnedPoints;
+          activePetRecord.value.xp += 20;
+          if (activePetRecord.value.isSick) {
+            activePetRecord.value.isSick = false;
+            showToast(`「${activePet.value.shortName}」康復！+${earnedPoints} 屬性點`, '💖');
+            sayBubble('謝謝主人餵我，身體好起來了！💖');
+          } else {
+            showToast(`餵食成功！「${activePet.value.shortName}」+${earnedPoints} 屬性點`, '💪');
+            sayBubble(`營養吸收完成！獲得 +${earnedPoints} 屬性點！✨`);
+          }
+          pendingFood.value = null;
+        };
+
+        const localSmartEstimate = (text) => {
+          const db = [
+            { k: ['便當', '餐盒', '雞腿'], cal: 720, p: 32, c: 85, f: 26 },
+            { k: ['雞胸', '水煮', '健身'], cal: 480, p: 42, c: 48, f: 10 },
+            { k: ['滷肉飯', '肉燥飯'], cal: 520, p: 16, c: 65, f: 21 },
+            { k: ['拿鐵', '鮮奶茶'], cal: 160, p: 7, c: 14, f: 8 },
+            { k: ['美式', '黑咖啡', '無糖'], cal: 10, p: 0, c: 2, f: 0 },
+            { k: ['珍奶', '奶茶', '手搖'], cal: 550, p: 4, c: 88, f: 19 },
+            { k: ['蛋餅', '吐司', '三明治'], cal: 360, p: 14, c: 42, f: 15 },
+            { k: ['沙拉', '蔬菜'], cal: 260, p: 15, c: 18, f: 14 },
+            { k: ['火鍋', '涮涮鍋', '合菜'], cal: 850, p: 45, c: 60, f: 45 },
+            { k: ['披薩', '炸雞', '漢堡'], cal: 880, p: 36, c: 92, f: 40 }
+          ];
+          const clean = text || '拍照美味餐點';
+          const m = db.find(i => i.k.some(kw => clean.includes(kw)));
+          return m ? { name: clean, cal: m.cal, p: m.p, c: m.c, f: m.f } : { name: clean, cal: 420, p: 18, c: 45, f: 14 };
+        };
+
+        const fetchTimeout = async (url, opts, ms = 8500) => {
+          const ctrl = new AbortController();
+          const id = setTimeout(() => ctrl.abort(), ms);
+          try { const r = await fetch(url, { ...opts, signal: ctrl.signal }); clearTimeout(id); return r; }
+          catch (e) { clearTimeout(id); throw e; }
+        };
+
+        const callAI = async (provider, prompt, imgData) => {
+          if (provider === 'groq') {
+            const content = [{ type: 'text', text: prompt }];
+            if (imgData) content.push({ type: 'image_url', image_url: { url: imgData } });
+            const res = await fetchTimeout('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.groqKey}` },
+              body: JSON.stringify({ model: 'meta-llama/llama-4-scout-17b-16e-instruct', messages: [{ role: 'user', content }], temperature: 0.15 })
+            });
+            if (!res.ok) throw new Error();
+            return (await res.json()).choices?.[0]?.message?.content || '';
+          }
+          if (provider === 'openrouter') {
+            const content = [{ type: 'text', text: prompt }];
+            if (imgData) content.push({ type: 'image_url', image_url: { url: imgData } });
+            const res = await fetchTimeout('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.openrouterKey}` },
+              body: JSON.stringify({ model: 'google/gemma-3-27b-it:free', messages: [{ role: 'user', content }], temperature: 0.15 })
+            });
+            if (!res.ok) throw new Error();
+            return (await res.json()).choices?.[0]?.message?.content || '';
+          }
+          if (provider === 'gemini') {
+            const parts = [{ text: prompt }];
+            if (imgData) parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgData.split(',')[1] } });
+            const res = await fetchTimeout(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts }] })
+            });
+            if (!res.ok) throw new Error();
+            return (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+          }
+          throw new Error();
+        };
+
+        const analyzeAndAddFood = async () => {
+          if ((!foodInput.value && !foodImagePreview.value) || isEstimating.value) return;
+          const query = foodInput.value;
+          const hasImg = !!foodImagePreview.value;
+          const imgData = foodImagePreview.value;
+          isEstimating.value = true;
+
+          const prompt = `你是台灣資深臨床營養師。請仔細辨識${hasImg ? '照片中所有食物品項、份量大小、烹調方式與隱藏油脂/醬汁' : ''}${query ? `並結合文字說明「${query}」` : ''}，精準估算整份餐點的總熱量與三大營養素。只回傳純JSON格式，不要有任何多餘文字：{"name":"餐點名稱","cal":整數大卡,"p":整數蛋白質克數,"c":整數碳水克數,"f":整數脂肪克數}`;
+          const all = [
+            { id: 'groq', key: state.groqKey },
+            { id: 'openrouter', key: state.openrouterKey },
+            { id: 'gemini', key: state.apiKey }
+          ].filter(p => p.key);
+          const queue = [...all.filter(p => p.id === state.aiProvider), ...all.filter(p => p.id !== state.aiProvider)];
+
+          let parsed = null;
+          for (const eng of queue) {
+            try {
+              const raw = await callAI(eng.id, prompt, imgData);
+              const match = raw.match(/\{[\s\S]*\}/);
+              if (match) { parsed = JSON.parse(match[0]); break; }
+            } catch (e) {}
+          }
+
+          if (parsed) {
+            openPortionModal({ name: parsed.name || query || 'AI 辨識餐點', cal: parsed.cal || 400, p: parsed.p || 18, c: parsed.c || 42, f: parsed.f || 14 }, hasImg, true);
+          } else {
+            openPortionModal(localSmartEstimate(query), hasImg, true);
+          }
+
+          foodInput.value = '';
+          foodImagePreview.value = '';
+          isEstimating.value = false;
+        };
+
+        const removeMeal = (id) => { state.meals = state.meals.filter(m => m.id !== id); };
+
+        // Weight-based METs Workouts (Max 6/day)
+        const baseWorkouts = [
+          { icon: '🚶', name: '走路快走', met: 3.8 },
+          { icon: '🏃', name: '慢跑流汗', met: 7.5 },
+          { icon: '⛰️', name: '爬山健行', met: 6.5 },
+          { icon: '🏊', name: '游泳燃脂', met: 8.0 },
+          { icon: '🏋️', name: '肌力重訓', met: 5.5 },
+          { icon: '🧘', name: '瑜珈伸展', met: 3.0 },
+          { icon: '🚴', name: '單車騎行', met: 6.8 },
+          { icon: '🏸', name: '羽球揮拍', met: 5.5 }
+        ];
+
+        const computedWorkouts = computed(() => {
+          const w = currentWeight.value;
+          const hours = workoutDuration.value / 60;
+          return baseWorkouts.map(item => ({
+            icon: item.icon,
+            name: `${item.name} ${workoutDuration.value}分`,
+            cal: Math.round(item.met * w * hours)
+          }));
+        });
+
+        const quickWorkout = (w) => {
+          if (dateWorkouts.value.length >= 6) {
+            showToast('單日已達 6 筆運動紀錄上限囉！', '🛑');
+            return;
+          }
+          state.workouts.push({ id: Date.now() + Math.random(), date: selectedDate.value, name: w.name, cal: w.cal });
+          activePetRecord.value.xp += 25;
+          if (activePetRecord.value.isSick) activePetRecord.value.isSick = false;
+          showToast(`運動完成 (${dateWorkouts.value.length}/6)！「${activePet.value.shortName}」+25 XP`, '💪');
+        };
+
+        const addCustomWorkout = () => {
+          if (dateWorkouts.value.length >= 6 || !workoutForm.name || !workoutForm.cal) return;
+          quickWorkout({ name: workoutForm.name, cal: Math.round(workoutForm.cal) });
+          workoutForm.name = ''; workoutForm.cal = null;
+        };
+
+        const removeWorkout = (id) => { state.workouts = state.workouts.filter(w => w.id !== id); };
+
+        // Body Metrics
+        const hasLoggedBodyToday = computed(() => state.bodyLogs.some(b => b.date === todayStr));
+
+        const logBodyMetric = () => {
+          if (!bodyForm.weight) return;
+          const idx = state.bodyLogs.findIndex(b => b.date === todayStr);
+          const entry = { date: todayStr, weight: Number(bodyForm.weight), fat: bodyForm.fat ? Number(bodyForm.fat) : null };
+          state.profile.weight = entry.weight;
+          if (entry.fat) state.profile.bodyFat = entry.fat;
+          if (idx >= 0) {
+            state.bodyLogs[idx] = entry;
+            showToast('已更新今日體態數據！', '✅');
+          } else {
+            state.bodyLogs.push(entry);
+            activePetRecord.value.xp += 30;
+            activePetRecord.value.unspentPoints += 2;
+            if (activePetRecord.value.isSick) activePetRecord.value.isSick = false;
+            showToast(`體態打卡成功！「${activePet.value.shortName}」+30 XP · +2 屬性點`, '🏆');
+          }
+          bodyForm.weight = null; bodyForm.fat = null;
+        };
+
+        const recentBodyLogs = computed(() => state.bodyLogs.slice(-7));
+        const weightChartCoords = computed(() => {
+          const logs = recentBodyLogs.value;
+          if (logs.length < 2) return [];
+          const weights = logs.map(l => l.weight);
+          const min = Math.min(...weights) - 0.5, max = Math.max(...weights) + 0.5;
+          const range = max - min || 1;
+          return logs.map((l, i) => ({ x: (i / (logs.length - 1)) * 280 + 10, y: 70 - ((l.weight - min) / range) * 60 }));
+        });
+        const weightChartPoints = computed(() => weightChartCoords.value.map(p => `${p.x},${p.y}`).join(' '));
+
+        const exportData = () => {
+          const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = `FitPet_Backup_${todayStr}.json`; a.click();
+          URL.revokeObjectURL(url);
+          showToast('備份檔已下載', '💾');
+        };
+
+        const importData = (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            try {
+              const p = JSON.parse(ev.target.result);
+              Object.assign(state, loadState(), p);
+              showToast('存檔還原成功！', '🎉');
+            } catch (err) { showToast('檔案格式不正確', '❌'); }
+          };
+          reader.readAsText(file);
+        };
+
+        onMounted(() => {
+          checkInactivityPenalty();
+          startPetRoaming();
+          inspectedPetId.value = state.activePetId;
+          if (!state.profile.completed) showTdeeModal.value = true;
+          const last = state.bodyLogs[state.bodyLogs.length - 1];
+          if (last) { bodyForm.weight = last.weight; bodyForm.fat = last.fat; }
+        });
+
+        onUnmounted(() => {
+          clearInterval(roamTimer);
+          clearInterval(clockTimer);
+          clearTimeout(bubbleTimer);
+        });
+
+        return {
+          activeTab, selectedDate, todayStr, shiftDate, showTdeeModal, toast, state, tdeeReport, applyTdeePlan,
+          currentWeight, currentBMI, bmiLabel, targetWater, dateWater, addWater,
+          activePet, activePetRecord, activePetLevel, activePetXpPercent, finalStats, totalCP, allocateStat,
+          getPetLevel, getPetComputedStats, inspectedPetId, inspectedPet,
+          idleCoinsPerHour, pendingIdleCoins, collectIdleCoins,
+          petX, petDir, petAction, petBubbleText, petHeartBurst, petJumpAnim, handleRoamingPetTap,
+          remainingCal, dateIntake, dateBurned, calPercent, todayIntake, minHealthyIntake, isHealthyDeficitActive, dateDeficit, todayDeficit, dateMacros, targetMacros,
+          foodInput, foodImagePreview, handleFoodPhoto, isEstimating, analyzeAndAddFood,
+          foodPresets, pendingFood, portionRatio, portionOptions, openPortionModal, confirmPendingFood,
+          dateMeals, removeMeal,
+          currentBoss, elementMultiplier, bestCounterPet, deficitAtkBonus, remainingRaidTickets, isBattling, battleLogs,
+          arenaPetHp, arenaBossHp, petHitAnim, bossHitAnim, petFloatText, bossFloatText, startDungeonBattle,
+          workoutDuration, computedWorkouts, workoutForm, quickWorkout, addCustomWorkout, dateWorkouts, removeWorkout,
+          bodyForm, hasLoggedBodyToday, logBodyMetric, recentBodyLogs, weightChartCoords, weightChartPoints,
+          shopCatalog, buyShopItem, hatchedPet, equipPet, rarityBadgeClass, dexFilter, onlyOwnedDex, filteredDex,
+          activeEngineCount, exportData, importData
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

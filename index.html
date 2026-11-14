@@ -513,7 +513,6 @@
               </div>
             </div>
 
-            <!-- Symmetrical 3-Column Macro Cards -->
             <div class="grid grid-cols-3 gap-2 pt-3 border-t surface-header tabular-nums">
               <div v-for="m in macroDisplayList" :key="m.label" :class="m.boxClass" class="border p-2.5 rounded-2xl flex flex-col items-center text-center">
                 <div class="text-xs font-bold whitespace-nowrap" :class="m.textClass">{{ m.label }}</div>
@@ -528,7 +527,7 @@
             </div>
           </section>
 
-          <!-- Clean Single-Line Header Food Logger -->
+          <!-- Clean Food Logger -->
           <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <div class="flex surface-subtle border p-0.5 rounded-xl shrink-0">
@@ -696,8 +695,8 @@
             </div>
           </section>
 
-          <!-- Symmetrical Equipment Selection & Input Card -->
-          <section class="glass-card rounded-[26px] p-4 space-y-3">
+          <!-- Ultra-Compact Equipment Selection & Single-Line Last Record Bar -->
+          <section class="glass-card rounded-[26px] p-4 space-y-2.5">
             <div class="flex items-center justify-between gap-2">
               <span class="font-bold text-primary text-sm whitespace-nowrap">{{ editingLiftId ? '編輯訓練' : '選擇器材 / 動作' }}</span>
               <span class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-2.5 py-0.5 rounded-full whitespace-nowrap tabular-nums">
@@ -724,31 +723,30 @@
 
             <input v-if="selectedDropdownExercise === '__custom__'" v-model.trim="liftForm.exercise" type="text" placeholder="請輸入自訂器材或動作..." class="w-full surface-input border border-indigo-400 rounded-2xl px-3.5 py-2.5 text-base focus:outline-none">
 
-            <div v-if="activeBwPreset" class="bg-emerald-500/10 border border-emerald-500/25 p-2.5 rounded-2xl flex items-center justify-between gap-2 pop-in tabular-nums">
-              <div class="text-xs text-primary min-w-0">
-                <span class="block truncate">體重 {{ currentWeight }}kg × {{ Math.round(activeBwPreset.ratio * 100) }}% = <b class="text-emerald-500">{{ Math.round(currentWeight * activeBwPreset.ratio * 10) / 10 }}kg</b></span>
-              </div>
+            <!-- Slim Single-Line Bodyweight Equivalent Bar -->
+            <div v-if="activeBwPreset" class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl flex items-center justify-between gap-2 pop-in tabular-nums">
+              <span class="text-xs text-primary truncate">
+                體重 {{ currentWeight }}×{{ Math.round(activeBwPreset.ratio * 100) }}% = <b class="text-emerald-500">{{ Math.round(currentWeight * activeBwPreset.ratio * 10) / 10 }}kg</b>
+              </span>
               <div class="flex gap-1 shrink-0">
-                <button type="button" @click="addExtraLoad(5)" class="surface-input border text-emerald-500 text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap">+5kg</button>
-                <button type="button" @click="addExtraLoad(10)" class="surface-input border text-emerald-500 text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap">+10kg</button>
+                <button type="button" @click="addExtraLoad(5)" class="surface-input border text-emerald-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">+5kg</button>
+                <button type="button" @click="addExtraLoad(10)" class="surface-input border text-emerald-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">+10kg</button>
               </div>
             </div>
 
-            <div v-if="lastRecordForCurrentExercise && !editingLiftId" class="bg-amber-500/10 border border-amber-500/25 p-2.5 rounded-2xl flex items-center justify-between gap-2 pop-in tabular-nums">
-              <div class="min-w-0">
-                <div class="text-[11px] font-bold text-amber-500">📌 上次 ({{ lastRecordForCurrentExercise.date.slice(5) }})</div>
-                <div class="text-xs text-primary truncate">
-                  <b>{{ lastRecordForCurrentExercise.weight }}kg</b> × {{ lastRecordForCurrentExercise.reps }}次 × {{ lastRecordForCurrentExercise.sets }}組
-                </div>
-              </div>
-              <div class="flex gap-1.5 shrink-0">
-                <button type="button" @click="applyLastLift(0)" class="surface-input border text-primary text-xs font-bold px-2.5 py-1 rounded-xl whitespace-nowrap">帶入</button>
-                <button type="button" @click="applyLastLift(2.5)" class="bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-xl whitespace-nowrap">+2.5kg</button>
+            <!-- Slim Single-Line Last Record Bar (Only tracks single latest record) -->
+            <div v-if="lastRecordForCurrentExercise && !editingLiftId" class="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl flex items-center justify-between gap-2 pop-in tabular-nums">
+              <span class="text-xs text-primary truncate">
+                <b class="text-amber-500">📌 上次</b> {{ lastRecordForCurrentExercise.weight }}kg×{{ lastRecordForCurrentExercise.reps }}×{{ lastRecordForCurrentExercise.sets }}
+              </span>
+              <div class="flex gap-1 shrink-0">
+                <button type="button" @click="applyLastLift(0)" class="surface-input border text-primary text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">帶入</button>
+                <button type="button" @click="applyLastLift(2.5)" class="bg-amber-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">+2.5</button>
               </div>
             </div>
 
             <!-- Strictly Aligned 3-Column Numeric Inputs -->
-            <form @submit.prevent="addLiftRecord" class="space-y-3">
+            <form @submit.prevent="addLiftRecord" class="space-y-2.5 pt-0.5">
               <div class="grid grid-cols-3 gap-2">
                 <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
                   <div class="h-5 flex items-center justify-center gap-1">
@@ -865,7 +863,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: BODY METRICS -->
+      <!-- TAB 3: BODY METRICS (With Editable & Deletable History Records) -->
       <div v-if="activeTab === 'body'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <div class="md:col-span-6 space-y-3.5">
           <section v-if="state.profile.hasGoal && (state.profile.targetWeight || state.profile.targetBodyFat)" class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 text-white rounded-[26px] p-4 sm:p-5 space-y-3 shadow-lg shadow-blue-500/20 tabular-nums">
@@ -889,7 +887,9 @@
 
           <section class="glass-card rounded-[26px] p-4 sm:p-5 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <span class="font-bold text-primary text-sm whitespace-nowrap">體重與體脂打卡</span>
+              <span class="font-bold text-primary text-sm whitespace-nowrap">
+                {{ editingBodyDate ? `編輯 ${editingBodyDate.slice(5)} 體態` : '體重與體脂打卡' }}
+              </span>
               <span class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-2.5 py-0.5 rounded-full whitespace-nowrap tabular-nums">BMI {{ currentBMI }}</span>
             </div>
 
@@ -904,9 +904,12 @@
                   <input v-model.number="bodyForm.fat" type="number" step="0.1" inputmode="decimal" placeholder="20.5" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base font-bold focus:outline-none focus:border-indigo-400 tabular-nums">
                 </div>
               </div>
-              <button type="submit" :disabled="!bodyForm.weight" class="w-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35">
-                儲存紀錄
-              </button>
+              <div class="flex gap-2">
+                <button v-if="editingBodyDate" type="button" @click="cancelEditBody" class="px-4 surface-subtle border text-secondary font-bold py-3 rounded-2xl text-sm whitespace-nowrap">取消</button>
+                <button type="submit" :disabled="!bodyForm.weight" class="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35">
+                  {{ editingBodyDate ? '更新此筆紀錄' : '儲存紀錄' }}
+                </button>
+              </div>
             </form>
           </section>
         </div>
@@ -932,14 +935,23 @@
             </div>
           </section>
 
-          <section v-if="state.bodyLogs.length > 0" class="glass-card rounded-[26px] p-4 sm:p-5 space-y-2">
-            <div class="text-xs font-bold text-secondary">歷史紀錄</div>
-            <div v-for="log in [...state.bodyLogs].reverse().slice(0, 7)" :key="log.date" class="flex justify-between items-center py-2 border-b surface-header last:border-none text-sm tabular-nums">
-              <span class="text-secondary text-xs">{{ log.date }}</span>
-              <div class="flex items-center gap-2.5">
-                <span class="font-bold text-primary">{{ log.weight }} kg</span>
-                <span v-if="log.fat" class="text-indigo-500 font-semibold bg-indigo-500/15 px-2 py-0.5 rounded-lg text-xs">{{ log.fat }}%</span>
+          <section v-if="state.bodyLogs.length > 0" class="glass-card rounded-[26px] p-4 sm:p-5 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-secondary">歷史紀錄 ({{ state.bodyLogs.length }})</span>
+              <span class="text-[11px] text-secondary">點擊可編輯 · 右側可刪除</span>
+            </div>
+            <div v-for="log in [...state.bodyLogs].reverse().slice(0, 10)" :key="log.date"
+              class="flex justify-between items-center p-2.5 surface-subtle rounded-2xl border hover:border-indigo-400/50 transition gap-2 tabular-nums">
+              <div @click="startEditBody(log)" class="flex items-center justify-between flex-1 min-w-0 cursor-pointer pr-1">
+                <span class="text-secondary text-xs font-medium whitespace-nowrap">{{ log.date }}</span>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span class="font-bold text-primary text-sm whitespace-nowrap">{{ log.weight }} kg</span>
+                  <span v-if="log.fat" class="text-indigo-500 font-semibold bg-indigo-500/15 px-2 py-0.5 rounded-lg text-xs whitespace-nowrap">{{ log.fat }}%</span>
+                </div>
               </div>
+              <button @click="removeBodyLog(log.date)" title="刪除此筆紀錄" class="w-7 h-7 rounded-xl text-secondary hover:text-rose-500 hover:bg-rose-500/10 text-xs font-bold shrink-0 transition">
+                ✕
+              </button>
             </div>
           </section>
         </div>
@@ -1074,7 +1086,6 @@
       { name: '徒手弓箭步蹲', ratio: 0.65 }, { name: '捲腹/仰臥起坐', ratio: 0.45 }
     ];
 
-    // Concise, non-truncating equipment names for mobile dropdowns (All 23 gym machines preserved)
     const EXERCISE_CATALOG = {
       '腿臀': [
         '45度倒蹬腿推機', '哈克深蹲機', 'V型深蹲機',
@@ -1170,6 +1181,7 @@
 
         const manualForm = reactive({ name: '', grams: 100, cal100: null, p100: null, c100: null, f100: null });
         const pendingFood = ref(null);
+        const editingBodyDate = ref(null);
         const bodyForm = reactive({ weight: null, fat: null });
 
         const selectedMuscleGroup = ref('腿臀');
@@ -1495,37 +1507,22 @@
           const fPct = Math.min(100, Math.round((dateMacros.value.f / (targetMacros.value.f || 1)) * 100));
           return [
             {
-              label: '蛋白質',
-              cur: dateMacros.value.p,
-              tar: targetMacros.value.p,
+              label: '蛋白質', cur: dateMacros.value.p, tar: targetMacros.value.p,
               subText: `${proteinPerKg.value} g/kg`,
               subClass: Number(proteinPerKg.value) >= 1.6 ? 'bg-emerald-500 text-white' : 'bg-sky-500/15 text-sky-500',
-              boxClass: 'bg-sky-500/10 border-sky-500/20',
-              textClass: 'text-sky-500',
-              trackClass: 'bg-sky-500/20',
-              barClass: 'bg-gradient-to-r from-sky-400 to-blue-500'
+              boxClass: 'bg-sky-500/10 border-sky-500/20', textClass: 'text-sky-500', trackClass: 'bg-sky-500/20', barClass: 'bg-gradient-to-r from-sky-400 to-blue-500'
             },
             {
-              label: '碳水',
-              cur: dateMacros.value.c,
-              tar: targetMacros.value.c,
+              label: '碳水', cur: dateMacros.value.c, tar: targetMacros.value.c,
               subText: `達成 ${cPct}%`,
               subClass: 'bg-amber-500/15 text-amber-500',
-              boxClass: 'bg-amber-500/10 border-amber-500/20',
-              textClass: 'text-amber-500',
-              trackClass: 'bg-amber-500/20',
-              barClass: 'bg-gradient-to-r from-amber-400 to-orange-500'
+              boxClass: 'bg-amber-500/10 border-amber-500/20', textClass: 'text-amber-500', trackClass: 'bg-amber-500/20', barClass: 'bg-gradient-to-r from-amber-400 to-orange-500'
             },
             {
-              label: '脂肪',
-              cur: dateMacros.value.f,
-              tar: targetMacros.value.f,
+              label: '脂肪', cur: dateMacros.value.f, tar: targetMacros.value.f,
               subText: `達成 ${fPct}%`,
               subClass: 'bg-purple-500/15 text-purple-500',
-              boxClass: 'bg-purple-500/10 border-purple-500/20',
-              textClass: 'text-purple-500',
-              trackClass: 'bg-purple-500/20',
-              barClass: 'bg-gradient-to-r from-purple-400 to-fuchsia-500'
+              boxClass: 'bg-purple-500/10 border-purple-500/20', textClass: 'text-purple-500', trackClass: 'bg-purple-500/20', barClass: 'bg-gradient-to-r from-purple-400 to-fuchsia-500'
             }
           ];
         });
@@ -1953,7 +1950,7 @@
 
         const removeMeal = (id) => { state.meals = state.meals.filter(m => m.id !== id); };
 
-        // Weight Training, Plate x2, PR Crown & Bodyweight Calisthenics
+        // Weight Training, Plate x2, PR Crown & Single-Record Per Exercise Logic
         const bodyweightCatalog = BODYWEIGHT_CATALOG;
         const currentGroupOptions = computed(() => EXERCISE_CATALOG[selectedMuscleGroup.value] || []);
         const activeBwPreset = computed(() => bodyweightCatalog.find(b => b.name === liftForm.exercise) || null);
@@ -2002,9 +1999,12 @@
           showToast(`雙邊掛片總重：${liftForm.weight} kg`, '⚖️');
         };
 
+        // Strictly retrieves ONLY the single most recent record for the selected exercise
         const lastRecordForCurrentExercise = computed(() => {
           const name = (liftForm.exercise || '').trim();
-          return name ? ([...state.lifts].reverse().find(l => l.exercise === name) || null) : null;
+          if (!name) return null;
+          const matches = state.lifts.filter(l => l.exercise === name);
+          return matches.length ? matches[matches.length - 1] : null;
         });
 
         const applyLastLift = (extra = 0) => {
@@ -2030,6 +2030,18 @@
             if (idx >= 0) state.lifts[idx] = { ...state.lifts[idx], muscle: liftForm.muscle, exercise: liftForm.exercise, weight: w, reps: r, sets: s, volume: vol, isPR };
             editingLiftId.value = null;
             showToast('已更新訓練紀錄', '✅');
+            return;
+          }
+
+          // Keep only 1 record per exercise per day (updates existing entry if logged again today)
+          const sameDayIdx = state.lifts.findIndex(l => l.date === selectedDate.value && l.exercise === liftForm.exercise);
+          if (sameDayIdx >= 0) {
+            state.lifts[sameDayIdx] = {
+              ...state.lifts[sameDayIdx],
+              muscle: liftForm.muscle || selectedMuscleGroup.value,
+              weight: w, reps: r, sets: s, volume: vol, isPR
+            };
+            showToast(isPR ? `👑 打破「${liftForm.exercise}」新紀錄 (PR)！` : `已更新今日「${liftForm.exercise}」最新紀錄`, isPR ? '👑' : '✅');
           } else {
             state.lifts.push({ id: Date.now() + Math.random(), date: selectedDate.value, muscle: liftForm.muscle || selectedMuscleGroup.value, exercise: liftForm.exercise, weight: w, reps: r, sets: s, volume: vol, isPR });
             showToast(isPR ? `👑 打破「${liftForm.exercise}」新紀錄 (PR)！` : `已紀錄 ${liftForm.exercise}`, isPR ? '👑' : '🏋️');
@@ -2178,7 +2190,7 @@
           showToast('AI 引擎診斷完成', '⚡');
         };
 
-        // Body Metrics & BMI
+        // Body Metrics (Create, Edit & Delete Historical Records)
         const hasLoggedBodyToday = computed(() => state.bodyLogs.some(b => b.date === todayStr.value));
         const currentWeight = computed(() => {
           const last = state.bodyLogs[state.bodyLogs.length - 1];
@@ -2190,13 +2202,45 @@
 
         const logBodyMetric = () => {
           if (!bodyForm.weight) return;
-          const idx = state.bodyLogs.findIndex(b => b.date === todayStr.value);
-          const entry = { date: todayStr.value, weight: Number(bodyForm.weight), fat: bodyForm.fat ? Number(bodyForm.fat) : null };
-          state.profile.weight = entry.weight;
-          if (entry.fat) state.profile.bodyFat = entry.fat;
-          if (idx >= 0) state.bodyLogs[idx] = entry; else state.bodyLogs.push(entry);
-          showToast('已儲存今日體態', '✅');
-          bodyForm.weight = null; bodyForm.fat = null;
+          const targetDate = editingBodyDate.value || todayStr.value;
+          const idx = state.bodyLogs.findIndex(b => b.date === targetDate);
+          const entry = { date: targetDate, weight: Number(bodyForm.weight), fat: bodyForm.fat ? Number(bodyForm.fat) : null };
+          if (idx >= 0) state.bodyLogs[idx] = entry;
+          else {
+            state.bodyLogs.push(entry);
+            state.bodyLogs.sort((a, b) => a.date.localeCompare(b.date));
+          }
+          const newest = state.bodyLogs[state.bodyLogs.length - 1];
+          if (newest) {
+            state.profile.weight = newest.weight;
+            if (newest.fat) state.profile.bodyFat = newest.fat;
+          }
+          showToast(editingBodyDate.value ? `已更新 ${targetDate} 體態` : '已儲存今日體態', '✅');
+          editingBodyDate.value = null;
+          bodyForm.weight = null;
+          bodyForm.fat = null;
+        };
+
+        const startEditBody = (log) => {
+          editingBodyDate.value = log.date;
+          bodyForm.weight = log.weight;
+          bodyForm.fat = log.fat;
+        };
+
+        const cancelEditBody = () => {
+          editingBodyDate.value = null;
+          bodyForm.weight = null;
+          bodyForm.fat = null;
+        };
+
+        const removeBodyLog = (dateStr) => {
+          state.bodyLogs = state.bodyLogs.filter(b => b.date !== dateStr);
+          if (editingBodyDate.value === dateStr) cancelEditBody();
+          const newest = state.bodyLogs[state.bodyLogs.length - 1];
+          if (newest) {
+            state.profile.weight = newest.weight;
+          }
+          showToast(`已刪除 ${dateStr} 紀錄`, '🗑️');
         };
 
         const recentBodyLogs = computed(() => state.bodyLogs.slice(-7));
@@ -2290,8 +2334,9 @@
           previewLiftVolume, addLiftRecord, startEditLift, addExtraSet, removeLift, dateLifts, dateTotalVolume, dateTotalSets,
           last7DaysLiftBars, max7DaysLiftVol, weeklyAvgVolume, lastWorkoutDate, copyLastWorkoutSession, isGeneratingAdvice, generateAiTrainingAdvice,
           showSupabaseSql, isSyncingCloud, pushToSupabase, pullFromSupabase,
-          bodyForm, hasLoggedBodyToday, currentWeight, currentBodyFat, currentBMI, bmiLabel,
-          logBodyMetric, recentBodyLogs, weightChartCoords, weightChartPoints, weightAreaPoints,
+          editingBodyDate, bodyForm, hasLoggedBodyToday, currentWeight, currentBodyFat, currentBMI, bmiLabel,
+          logBodyMetric, startEditBody, cancelEditBody, removeBodyLog,
+          recentBodyLogs, weightChartCoords, weightChartPoints, weightAreaPoints,
           exportData, exportCsvReport, importData
         };
       }

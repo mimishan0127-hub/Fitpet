@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FitQuest">
   <meta name="theme-color" content="#10B981">
-  <title>FitQuest AI 營養與重訓助理</title>
+  <title>FitQuest</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
@@ -15,33 +15,32 @@
     :root {
       --sat: env(safe-area-inset-top, 0px);
       --sab: env(safe-area-inset-bottom, 0px);
-      --bg-shell: rgba(255, 255, 255, 0.55);
-      --bg-header: rgba(255, 255, 255, 0.85);
-      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-shell: rgba(248, 250, 252, 0.72);
+      --bg-header: rgba(255, 255, 255, 0.88);
+      --bg-card: rgba(255, 255, 255, 0.94);
       --bg-subtle: #F8FAFC;
       --bg-input: #FFFFFF;
       --border-card: rgba(255, 255, 255, 0.95);
-      --border-line: rgba(226, 232, 240, 0.85);
+      --border-line: rgba(226, 232, 240, 0.75);
       --text-main: #0F172A;
       --text-sub: #64748B;
-      --card-shadow: 0 12px 32px -10px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(16, 185, 129, 0.05);
+      --card-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
     }
     .theme-dark {
-      --bg-shell: rgba(11, 17, 32, 0.92);
-      --bg-header: rgba(15, 23, 42, 0.88);
-      --bg-card: rgba(30, 41, 59, 0.86);
-      --bg-subtle: rgba(15, 23, 42, 0.72);
+      --bg-shell: rgba(9, 13, 22, 0.95);
+      --bg-header: rgba(15, 23, 42, 0.9);
+      --bg-card: rgba(24, 33, 49, 0.9);
+      --bg-subtle: rgba(15, 23, 42, 0.75);
       --bg-input: #0F172A;
-      --border-card: rgba(51, 65, 85, 0.65);
-      --border-line: rgba(51, 65, 85, 0.75);
+      --border-card: rgba(51, 65, 85, 0.55);
+      --border-line: rgba(51, 65, 85, 0.7);
       --text-main: #F8FAFC;
       --text-sub: #94A3B8;
-      --card-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.45);
+      --card-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.45);
     }
     body {
-      background: radial-gradient(circle at 15% 15%, #D1FAE5 0%, transparent 45%),
-                  radial-gradient(circle at 85% 20%, #E0F2FE 0%, transparent 45%),
-                  radial-gradient(circle at 50% 90%, #FEF3C7 0%, transparent 50%),
+      background: radial-gradient(circle at 12% 12%, #D1FAE5 0%, transparent 42%),
+                  radial-gradient(circle at 88% 18%, #E0F2FE 0%, transparent 42%),
                   #F8FAFC;
       color: var(--text-main);
       overscroll-behavior-y: none;
@@ -50,9 +49,9 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
     }
     body.body-dark {
-      background: radial-gradient(circle at 15% 15%, #064E3B 0%, transparent 45%),
-                  radial-gradient(circle at 85% 20%, #0C4A6E 0%, transparent 45%),
-                  #060A14;
+      background: radial-gradient(circle at 12% 12%, #064E3B 0%, transparent 42%),
+                  radial-gradient(circle at 88% 18%, #0C4A6E 0%, transparent 42%),
+                  #060911;
     }
     .app-shell {
       height: 100vh;
@@ -62,11 +61,12 @@
       color: var(--text-main);
       transition: background-color 0.25s ease, color 0.25s ease;
     }
-    .safe-bottom { padding-bottom: calc(10px + var(--sab)); }
-    .timer-offset { bottom: calc(68px + var(--sab)); }
+    .safe-bottom { padding-bottom: calc(8px + var(--sab)); }
+    .timer-offset { bottom: calc(66px + var(--sab)); }
     input, textarea, select { user-select: text; }
-    ::-webkit-scrollbar { width: 4px; height: 4px; background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.28); border-radius: 999px; }
+    .no-scrollbar::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+    .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+    ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
     .glass-card {
       background: var(--bg-card);
       backdrop-filter: blur(20px);
@@ -82,10 +82,10 @@
     .custom-select {
       appearance: none; -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.8' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-      background-position: right 0.65rem center; background-repeat: no-repeat; background-size: 1.15em 1.15em; padding-right: 2.1rem;
+      background-position: right 0.55rem center; background-repeat: no-repeat; background-size: 1.05em 1.05em; padding-right: 1.85rem;
     }
     @keyframes popIn { 0% { transform: scale(0.96) translateY(6px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-    .pop-in { animation: popIn 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+    .pop-in { animation: popIn 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
   </style>
   <script>
     (function() {
@@ -120,7 +120,7 @@
       addLink('icon', icon192, '192x192');
       addLink('apple-touch-icon', icon512);
       addLink('manifest', 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-        name: 'FitQuest AI 營養與重訓助理', short_name: 'FitQuest', start_url: '.', display: 'standalone',
+        name: 'FitQuest', short_name: 'FitQuest', start_url: '.', display: 'standalone',
         background_color: '#F0FDF4', theme_color: '#10B981',
         icons: [{ src: icon192, sizes: '192x192', type: 'image/png' }, { src: icon512, sizes: '512x512', type: 'image/png' }]
       })));
@@ -130,70 +130,70 @@
 <body class="overflow-hidden antialiased" :class="state.darkMode && 'body-dark'">
   <div id="app" v-cloak :class="state.darkMode && 'theme-dark'" class="app-shell flex flex-col max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full md:my-3 md:h-[calc(100dvh-24px)] md:rounded-[32px] md:shadow-2xl md:border md:border-white/20 relative overflow-hidden">
 
-    <!-- Floating Toast -->
-    <div v-if="toast.show" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-xl flex items-center gap-2 backdrop-blur-md max-w-[90vw] pop-in border border-white/15">
+    <!-- Minimal Floating Toast -->
+    <div v-if="toast.show" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white px-4 py-2 rounded-full text-xs font-semibold shadow-xl flex items-center gap-2 backdrop-blur-md max-w-[90vw] pop-in border border-white/10">
       <span class="shrink-0">{{ toast.icon }}</span>
       <span class="truncate">{{ toast.msg }}</span>
     </div>
 
-    <!-- Floating Rest Timer Pill (Visible during gym rest countdown) -->
-    <div v-if="restTimer.active" class="fixed timer-offset md:bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white px-4 py-2.5 rounded-full shadow-2xl border border-indigo-400/40 flex items-center gap-3 backdrop-blur-md pop-in">
+    <!-- Floating Rest Timer Pill -->
+    <div v-if="restTimer.active" class="fixed timer-offset md:bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white px-4 py-2 rounded-full shadow-2xl border border-indigo-400/40 flex items-center gap-3 backdrop-blur-md pop-in whitespace-nowrap">
       <div class="flex items-center gap-1.5">
-        <span class="text-base animate-pulse">⏱️</span>
-        <span class="text-xs text-indigo-300 font-bold">組間休息</span>
-        <span class="text-lg font-black text-amber-300 tabular-nums w-12 text-center">{{ formattedRestTime }}</span>
+        <span class="text-sm animate-pulse">⏱️</span>
+        <span class="text-xs text-indigo-300 font-bold">休息</span>
+        <span class="text-base font-black text-amber-300 tabular-nums w-11 text-center">{{ formattedRestTime }}</span>
       </div>
       <div class="flex items-center gap-1.5">
-        <button @click="adjustRestTimer(15)" class="bg-white/15 hover:bg-white/25 text-xs font-bold px-2.5 py-1 rounded-full active:scale-90 transition">+15s</button>
-        <button @click="stopRestTimer" class="bg-rose-500/80 hover:bg-rose-500 text-xs font-bold px-2.5 py-1 rounded-full active:scale-90 transition">結束</button>
+        <button @click="adjustRestTimer(15)" class="bg-white/15 hover:bg-white/25 text-xs font-bold px-2 py-1 rounded-full active:scale-90 transition">+15s</button>
+        <button @click="stopRestTimer" class="bg-rose-500/80 hover:bg-rose-500 text-xs font-bold px-2 py-1 rounded-full active:scale-90 transition">結束</button>
       </div>
     </div>
 
-    <!-- Food Library & Learned Personal Foods Modal -->
+    <!-- Food Library Modal -->
     <div v-if="showFoodDbModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="glass-card w-full max-w-lg rounded-t-3xl sm:rounded-3xl h-[88dvh] sm:h-[82dvh] flex flex-col shadow-2xl overflow-hidden pop-in overscroll-contain">
+      <div class="glass-card w-full max-w-lg rounded-t-3xl sm:rounded-3xl h-[86dvh] sm:h-[80dvh] flex flex-col shadow-2xl overflow-hidden pop-in overscroll-contain">
         <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto mt-2.5 sm:hidden shrink-0"></div>
-        <div class="px-5 py-3.5 border-b surface-header flex items-center justify-between shrink-0">
-          <div>
-            <h3 class="font-extrabold text-primary text-base">📚 標準與個人記憶食物庫 ({{ combinedFoodLibrary.length }}筆)</h3>
-            <p class="text-xs text-secondary">{{ externalDbStatus }}</p>
+        <div class="px-5 py-3 border-b surface-header flex items-center justify-between gap-2 shrink-0">
+          <div class="min-w-0">
+            <h3 class="font-bold text-primary text-sm truncate">📚 食物庫 ({{ combinedFoodLibrary.length }})</h3>
+            <p class="text-[11px] text-secondary truncate">{{ externalDbStatus }}</p>
           </div>
-          <button @click="showFoodDbModal = false" class="w-8 h-8 rounded-full surface-subtle text-secondary text-sm font-bold border">✕</button>
+          <button @click="showFoodDbModal = false" class="w-8 h-8 rounded-full surface-subtle text-secondary text-xs font-bold border shrink-0">✕</button>
         </div>
 
-        <div class="p-4 border-b surface-header space-y-2.5 shrink-0">
+        <div class="p-3.5 border-b surface-header space-y-2 shrink-0">
           <div class="flex gap-2">
-            <input v-model.trim="dbSearchQuery" type="text" placeholder="搜尋食材、個人記憶或烹調法..." class="flex-1 surface-input border rounded-xl px-3.5 py-2 text-base focus:outline-none focus:border-emerald-400">
-            <label class="px-3.5 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center justify-center cursor-pointer shrink-0 active:scale-95 transition">
-              📥 匯入庫
+            <input v-model.trim="dbSearchQuery" type="text" placeholder="搜尋食材或烹調法..." class="flex-1 min-w-0 surface-input border rounded-xl px-3 py-2 text-base focus:outline-none focus:border-emerald-400">
+            <label class="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center justify-center cursor-pointer shrink-0 whitespace-nowrap active:scale-95 transition">
+              📥 匯入
               <input type="file" accept=".json" @change="importExternalFoodDb" class="hidden">
             </label>
           </div>
-          <div class="flex gap-1.5 overflow-x-auto pb-0.5">
+          <div class="flex gap-1.5 overflow-x-auto no-scrollbar">
             <button v-for="cat in dbCategories" :key="cat" @click="dbSelectedCat = cat"
-              class="px-3 py-1 rounded-full text-xs font-bold shrink-0 transition"
-              :class="dbSelectedCat === cat ? 'bg-emerald-600 text-white shadow-sm' : 'surface-subtle text-secondary border'">
+              class="px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 whitespace-nowrap transition"
+              :class="dbSelectedCat === cat ? 'bg-emerald-600 text-white' : 'surface-subtle text-secondary border'">
               {{ cat }}
             </button>
           </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-2 overscroll-contain">
+        <div class="flex-1 overflow-y-auto p-3.5 space-y-2 overscroll-contain">
           <div v-for="item in filteredOfflineDb" :key="item.name + item.cook + (item.cat || '')" @click="selectFromLibrary(item)"
-            class="flex items-center justify-between p-3 surface-subtle hover:border-emerald-400/60 rounded-2xl border cursor-pointer active:scale-[0.99] transition">
-            <div class="min-w-0 pr-2">
+            class="flex items-center justify-between p-3 surface-subtle hover:border-emerald-400/60 rounded-2xl border cursor-pointer active:scale-[0.99] transition gap-2">
+            <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5">
-                <span class="text-xs font-bold px-2 py-0.5 rounded shrink-0"
+                <span class="text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap"
                   :class="item.cat === '⭐個人記憶' ? 'bg-amber-500/20 text-amber-500' : 'surface-input border text-secondary'">
                   {{ item.cook }}
                 </span>
                 <span class="font-bold text-primary text-sm truncate">{{ item.name }}</span>
               </div>
-              <div class="text-xs text-secondary mt-1 tabular-nums">
-                每100g: <b class="text-primary">{{ item.cal100 }}卡</b> (蛋{{ item.p100 }}g/碳{{ item.c100 }}g/脂{{ item.f100 }}g) · 預設{{ item.grams }}g
+              <div class="text-[11px] text-secondary mt-1 tabular-nums truncate">
+                每100g: {{ item.cal100 }}卡 · 蛋{{ item.p100 }}g · 預設{{ item.grams }}g
               </div>
             </div>
-            <span class="font-extrabold text-emerald-500 bg-emerald-500/15 px-2.5 py-1 rounded-xl text-xs shrink-0 tabular-nums">
+            <span class="font-bold text-emerald-500 bg-emerald-500/15 px-2.5 py-1 rounded-xl text-xs shrink-0 whitespace-nowrap tabular-nums">
               {{ Math.round(item.cal100 * item.grams / 100) }} kcal
             </span>
           </div>
@@ -203,263 +203,240 @@
 
     <!-- Precision Gram-Based Food Confirmation Modal -->
     <div v-if="pendingFood" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="glass-card w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[92dvh] flex flex-col shadow-2xl overflow-hidden pop-in overscroll-contain">
+      <div class="glass-card w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90dvh] flex flex-col shadow-2xl overflow-hidden pop-in overscroll-contain">
         <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto mt-2.5 sm:hidden shrink-0"></div>
-        <div class="px-6 py-3.5 border-b surface-header flex items-center justify-between shrink-0">
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-xs font-bold text-emerald-500 bg-emerald-500/15 px-2.5 py-0.5 rounded-full">{{ pendingFood.sourceLabel }}</span>
-            <select v-model="pendingFood.mealType" class="custom-select surface-subtle border text-primary text-base font-bold rounded-xl pl-2.5 py-0.5">
+        <div class="px-5 py-3 border-b surface-header flex items-center justify-between gap-2 shrink-0">
+          <div class="flex items-center gap-1.5 min-w-0">
+            <span class="text-xs font-bold text-emerald-500 bg-emerald-500/15 px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">{{ pendingFood.sourceLabel }}</span>
+            <select v-model="pendingFood.mealType" class="custom-select surface-subtle border text-primary text-base font-bold rounded-xl pl-2.5 py-0.5 shrink-0">
               <option value="早餐">🌅 早餐</option>
               <option value="午餐">☀️ 午餐</option>
               <option value="晚餐">🌙 晚餐</option>
               <option value="點心">🍎 點心</option>
             </select>
           </div>
-          <button @click="pendingFood = null" class="w-8 h-8 rounded-full surface-subtle border text-secondary text-sm font-bold shrink-0">✕</button>
+          <button @click="pendingFood = null" class="w-8 h-8 rounded-full surface-subtle border text-secondary text-xs font-bold shrink-0">✕</button>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4 overscroll-contain">
-          <div class="space-y-2">
+        <div class="flex-1 overflow-y-auto px-5 py-4 space-y-3.5 overscroll-contain">
+          <div class="space-y-1.5">
             <input v-model.trim="pendingFood.name" type="text" class="w-full surface-input border rounded-xl px-3.5 py-2 text-base font-bold text-primary">
-            <div v-if="pendingFood.tip" class="text-xs text-teal-500 bg-teal-500/10 border border-teal-500/20 px-3 py-2 rounded-xl flex items-center gap-1.5">
-              <span>💡</span><span>{{ pendingFood.tip }}</span>
+            <div v-if="pendingFood.tip" class="text-xs text-teal-500 bg-teal-500/10 border border-teal-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+              <span class="shrink-0">💡</span><span>{{ pendingFood.tip }}</span>
             </div>
           </div>
 
           <div v-if="pendingFood.items && pendingFood.items.length > 0" class="surface-subtle p-3 rounded-2xl border space-y-2">
-            <div class="text-xs font-bold text-secondary">🍱 食材明細拆解（可勾選增減）</div>
-            <label v-for="(sub, idx) in pendingFood.items" :key="idx" class="flex items-center justify-between surface-input p-2.5 rounded-xl border cursor-pointer gap-2">
+            <div class="text-xs font-bold text-secondary">🍱 食材明細（可勾選）</div>
+            <label v-for="(sub, idx) in pendingFood.items" :key="idx" class="flex items-center justify-between surface-input p-2 rounded-xl border cursor-pointer gap-2">
               <div class="flex items-center gap-2 min-w-0">
                 <input type="checkbox" v-model="sub.checked" @change="recalcPendingFromItems" class="w-4 h-4 accent-emerald-600 shrink-0">
                 <div class="min-w-0">
                   <div class="text-xs font-bold text-primary truncate" :class="!sub.checked && 'line-through opacity-40'">{{ sub.name }}</div>
-                  <div class="text-xs text-secondary tabular-nums">
-                    <span v-if="sub.grams">約 {{ sub.grams }}g</span>
+                  <div class="text-[11px] text-secondary tabular-nums">
+                    <span v-if="sub.grams">{{ sub.grams }}g</span>
                     <span v-if="sub.cooking"> · {{ sub.cooking }}</span>
                   </div>
                 </div>
               </div>
-              <span class="text-xs font-extrabold text-primary shrink-0 tabular-nums">{{ sub.cal }} kcal</span>
+              <span class="text-xs font-bold text-primary shrink-0 whitespace-nowrap tabular-nums">{{ sub.cal }} kcal</span>
             </label>
           </div>
 
-          <div class="bg-amber-500/10 border border-amber-500/25 p-3.5 rounded-2xl space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-500">⚖️ 實際食用重量</span>
-              <span class="text-xs font-bold text-emerald-500 tabular-nums">計入 {{ finalPendingPreview.cal }} kcal</span>
+          <div class="bg-amber-500/10 border border-amber-500/25 p-3 rounded-2xl space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-amber-500 whitespace-nowrap">⚖️ 食用重量</span>
+              <span class="text-xs font-bold text-emerald-500 whitespace-nowrap tabular-nums">計入 {{ finalPendingPreview.cal }} kcal</span>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" @click="adjustGrams(-25)" class="w-11 h-10 rounded-xl surface-input border font-bold text-primary active:scale-90 transition">-25g</button>
-              <div class="flex-1 relative">
+              <button type="button" @click="adjustGrams(-25)" class="w-11 h-10 rounded-xl surface-input border font-bold text-primary shrink-0 active:scale-90 transition">-25g</button>
+              <div class="flex-1 relative min-w-0">
                 <input v-model.number="pendingFood.actualGrams" type="number" inputmode="numeric" class="w-full surface-input border border-amber-400/50 rounded-xl px-3 py-2 text-center text-base font-black text-primary tabular-nums">
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-secondary">g</span>
               </div>
-              <button type="button" @click="adjustGrams(25)" class="w-11 h-10 rounded-xl surface-input border font-bold text-primary active:scale-90 transition">+25g</button>
+              <button type="button" @click="adjustGrams(25)" class="w-11 h-10 rounded-xl surface-input border font-bold text-primary shrink-0 active:scale-90 transition">+25g</button>
             </div>
             <div class="grid grid-cols-4 gap-1.5">
               <button v-for="mult in [0.5, 0.75, 1, 1.5]" :key="mult" type="button" @click="pendingFood.actualGrams = Math.max(10, Math.round(pendingFood.baseGrams * mult))"
-                class="py-1.5 rounded-lg text-xs font-bold border transition"
+                class="py-1.5 rounded-lg text-xs font-bold border whitespace-nowrap transition"
                 :class="Math.abs(pendingFood.actualGrams - Math.round(pendingFood.baseGrams * mult)) <= 1 ? 'bg-amber-500 text-white border-amber-500' : 'surface-input text-secondary'">
-                {{ mult === 1 ? '1份標準' : `${mult * 100}%份` }}
+                {{ mult === 1 ? '1份' : `${mult * 100}%` }}
               </button>
             </div>
           </div>
 
-          <div class="bg-emerald-500/10 p-3.5 rounded-2xl border border-emerald-500/20 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-primary">📊 每 100g 營養密度</span>
-              <label class="inline-flex items-center gap-1.5 cursor-pointer">
+          <div class="bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-primary whitespace-nowrap">📊 每 100g 基準</span>
+              <label class="inline-flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap">
                 <input type="checkbox" v-model="pendingFood.useBuffer" class="w-4 h-4 accent-emerald-600">
                 <span class="text-xs font-bold" :class="pendingFood.useBuffer ? 'text-emerald-500' : 'text-secondary'">+15%外食油</span>
               </label>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-              <div v-for="f in [{k:'cal100',l:'卡/100g',c:'text-secondary',s:'1'},{k:'p100',l:'蛋白/100g',c:'text-sky-500',s:'0.1'},{k:'c100',l:'碳水/100g',c:'text-amber-500',s:'0.1'},{k:'f100',l:'脂肪/100g',c:'text-purple-500',s:'0.1'}]" :key="f.k" class="surface-input p-2 rounded-xl border">
-                <div class="text-xs font-semibold" :class="f.c">{{ f.l }}</div>
+              <div v-for="f in [{k:'cal100',l:'熱量',c:'text-secondary',s:'1'},{k:'p100',l:'蛋白',c:'text-sky-500',s:'0.1'},{k:'c100',l:'碳水',c:'text-amber-500',s:'0.1'},{k:'f100',l:'脂肪',c:'text-purple-500',s:'0.1'}]" :key="f.k" class="surface-input p-2 rounded-xl border">
+                <div class="text-[11px] font-semibold whitespace-nowrap" :class="f.c">{{ f.l }}</div>
                 <input v-model.number="pendingFood[f.k]" type="number" :step="f.s" inputmode="decimal" class="w-full text-center font-bold text-primary text-base bg-transparent focus:outline-none mt-0.5 tabular-nums">
               </div>
             </div>
           </div>
 
           <form v-if="!pendingFood.editId" @submit.prevent="refinePendingWithAI" class="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-2xl space-y-2">
-            <div class="text-xs font-bold text-indigo-400">🔄 需要 AI 補充修正？</div>
+            <div class="text-xs font-bold text-indigo-400">🔄 補充修正讓 AI 重算</div>
             <div class="flex gap-2">
-              <input v-model.trim="refinePromptInput" type="text" placeholder="例：這是炸的、去皮、白飯吃一半..." class="flex-1 surface-input border rounded-xl px-3 py-2 text-base focus:outline-none">
-              <button type="submit" :disabled="isRefining || !refinePromptInput" class="bg-indigo-600 text-white text-xs font-bold px-3.5 rounded-xl shrink-0 active:scale-95 transition disabled:opacity-40">
-                {{ isRefining ? '重算中...' : '重算' }}
+              <input v-model.trim="refinePromptInput" type="text" placeholder="例：去皮、白飯吃一半..." class="flex-1 min-w-0 surface-input border rounded-xl px-3 py-2 text-base focus:outline-none">
+              <button type="submit" :disabled="isRefining || !refinePromptInput" class="bg-indigo-600 text-white text-xs font-bold px-3.5 rounded-xl shrink-0 whitespace-nowrap active:scale-95 transition disabled:opacity-40">
+                {{ isRefining ? refiningStatus : '重算' }}
               </button>
             </div>
           </form>
         </div>
 
         <div class="p-4 border-t surface-header shrink-0 safe-bottom">
-          <button @click="confirmPendingFood" class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white font-bold py-3.5 rounded-2xl text-base shadow-lg shadow-emerald-500/25 active:scale-[0.99] transition tabular-nums">
-            {{ pendingFood.editId ? '儲存修改' : '確認紀錄並加入個人記憶' }} ({{ pendingFood.actualGrams }}g · {{ finalPendingPreview.cal }} kcal)
+          <button @click="confirmPendingFood" class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white font-bold py-3 rounded-2xl text-base shadow-lg shadow-emerald-500/25 active:scale-[0.99] transition tabular-nums">
+            {{ pendingFood.editId ? '儲存修改' : '確認紀錄' }} ({{ pendingFood.actualGrams }}g · {{ finalPendingPreview.cal }} kcal)
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Detailed Clinical TDEE & BMR Assessment Modal -->
+    <!-- Clinical TDEE & BMR Modal -->
     <div v-if="showTdeeModal" class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="glass-card w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90dvh] flex flex-col shadow-2xl overflow-hidden pop-in overscroll-contain">
         <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto mt-2.5 sm:hidden shrink-0"></div>
-        <div class="px-6 py-3.5 border-b surface-header flex items-center justify-between shrink-0">
-          <div>
-            <h2 class="font-extrabold text-primary text-base">📊 深度 BMR 與 TDEE 評估</h2>
-            <p class="text-xs text-secondary">結合體組成、日常職業活動量與運動頻率精算</p>
-          </div>
-          <button v-if="state.profile.completed" @click="showTdeeModal = false" class="w-8 h-8 rounded-full surface-subtle border text-secondary text-sm font-bold">✕</button>
+        <div class="px-5 py-3 border-b surface-header flex items-center justify-between gap-2 shrink-0">
+          <h2 class="font-bold text-primary text-base truncate">📊 基礎代謝與目標設定</h2>
+          <button v-if="state.profile.completed" @click="showTdeeModal = false" class="w-8 h-8 rounded-full surface-subtle border text-secondary text-xs font-bold shrink-0">✕</button>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4 overscroll-contain">
-          <div class="space-y-2.5">
-            <div class="text-xs font-extrabold text-primary">1. 基本生理與體組成數據</div>
-            <div class="grid grid-cols-2 gap-2.5">
-              <div>
-                <label class="text-xs text-secondary block mb-1">性別</label>
-                <select v-model="state.profile.gender" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
-                  <option value="male">男性</option>
-                  <option value="female">女性</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-secondary block mb-1">年齡 (歲)</label>
-                <input v-model.number="state.profile.age" type="number" inputmode="numeric" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
-              </div>
-              <div>
-                <label class="text-xs text-secondary block mb-1">身高 (cm)</label>
-                <input v-model.number="state.profile.height" type="number" step="0.5" inputmode="decimal" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
-              </div>
-              <div>
-                <label class="text-xs text-secondary block mb-1">目前體重 (kg)</label>
-                <input v-model.number="state.profile.weight" type="number" step="0.1" inputmode="decimal" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2.5">
-              <div>
-                <label class="text-xs text-secondary block mb-1">體脂率 % (選填)</label>
-                <input v-model.number="state.profile.bodyFat" type="number" step="0.1" inputmode="decimal" placeholder="如 22.0" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
-              </div>
-              <div>
-                <label class="text-xs text-secondary block mb-1">每日平均睡眠</label>
-                <select v-model.number="state.profile.sleepHours" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
-                  <option :value="5">少於 6 小時</option>
-                  <option :value="7">6.5 ~ 8 小時</option>
-                  <option :value="9">8.5 小時以上</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-2.5 pt-2 border-t surface-header">
-            <div class="text-xs font-extrabold text-primary">2. 日常職業活動量 (NEAT) 與運動頻率 (EAT)</div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <div>
-                <label class="text-xs text-secondary block mb-1">平日工作型態</label>
-                <select v-model="state.profile.workStyle" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
-                  <option value="desk">純坐辦公室 / 學生</option>
-                  <option value="mixed">偶爾走動 / 內外勤</option>
-                  <option value="standing">久站走動 (餐飲/櫃位)</option>
-                  <option value="labor">重度體力勞動工作</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-secondary block mb-1">每週主動運動頻率</label>
-                <select v-model.number="state.profile.workoutFreq" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
-                  <option :value="0">幾乎不運動 (0天)</option>
-                  <option :value="2">輕度運動 (每週 1-2 天)</option>
-                  <option :value="4">規律重訓/有氧 (3-4 天)</option>
-                  <option :value="6">高強度訓練 (每週 5-6 天)</option>
-                </select>
-              </div>
+        <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4 overscroll-contain">
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="text-[11px] text-secondary block mb-1">性別</label>
+              <select v-model="state.profile.gender" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
+                <option value="male">男性</option>
+                <option value="female">女性</option>
+              </select>
             </div>
             <div>
-              <label class="text-xs text-secondary block mb-1">三大營養素比例模式</label>
-              <select v-model="state.profile.macroPreset" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
-                <option value="balanced">均衡減脂 (蛋白30% / 碳水45% / 脂肪25%)</option>
-                <option value="high_protein">高蛋白增肌控脂 (蛋白40% / 碳水35% / 脂肪25%)</option>
-                <option value="low_carb">低碳水飲食 (蛋白35% / 碳水20% / 脂肪45%)</option>
-                <option value="keto">生酮飲食模式 (蛋白25% / 碳水5% / 脂肪70%)</option>
+              <label class="text-[11px] text-secondary block mb-1">年齡</label>
+              <input v-model.number="state.profile.age" type="number" inputmode="numeric" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
+            </div>
+            <div>
+              <label class="text-[11px] text-secondary block mb-1">身高 (cm)</label>
+              <input v-model.number="state.profile.height" type="number" step="0.5" inputmode="decimal" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
+            </div>
+            <div>
+              <label class="text-[11px] text-secondary block mb-1">體重 (kg)</label>
+              <input v-model.number="state.profile.weight" type="number" step="0.1" inputmode="decimal" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
+            </div>
+            <div>
+              <label class="text-[11px] text-secondary block mb-1">體脂率 %</label>
+              <input v-model.number="state.profile.bodyFat" type="number" step="0.1" inputmode="decimal" placeholder="選填" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
+            </div>
+            <div>
+              <label class="text-[11px] text-secondary block mb-1">平均睡眠</label>
+              <select v-model.number="state.profile.sleepHours" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
+                <option :value="5">少於 6 小時</option>
+                <option :value="7">6.5 ~ 8 小時</option>
+                <option :value="9">8.5 小時以上</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] text-secondary block mb-1">工作活動量</label>
+              <select v-model="state.profile.workStyle" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
+                <option value="desk">久坐辦公</option>
+                <option value="mixed">偶爾走動</option>
+                <option value="standing">久站走動</option>
+                <option value="labor">體力勞動</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] text-secondary block mb-1">每週運動</label>
+              <select v-model.number="state.profile.workoutFreq" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
+                <option :value="0">不運動</option>
+                <option :value="2">1~2 天</option>
+                <option :value="4">3~4 天</option>
+                <option :value="6">5~6 天</option>
               </select>
             </div>
           </div>
 
-          <div class="bg-amber-500/10 border border-amber-500/25 p-3.5 rounded-2xl space-y-2.5">
+          <div>
+            <label class="text-[11px] text-secondary block mb-1">營養素比例 (蛋 / 碳 / 脂)</label>
+            <select v-model="state.profile.macroPreset" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
+              <option value="balanced">均衡減脂 (30% / 45% / 25%)</option>
+              <option value="high_protein">高蛋白增肌 (40% / 35% / 25%)</option>
+              <option value="low_carb">低碳水飲食 (35% / 20% / 45%)</option>
+              <option value="keto">生酮飲食 (25% / 5% / 70%)</option>
+            </select>
+          </div>
+
+          <div class="bg-amber-500/10 border border-amber-500/25 p-3 rounded-2xl space-y-2.5">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-500">3. 體態目標與熱量赤字設定</span>
+              <span class="text-xs font-bold text-amber-500">體態目標與熱量赤字</span>
               <input type="checkbox" v-model="state.profile.hasGoal" class="w-4 h-4 accent-emerald-600">
             </div>
-            <div v-if="state.profile.hasGoal" class="space-y-2.5">
-              <div class="grid grid-cols-2 gap-2.5">
+            <div v-if="state.profile.hasGoal" class="space-y-2">
+              <div class="grid grid-cols-2 gap-2">
                 <input v-model.number="state.profile.targetWeight" type="number" step="0.1" inputmode="decimal" placeholder="目標體重 kg" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
                 <input v-model.number="state.profile.targetBodyFat" type="number" step="0.1" inputmode="decimal" placeholder="目標體脂 %" class="w-full surface-input border rounded-xl px-3 py-2 text-base">
               </div>
               <select v-model.number="state.profile.deficitStrategy" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
-                <option :value="-300">溫和減脂 (-300 kcal/日 · 肌肉流失最少)</option>
-                <option :value="-500">標準減脂 (-500 kcal/日 · 約週減0.45kg)</option>
-                <option :value="0">維持體態 (0 kcal · TDEE等熱量)</option>
-                <option :value="250">乾淨增肌 (+250 kcal/日 · 配合重訓)</option>
+                <option :value="-300">溫和減脂 (-300 kcal/日)</option>
+                <option :value="-500">標準減脂 (-500 kcal/日)</option>
+                <option :value="0">維持體態 (0 kcal)</option>
+                <option :value="250">乾淨增肌 (+250 kcal/日)</option>
               </select>
             </div>
           </div>
 
-          <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white p-4 rounded-2xl space-y-2.5 shadow-md tabular-nums">
+          <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white p-4 rounded-2xl space-y-2 shadow-md tabular-nums">
             <div class="flex items-center justify-between border-b border-white/10 pb-2">
               <div>
-                <div class="text-xs text-slate-400">基礎代謝率 BMR ({{ tdeeReport.formulaUsed }})</div>
-                <div class="text-lg font-extrabold text-white">{{ tdeeReport.bmr }} <span class="text-xs font-normal text-slate-300">kcal</span></div>
+                <div class="text-[11px] text-slate-400">基礎代謝 BMR</div>
+                <div class="text-base font-bold text-white">{{ tdeeReport.bmr }} kcal</div>
               </div>
               <div class="text-right">
-                <div class="text-xs text-emerald-300 font-semibold">每日總消耗 TDEE</div>
-                <div class="text-xl font-black text-emerald-400">{{ tdeeReport.tdee }} <span class="text-xs font-normal">kcal</span></div>
+                <div class="text-[11px] text-emerald-300">每日總消耗 TDEE</div>
+                <div class="text-lg font-black text-emerald-400">{{ tdeeReport.tdee }} kcal</div>
               </div>
             </div>
-
-            <div v-if="tdeeReport.lbm" class="flex justify-between text-xs bg-white/10 px-3 py-1.5 rounded-xl text-slate-200">
-              <span>除脂體重 (純肌肉骨骼)：<b>{{ tdeeReport.lbm }} kg</b></span>
-              <span>體脂肪重：<b>{{ tdeeReport.fatMass }} kg</b></span>
-            </div>
-
             <div class="flex items-center justify-between pt-0.5">
               <div>
-                <div class="text-xs text-amber-200 font-semibold">建議每日攝取上限</div>
-                <div class="text-2xl font-black text-amber-300">{{ tdeeReport.recommendedCal }} <span class="text-xs font-normal text-white">kcal/日</span></div>
+                <div class="text-[11px] text-amber-200">建議每日攝取</div>
+                <div class="text-xl font-black text-amber-300">{{ tdeeReport.recommendedCal }} kcal</div>
               </div>
-              <div v-if="tdeeReport.targetDateStr" class="text-right bg-emerald-500/20 border border-emerald-400/30 px-2.5 py-1.5 rounded-xl">
-                <div class="text-xs text-emerald-300 font-bold">約 {{ tdeeReport.estimatedWeeks }} 週達標</div>
-                <div class="text-xs text-slate-200">預計 {{ tdeeReport.targetDateStr }}</div>
+              <div v-if="tdeeReport.targetDateStr" class="text-right bg-emerald-500/20 px-2.5 py-1 rounded-xl">
+                <div class="text-[11px] text-emerald-300 font-bold">約 {{ tdeeReport.estimatedWeeks }} 週達標</div>
+                <div class="text-[11px] text-slate-200">{{ tdeeReport.targetDateStr }}</div>
               </div>
-            </div>
-
-            <div v-if="tdeeReport.belowBmrWarning" class="text-xs text-rose-300 bg-rose-500/20 px-3 py-1.5 rounded-xl">
-              ⚠️ 已自動將建議攝取保護在基礎代謝 ({{ tdeeReport.bmr }} 卡) 以上，避免代謝受損。
             </div>
           </div>
         </div>
 
         <div class="p-4 border-t surface-header shrink-0 safe-bottom">
-          <button @click="applyTdeePlan" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3.5 rounded-2xl text-base shadow-md active:scale-[0.99] transition">
-            套用此精算方案
+          <button @click="applyTdeePlan" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3 rounded-2xl text-base shadow-md active:scale-[0.99] transition">
+            套用目標
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Responsive Top Header -->
-    <header class="surface-header backdrop-blur-xl border-b px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 z-20 gap-2">
-      <div class="flex items-center gap-2.5 shrink-0">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-slate-800 flex items-center justify-center text-xs shadow-sm text-white font-black tracking-tighter">
+    <!-- Clean Minimalist Top Header -->
+    <header class="surface-header backdrop-blur-xl border-b px-4 sm:px-6 py-2.5 flex items-center justify-between shrink-0 z-20 gap-2">
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 via-teal-500 to-slate-800 flex items-center justify-center text-[11px] shadow-sm text-white font-black tracking-tighter">
           FQ
         </div>
-        <span class="font-extrabold text-primary text-base tracking-tight">FitQuest</span>
+        <span class="font-extrabold text-primary text-sm tracking-tight whitespace-nowrap">FitQuest</span>
       </div>
 
       <!-- Tablet / Desktop Segmented Navigation -->
       <nav class="hidden md:flex items-center surface-subtle p-1 rounded-2xl border">
         <button v-for="t in navTabs" :key="t.id" @click="activeTab = t.id"
-          class="px-4 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition relative"
+          class="px-4 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition relative whitespace-nowrap"
           :class="activeTab === t.id ? 'surface-input text-primary shadow-sm' : 'text-secondary hover:text-primary'">
           <span>{{ t.icon }}</span>
           <span>{{ t.label }}</span>
@@ -467,37 +444,37 @@
         </button>
       </nav>
 
-      <div class="flex items-center gap-1.5 shrink-0">
-        <button @click="state.darkMode = !state.darkMode" :title="state.darkMode ? '切換日間模式' : '切換暗黑健身房模式'" class="w-8 h-8 rounded-full surface-subtle border flex items-center justify-center text-sm active:scale-90 transition">
+      <div class="flex items-center gap-2 shrink-0">
+        <button @click="state.darkMode = !state.darkMode" class="w-8 h-8 rounded-full surface-subtle border flex items-center justify-center text-xs active:scale-90 transition shrink-0">
           {{ state.darkMode ? '☀️' : '🌙' }}
         </button>
-        <button @click="showTdeeModal = true" class="text-xs font-bold text-emerald-600 bg-emerald-500/15 hover:bg-emerald-500/25 px-3 py-1.5 rounded-full transition tabular-nums">
+        <button @click="showTdeeModal = true" class="text-xs font-bold text-emerald-600 bg-emerald-500/15 hover:bg-emerald-500/25 px-3 py-1.5 rounded-full transition whitespace-nowrap tabular-nums">
           🎯 {{ state.targetCal }} kcal
         </button>
       </div>
     </header>
 
     <!-- Main Scrollable Content -->
-    <main class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 pb-28 md:pb-8 z-10 overscroll-contain">
+    <main class="flex-1 overflow-y-auto px-4 sm:px-6 py-3.5 space-y-3.5 pb-24 md:pb-8 z-10 overscroll-contain">
 
-      <!-- Shared 1-Day Date Stepper -->
-      <div v-if="activeTab === 'diet' || activeTab === 'lift'" class="max-w-md mx-auto flex items-center justify-between surface-subtle backdrop-blur-md px-2.5 py-1.5 rounded-2xl border shadow-sm">
-        <button @click="shiftDate(-1)" class="w-8 h-8 rounded-xl hover:bg-emerald-500/10 text-secondary font-bold text-xs flex items-center justify-center active:scale-90 transition">◀</button>
-        <div class="text-xs font-bold text-primary flex items-center gap-2 tabular-nums">
+      <!-- Full-Width Aligned 1-Day Date Stepper -->
+      <div v-if="activeTab === 'diet' || activeTab === 'lift'" class="w-full md:max-w-md md:mx-auto flex items-center justify-between glass-card px-2.5 py-1.5 rounded-2xl">
+        <button @click="shiftDate(-1)" class="w-8 h-8 rounded-xl hover:bg-emerald-500/10 text-secondary font-bold text-xs flex items-center justify-center active:scale-90 transition shrink-0">◀</button>
+        <div class="text-xs font-bold text-primary flex items-center gap-2 whitespace-nowrap tabular-nums">
           <span>{{ selectedDate === todayStr ? '今天 · ' + selectedDate.slice(5) : selectedDate }}</span>
-          <button v-if="selectedDate !== todayStr" @click="selectedDate = todayStr" class="text-xs bg-emerald-500/15 text-emerald-500 px-2.5 py-0.5 rounded-full font-bold">回今天</button>
+          <button v-if="selectedDate !== todayStr" @click="selectedDate = todayStr" class="text-[11px] bg-emerald-500/15 text-emerald-500 px-2 py-0.5 rounded-full font-bold">回今天</button>
         </div>
-        <button @click="shiftDate(1)" :disabled="selectedDate >= todayStr" class="w-8 h-8 rounded-xl hover:bg-emerald-500/10 text-secondary font-bold text-xs flex items-center justify-center active:scale-90 transition disabled:opacity-25">▶</button>
+        <button @click="shiftDate(1)" :disabled="selectedDate >= todayStr" class="w-8 h-8 rounded-xl hover:bg-emerald-500/10 text-secondary font-bold text-xs flex items-center justify-center active:scale-90 transition shrink-0 disabled:opacity-25">▶</button>
       </div>
 
       <!-- TAB 1: DIET -->
-      <div v-if="activeTab === 'diet'" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-        <div class="md:col-span-6 space-y-4">
-          <!-- Summary Ring + Protein g/kg Badge -->
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
-            <div class="flex items-center justify-between gap-3 sm:gap-4">
-              <div class="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center">
-                <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90 drop-shadow-sm">
+      <div v-if="activeTab === 'diet'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
+        <div class="md:col-span-6 space-y-3.5">
+          <!-- Calorie Ring & Symmetrical Macro Cards -->
+          <section class="glass-card rounded-[26px] p-4 space-y-3.5">
+            <div class="flex items-center justify-between gap-3">
+              <div class="relative w-28 h-28 shrink-0 flex items-center justify-center">
+                <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
                   <defs>
                     <linearGradient id="calGradOk" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stop-color="#10B981" /><stop offset="50%" stop-color="#06B6D4" /><stop offset="100%" stop-color="#3B82F6" />
@@ -506,189 +483,182 @@
                       <stop offset="0%" stop-color="#F59E0B" /><stop offset="100%" stop-color="#F97316" />
                     </linearGradient>
                   </defs>
-                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" class="text-slate-300/30" stroke-width="10" />
-                  <circle cx="50" cy="50" r="40" fill="none" :stroke="calPercent > 100 ? 'url(#calGradWarm)' : 'url(#calGradOk)'" stroke-width="10"
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" class="text-slate-300/30" stroke-width="9" />
+                  <circle cx="50" cy="50" r="40" fill="none" :stroke="calPercent > 100 ? 'url(#calGradWarm)' : 'url(#calGradOk)'" stroke-width="9"
                     stroke-linecap="round" :stroke-dasharray="251.2" :stroke-dashoffset="251.2 - (Math.min(calPercent, 100) / 100) * 251.2"
                     class="transition-all duration-500" />
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-center tabular-nums">
-                  <span class="text-xs font-bold text-secondary">{{ remainingCal >= 0 ? '剩餘' : '超出' }}</span>
-                  <span class="text-xl sm:text-2xl font-black tracking-tight leading-none mt-0.5" :class="remainingCal >= 0 ? 'text-primary' : 'text-amber-500'">
+                  <span class="text-[11px] font-semibold text-secondary">{{ remainingCal >= 0 ? '剩餘' : '超出' }}</span>
+                  <span class="text-xl font-black tracking-tight leading-none mt-0.5" :class="remainingCal >= 0 ? 'text-primary' : 'text-amber-500'">
                     {{ Math.abs(remainingCal) }}
                   </span>
-                  <span class="text-xs font-semibold text-emerald-500 mt-0.5">kcal</span>
+                  <span class="text-[11px] font-semibold text-emerald-500 mt-0.5">kcal</span>
                 </div>
               </div>
 
-              <div class="flex-1 space-y-2 min-w-0 tabular-nums">
-                <div class="flex justify-between items-center surface-subtle border px-3 py-2 rounded-2xl text-xs">
-                  <span class="text-secondary font-medium truncate">已攝取</span>
-                  <span class="font-extrabold text-primary shrink-0">{{ dateIntake }} kcal</span>
+              <div class="flex-1 space-y-1.5 min-w-0 tabular-nums">
+                <div class="flex justify-between items-center surface-subtle border px-3 py-2 rounded-xl text-xs gap-2">
+                  <span class="text-secondary font-medium whitespace-nowrap">已攝取</span>
+                  <span class="font-bold text-primary whitespace-nowrap">{{ dateIntake }} kcal</span>
                 </div>
-                <div class="flex justify-between items-center bg-sky-500/10 border border-sky-500/20 px-3 py-2 rounded-2xl text-xs">
-                  <span class="text-sky-500 font-medium truncate">7日均攝取</span>
-                  <span class="font-bold text-primary shrink-0">{{ weeklyAvgIntake }} kcal</span>
+                <div class="flex justify-between items-center bg-sky-500/10 border border-sky-500/20 px-3 py-2 rounded-xl text-xs gap-2">
+                  <span class="text-sky-500 font-medium whitespace-nowrap">7日均攝取</span>
+                  <span class="font-bold text-primary whitespace-nowrap">{{ weeklyAvgIntake }} kcal</span>
                 </div>
-                <div class="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-2xl text-xs">
-                  <span class="text-emerald-500 font-medium truncate">預估赤字</span>
-                  <span class="font-extrabold text-emerald-500 shrink-0">{{ dateDeficit }} kcal</span>
+                <div class="flex justify-between items-center bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-xs gap-2">
+                  <span class="text-emerald-500 font-medium whitespace-nowrap">預估赤字</span>
+                  <span class="font-bold text-emerald-500 whitespace-nowrap">{{ dateDeficit }} kcal</span>
                 </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 sm:gap-2.5 pt-2 border-t surface-header tabular-nums">
-              <div v-for="m in macroDisplayList" :key="m.label" :class="m.boxClass" class="border p-2.5 rounded-2xl text-center">
-                <div class="flex items-center justify-center gap-1">
-                  <span class="text-xs font-bold" :class="m.textClass">{{ m.label }}</span>
-                  <span v-if="m.badge" class="text-[10px] font-black px-1.5 py-0.2 rounded-full"
-                    :class="Number(proteinPerKg) >= 1.6 ? 'bg-emerald-500 text-white' : 'bg-sky-500/20 text-sky-500'">
-                    {{ m.badge }}
-                  </span>
-                </div>
-                <div class="text-xs font-extrabold text-primary mt-0.5">{{ m.cur }}/{{ m.tar }}g</div>
-                <div class="w-full h-1.5 rounded-full mt-1.5 overflow-hidden" :class="m.trackClass">
+            <!-- Symmetrical 3-Column Macro Cards -->
+            <div class="grid grid-cols-3 gap-2 pt-3 border-t surface-header tabular-nums">
+              <div v-for="m in macroDisplayList" :key="m.label" :class="m.boxClass" class="border p-2.5 rounded-2xl flex flex-col items-center text-center">
+                <div class="text-xs font-bold whitespace-nowrap" :class="m.textClass">{{ m.label }}</div>
+                <div class="text-xs font-extrabold text-primary mt-0.5 whitespace-nowrap">{{ m.cur }}/{{ m.tar }}g</div>
+                <div class="w-full h-1.5 rounded-full my-1.5 overflow-hidden" :class="m.trackClass">
                   <div class="h-full rounded-full transition-all duration-500" :class="m.barClass" :style="{ width: Math.min((m.cur / m.tar) * 100, 100) + '%' }"></div>
                 </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" :class="m.subClass">
+                  {{ m.subText }}
+                </span>
               </div>
             </div>
           </section>
 
-          <!-- Food Logger -->
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
+          <!-- Clean Single-Line Header Food Logger -->
+          <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <div class="flex surface-subtle border p-1 rounded-xl">
-                <button type="button" @click="inputMode = 'ai'" class="px-3 py-1 rounded-lg text-xs font-bold transition"
+              <div class="flex surface-subtle border p-0.5 rounded-xl shrink-0">
+                <button type="button" @click="inputMode = 'ai'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition"
                   :class="inputMode === 'ai' ? 'surface-input text-primary shadow-sm' : 'text-secondary'">
-                  ✨ AI 精算
+                  ✨ AI 估算
                 </button>
-                <button type="button" @click="inputMode = 'manual'" class="px-3 py-1 rounded-lg text-xs font-bold transition"
+                <button type="button" @click="inputMode = 'manual'" class="px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition"
                   :class="inputMode === 'manual' ? 'surface-input text-primary shadow-sm' : 'text-secondary'">
-                  🏷️ 標示精算
+                  🏷️ 手動標示
                 </button>
               </div>
-              <button type="button" @click="showFoodDbModal = true" class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-500 transition active:scale-95 tabular-nums">
-                📚 食物庫 ({{ combinedFoodLibrary.length }})
+              <button type="button" @click="showFoodDbModal = true" class="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-500 whitespace-nowrap shrink-0 transition active:scale-95 tabular-nums">
+                📚 食物庫 · {{ combinedFoodLibrary.length }}
               </button>
             </div>
 
             <form v-if="inputMode === 'ai'" @submit.prevent="analyzeAndAddFood" class="space-y-2.5">
               <div v-if="foodImagePreview" class="relative rounded-2xl overflow-hidden border border-emerald-400/50 shadow-sm">
-                <img :src="foodImagePreview" class="w-full h-40 object-cover">
+                <img :src="foodImagePreview" class="w-full h-36 object-cover">
                 <button type="button" @click="foodImagePreview = ''" class="absolute top-2 right-2 bg-slate-900/80 text-white text-xs px-2.5 py-1 rounded-full">✕</button>
-                <div class="absolute bottom-2 left-2 bg-slate-900/80 text-white text-xs px-2.5 py-1 rounded-lg">
-                  📸 Gemini 3.8 視覺與營養標示 OCR 就緒
-                </div>
               </div>
 
               <div class="flex gap-2">
-                <input v-model.trim="foodInput" type="text" :placeholder="foodImagePreview ? '補充說明 (如: 少飯、微糖)...' : '輸入食物與克數 (如: 煎鮭魚150g、滷雞腿)...'" class="flex-1 min-w-0 surface-input border rounded-2xl px-4 py-3 text-base focus:outline-none focus:border-emerald-400 transition">
-                <label class="w-12 h-12 shrink-0 bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 rounded-2xl flex items-center justify-center text-xl cursor-pointer active:scale-95 transition">
+                <input v-model.trim="foodInput" type="text" :placeholder="foodImagePreview ? '補充說明 (選填)...' : '輸入食物，如：鮭魚 150g...'" class="flex-1 min-w-0 surface-input border rounded-2xl px-3.5 py-2.5 text-base focus:outline-none focus:border-emerald-400 transition">
+                <label class="w-11 h-11 shrink-0 bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 rounded-2xl flex items-center justify-center text-lg cursor-pointer active:scale-95 transition">
                   📷
                   <input type="file" accept="image/*" @change="handleFoodPhoto" class="hidden">
                 </label>
               </div>
 
-              <div class="flex gap-1.5 overflow-x-auto pb-0.5">
+              <div class="flex gap-1.5 overflow-x-auto no-scrollbar">
                 <button v-for="mod in ['少飯', '去皮', '微糖去冰', '過水去油', '半份']" :key="mod" type="button" @click="appendModifier(mod)"
-                  class="text-xs surface-subtle border hover:border-emerald-400/50 text-secondary px-2.5 py-1 rounded-lg shrink-0 font-medium transition">
+                  class="text-[11px] surface-subtle border hover:border-emerald-400/50 text-secondary px-2.5 py-1 rounded-lg shrink-0 whitespace-nowrap font-medium transition">
                   +{{ mod }}
                 </button>
               </div>
 
-              <button type="submit" :disabled="isEstimating || (!foodInput && !foodImagePreview)" class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white font-bold py-3 rounded-2xl text-base shadow-md shadow-emerald-500/20 active:scale-[0.99] transition disabled:opacity-35">
-                <span v-if="isEstimating">🔮 AI 結合標準庫精算中...</span>
-                <span v-else>{{ foodImagePreview ? 'AI 辨識照片並精算克數' : 'AI 估算並精算克數' }}</span>
+              <button type="submit" :disabled="isEstimating || (!foodInput && !foodImagePreview)" class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-emerald-500/20 active:scale-[0.99] transition disabled:opacity-35">
+                <span v-if="isEstimating">{{ estimatingStatus }}</span>
+                <span v-else>{{ foodImagePreview ? '辨識照片並精算' : '估算並紀錄' }}</span>
               </button>
             </form>
 
             <form v-else @submit.prevent="submitManualFood" class="space-y-2.5">
               <div class="flex gap-2">
-                <input v-model.trim="manualForm.name" type="text" placeholder="食品名稱 (如：網路查詢雞胸)" class="flex-1 min-w-0 surface-input border rounded-2xl px-3.5 py-2.5 text-base">
-                <div class="w-24 sm:w-28 relative shrink-0">
-                  <input v-model.number="manualForm.grams" type="number" inputmode="numeric" placeholder="克數" class="w-full surface-input border rounded-2xl px-3 py-2.5 text-base text-center font-bold">
+                <input v-model.trim="manualForm.name" type="text" placeholder="食品名稱" class="flex-1 min-w-0 surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <div class="w-24 relative shrink-0">
+                  <input v-model.number="manualForm.grams" type="number" inputmode="numeric" placeholder="克數" class="w-full surface-input border rounded-2xl px-2.5 py-2.5 text-base text-center font-bold">
                   <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-secondary">g</span>
                 </div>
               </div>
-              <div class="text-xs text-secondary px-1">填入「每 100g」營養標示（系統自動依食用克數換算）：</div>
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <input v-model.number="manualForm.cal100" type="number" inputmode="numeric" placeholder="卡/100g" class="surface-input border rounded-xl px-2 py-2.5 text-base text-center">
-                <input v-model.number="manualForm.p100" type="number" step="0.1" inputmode="decimal" placeholder="蛋白g" class="surface-input border rounded-xl px-2 py-2.5 text-base text-center">
-                <input v-model.number="manualForm.c100" type="number" step="0.1" inputmode="decimal" placeholder="碳水g" class="surface-input border rounded-xl px-2 py-2.5 text-base text-center">
-                <input v-model.number="manualForm.f100" type="number" step="0.1" inputmode="decimal" placeholder="脂肪g" class="surface-input border rounded-xl px-2 py-2.5 text-base text-center">
+                <input v-model.number="manualForm.cal100" type="number" inputmode="numeric" placeholder="卡/100g" class="surface-input border rounded-xl px-2 py-2 text-base text-center">
+                <input v-model.number="manualForm.p100" type="number" step="0.1" inputmode="decimal" placeholder="蛋白g" class="surface-input border rounded-xl px-2 py-2 text-base text-center">
+                <input v-model.number="manualForm.c100" type="number" step="0.1" inputmode="decimal" placeholder="碳水g" class="surface-input border rounded-xl px-2 py-2 text-base text-center">
+                <input v-model.number="manualForm.f100" type="number" step="0.1" inputmode="decimal" placeholder="脂肪g" class="surface-input border rounded-xl px-2 py-2 text-base text-center">
               </div>
-              <button type="submit" :disabled="!manualForm.name || !manualForm.cal100" class="w-full bg-slate-900 text-white font-bold py-3 rounded-2xl text-base active:scale-[0.99] transition disabled:opacity-35 tabular-nums">
-                依克數比例寫入 ({{ Math.round((manualForm.cal100 || 0) * ((manualForm.grams || 100) / 100)) }} kcal)
+              <button type="submit" :disabled="!manualForm.name || !manualForm.cal100" class="w-full bg-slate-900 text-white font-bold py-3 rounded-2xl text-sm active:scale-[0.99] transition disabled:opacity-35 tabular-nums">
+                寫入紀錄 ({{ Math.round((manualForm.cal100 || 0) * ((manualForm.grams || 100) / 100)) }} kcal)
               </button>
             </form>
 
-            <div class="flex flex-wrap gap-1.5 pt-1 border-t surface-header">
-              <button v-for="p in foodPresets" :key="p.name" @click="selectFromLibrary(p)" class="text-xs surface-subtle hover:border-emerald-400/50 border text-primary font-medium px-2.5 py-1.5 rounded-xl active:scale-95 transition">
+            <div class="flex gap-1.5 overflow-x-auto no-scrollbar pt-2 border-t surface-header">
+              <button v-for="p in foodPresets" :key="p.name" @click="selectFromLibrary(p)" class="text-[11px] surface-subtle hover:border-emerald-400/50 border text-primary font-medium px-2.5 py-1 rounded-xl shrink-0 whitespace-nowrap active:scale-95 transition">
                 {{ p.icon }} {{ p.name }}
               </button>
             </div>
           </section>
         </div>
 
-        <!-- Right Column: Grouped Meals by MealType + 7-Day Trend -->
-        <div class="md:col-span-6 space-y-4">
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-secondary">已紀錄餐點 ({{ dateMeals.length }})</span>
-              <button v-if="dateMeals.length === 0 && yesterdayMealsCount > 0" @click="copyYesterdayMeals" class="text-xs font-bold text-emerald-500 bg-emerald-500/15 px-3 py-1 rounded-full active:scale-95 transition">
-                📋 複製昨日餐點 ({{ yesterdayMealsCount }}筆)
+        <!-- Right Column: Grouped Meals + 7-Day Trend -->
+        <div class="md:col-span-6 space-y-3.5">
+          <section class="glass-card rounded-[26px] p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-secondary whitespace-nowrap">今日餐點 ({{ dateMeals.length }})</span>
+              <button v-if="dateMeals.length === 0 && yesterdayMealsCount > 0" @click="copyYesterdayMeals" class="text-xs font-bold text-emerald-500 bg-emerald-500/15 px-3 py-1 rounded-full whitespace-nowrap active:scale-95 transition">
+                📋 複製昨日 ({{ yesterdayMealsCount }}筆)
               </button>
             </div>
 
-            <div v-if="dateMeals.length === 0" class="text-center py-8 text-secondary text-xs surface-subtle rounded-2xl border">
-              尚無飲食紀錄，從左側輸入或拍照開始吧
+            <div v-if="dateMeals.length === 0" class="text-center py-6 text-secondary text-xs surface-subtle rounded-2xl border">
+              尚無飲食紀錄
             </div>
 
-            <div v-else class="space-y-3.5">
-              <div v-for="grp in groupedDateMeals" :key="grp.type" class="space-y-2">
-                <!-- Meal Group Header with Subtotal -->
-                <div class="flex items-center justify-between px-1 text-xs">
-                  <span class="font-extrabold text-primary">{{ grp.icon }} {{ grp.type }}</span>
-                  <span class="text-secondary font-semibold tabular-nums">
-                    小計 <b class="text-emerald-500">{{ grp.totalCal }} kcal</b> · 蛋白 {{ grp.totalP }}g
+            <div v-else class="space-y-3">
+              <div v-for="grp in groupedDateMeals" :key="grp.type" class="space-y-1.5">
+                <div class="flex items-center justify-between px-1 text-xs gap-2">
+                  <span class="font-bold text-primary whitespace-nowrap">{{ grp.icon }} {{ grp.type }}</span>
+                  <span class="text-secondary font-medium whitespace-nowrap tabular-nums">
+                    <b class="text-emerald-500">{{ grp.totalCal }} kcal</b> · 蛋白 {{ grp.totalP }}g
                   </span>
                 </div>
 
-                <div v-for="meal in grp.items" :key="meal.id" class="flex items-center justify-between p-3 surface-subtle rounded-2xl border hover:border-emerald-400/50 transition gap-2">
+                <div v-for="meal in grp.items" :key="meal.id" class="flex items-center justify-between p-2.5 surface-subtle rounded-2xl border hover:border-emerald-400/50 transition gap-2">
                   <div @click="editExistingMeal(meal)" class="min-w-0 flex-1 cursor-pointer">
                     <div class="flex items-center gap-1.5">
-                      <span v-if="meal.time" class="text-xs text-secondary shrink-0 tabular-nums">{{ meal.time }}</span>
-                      <span class="font-bold text-primary text-sm truncate">{{ meal.isPhoto ? '📸 ' : '' }}{{ meal.name }}</span>
+                      <span v-if="meal.time" class="text-[11px] text-secondary shrink-0 tabular-nums">{{ meal.time }}</span>
+                      <span class="font-bold text-primary text-xs sm:text-sm truncate">{{ meal.isPhoto ? '📸 ' : '' }}{{ meal.name }}</span>
                     </div>
-                    <div class="flex items-center gap-2 text-xs mt-1 tabular-nums">
-                      <span class="text-sky-500 font-medium">蛋白 {{ meal.p }}g</span>
-                      <span class="text-amber-500 font-medium">碳水 {{ meal.c }}g</span>
-                      <span class="text-purple-500 font-medium">脂 {{ meal.f }}g</span>
+                    <div class="flex items-center gap-2 text-[11px] mt-0.5 tabular-nums">
+                      <span class="text-sky-500 font-medium whitespace-nowrap">蛋 {{ meal.p }}g</span>
+                      <span class="text-amber-500 font-medium whitespace-nowrap">碳 {{ meal.c }}g</span>
+                      <span class="text-purple-500 font-medium whitespace-nowrap">脂 {{ meal.f }}g</span>
                     </div>
                   </div>
-                  <div class="flex items-center gap-1.5 shrink-0">
-                    <span class="font-extrabold text-emerald-500 bg-emerald-500/15 px-2 py-1 rounded-xl text-xs tabular-nums">{{ meal.cal }}</span>
-                    <button @click="repeatMeal(meal)" title="再吃一次" class="w-7 h-7 rounded-xl surface-input border hover:border-emerald-400 text-secondary hover:text-emerald-500 text-xs font-bold active:scale-90 transition">+1</button>
-                    <button @click="removeMeal(meal.id)" class="w-7 h-7 rounded-xl text-secondary hover:text-rose-500 text-xs">✕</button>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <span class="font-bold text-emerald-500 bg-emerald-500/15 px-2 py-1 rounded-xl text-xs whitespace-nowrap tabular-nums">{{ meal.cal }}</span>
+                    <button @click="repeatMeal(meal)" class="w-7 h-7 rounded-xl surface-input border text-secondary hover:text-emerald-500 text-xs font-bold active:scale-90 transition">+1</button>
+                    <button @click="removeMeal(meal.id)" class="w-6 h-7 rounded-xl text-secondary hover:text-rose-500 text-xs">✕</button>
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-secondary">近 7 日熱量趨勢 (虛線為目標上限)</span>
-              <span class="text-xs font-semibold text-secondary tabular-nums">週均 {{ weeklyAvgIntake }} kcal</span>
+          <section class="glass-card rounded-[26px] p-4 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-secondary">近 7 日熱量趨勢</span>
+              <span class="text-xs font-semibold text-secondary whitespace-nowrap tabular-nums">週均 {{ weeklyAvgIntake }} kcal</span>
             </div>
-            <div class="relative grid grid-cols-7 gap-1.5 items-end h-28 pt-4">
-              <div class="absolute inset-x-0 border-t border-dashed border-emerald-400/70 pointer-events-none" style="bottom: 83%"></div>
+            <div class="relative grid grid-cols-7 gap-1.5 items-end h-24 pt-3">
+              <div class="absolute inset-x-0 border-t border-dashed border-emerald-400/60 pointer-events-none" style="bottom: 82%"></div>
               <div v-for="day in last7DaysCalBars" :key="day.date" @click="selectedDate = day.date" class="flex flex-col items-center gap-1 h-full justify-end cursor-pointer z-10">
-                <span v-if="day.val > 0" class="text-[10px] font-bold text-secondary tabular-nums">{{ day.val }}</span>
-                <div class="w-full rounded-t-lg transition-all duration-300"
+                <span v-if="day.val > 0" class="text-[9px] font-bold text-secondary tabular-nums tracking-tighter">{{ day.val }}</span>
+                <div class="w-full rounded-t-md transition-all duration-300"
                   :class="day.val > state.targetCal ? 'bg-amber-400' : (day.val > 0 ? 'bg-emerald-400' : 'bg-slate-400/20')"
-                  :style="{ height: Math.max(8, Math.min(85, (day.val / (state.targetCal * 1.2)) * 85)) + '%' }">
+                  :style="{ height: Math.max(8, Math.min(82, (day.val / (state.targetCal * 1.2)) * 82)) + '%' }">
                 </div>
-                <span class="text-xs font-semibold tabular-nums" :class="day.date === selectedDate ? 'text-emerald-500 font-extrabold' : 'text-secondary'">{{ day.label }}</span>
+                <span class="text-[11px] font-semibold whitespace-nowrap tabular-nums" :class="day.date === selectedDate ? 'text-emerald-500 font-extrabold' : 'text-secondary'">{{ day.label }}</span>
               </div>
             </div>
           </section>
@@ -696,46 +666,47 @@
       </div>
 
       <!-- TAB 2: WEIGHT TRAINING & BODYWEIGHT CALISTHENICS -->
-      <div v-if="activeTab === 'lift'" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-        <div class="md:col-span-6 space-y-4">
-          <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-3xl p-5 shadow-lg space-y-3 tabular-nums">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-indigo-300">🏋️ {{ selectedDate === todayStr ? '今日' : selectedDate }} 訓練總容量</span>
-              <span class="text-xs bg-white/10 px-2.5 py-0.5 rounded-full text-slate-200">
-                7日均容量 {{ weeklyAvgVolume.toLocaleString() }} kg
+      <div v-if="activeTab === 'lift'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
+        <div class="md:col-span-6 space-y-3.5">
+          <!-- Sleek Minimalist Volume Card -->
+          <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-[26px] p-4 sm:p-5 shadow-lg space-y-3 tabular-nums">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-semibold text-indigo-300 whitespace-nowrap">🏋️ 今日訓練總容量</span>
+              <span class="text-[11px] bg-white/10 px-2.5 py-0.5 rounded-full text-slate-200 whitespace-nowrap">
+                7日均 {{ weeklyAvgVolume.toLocaleString() }} kg
               </span>
             </div>
             <div class="flex items-baseline justify-between gap-2">
               <div>
                 <span class="text-3xl font-black tracking-tight text-amber-300">{{ dateTotalVolume.toLocaleString() }}</span>
-                <span class="text-xs text-slate-300 ml-1">kg (重量×次數×組數)</span>
+                <span class="text-xs text-slate-300 ml-1">kg</span>
               </div>
-              <div class="text-right text-xs text-emerald-300 font-bold shrink-0">
+              <div class="text-right text-xs text-emerald-300 font-bold whitespace-nowrap">
                 {{ dateLifts.length }} 動作 · {{ dateTotalSets }} 組
               </div>
             </div>
-            <!-- Quick Rest Timer Bar -->
-            <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
-              <span class="text-xs text-slate-300">⏱️ 組間休息倒數：</span>
-              <div class="flex gap-1.5">
+            <div class="pt-2.5 border-t border-white/10 flex items-center justify-between gap-2">
+              <span class="text-xs text-slate-300 whitespace-nowrap">⏱️ 組間休息</span>
+              <div class="flex gap-1.5 shrink-0">
                 <button v-for="sec in [60, 90, 120]" :key="sec" type="button" @click="startRestTimer(sec)"
-                  class="bg-white/15 hover:bg-indigo-500 text-white text-xs font-bold px-2.5 py-1 rounded-xl active:scale-90 transition">
-                  {{ sec }}秒
+                  class="bg-white/15 hover:bg-indigo-500 text-white text-xs font-bold px-2.5 py-1 rounded-xl whitespace-nowrap active:scale-90 transition">
+                  {{ sec }}s
                 </button>
               </div>
             </div>
           </section>
 
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3.5">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-primary text-sm">{{ editingLiftId ? '編輯訓練紀錄' : '選擇器材 / 動作' }}</span>
-              <span class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-2.5 py-0.5 rounded-full tabular-nums">
+          <!-- Symmetrical Equipment Selection & Input Card -->
+          <section class="glass-card rounded-[26px] p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-primary text-sm whitespace-nowrap">{{ editingLiftId ? '編輯訓練' : '選擇器材 / 動作' }}</span>
+              <span class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-2.5 py-0.5 rounded-full whitespace-nowrap tabular-nums">
                 訓練量 {{ previewLiftVolume.toLocaleString() }} kg
               </span>
             </div>
 
             <div class="grid grid-cols-12 gap-2">
-              <select v-model="selectedMuscleGroup" @change="onMuscleGroupChange" class="custom-select col-span-5 sm:col-span-4 surface-input border rounded-2xl pl-3 py-3 text-base font-bold">
+              <select v-model="selectedMuscleGroup" @change="onMuscleGroupChange" class="custom-select col-span-4 surface-input border rounded-2xl pl-2.5 py-2.5 text-base font-bold">
                 <option value="腿臀">🦵 腿臀</option>
                 <option value="胸">🏋️ 胸部</option>
                 <option value="背">🔙 背部</option>
@@ -745,60 +716,66 @@
                 <option value="核心">🔥 核心</option>
               </select>
 
-              <select v-model="selectedDropdownExercise" @change="onExerciseDropdownChange" class="custom-select col-span-7 sm:col-span-8 surface-input border rounded-2xl pl-3 py-3 text-base font-bold">
+              <select v-model="selectedDropdownExercise" @change="onExerciseDropdownChange" class="custom-select col-span-8 surface-input border rounded-2xl pl-3 py-2.5 text-base font-bold truncate">
                 <option v-for="ex in currentGroupOptions" :key="ex" :value="ex">{{ ex }}</option>
                 <option value="__custom__">✏️ 自訂輸入動作...</option>
               </select>
             </div>
 
-            <input v-if="selectedDropdownExercise === '__custom__'" v-model.trim="liftForm.exercise" type="text" placeholder="請輸入自訂器材或動作名稱..." class="w-full surface-input border border-indigo-400 rounded-2xl px-4 py-2.5 text-base focus:outline-none">
+            <input v-if="selectedDropdownExercise === '__custom__'" v-model.trim="liftForm.exercise" type="text" placeholder="請輸入自訂器材或動作..." class="w-full surface-input border border-indigo-400 rounded-2xl px-3.5 py-2.5 text-base focus:outline-none">
 
-            <div v-if="activeBwPreset" class="bg-emerald-500/10 border border-emerald-500/25 p-3 rounded-2xl flex items-center justify-between gap-2 pop-in tabular-nums">
-              <div class="text-xs text-primary">
-                <span>體重 <b>{{ currentWeight }}kg</b> × {{ Math.round(activeBwPreset.ratio * 100) }}%</span>
-                <span class="block text-emerald-500 font-bold">等效重量：{{ Math.round(currentWeight * activeBwPreset.ratio * 10) / 10 }} kg</span>
+            <div v-if="activeBwPreset" class="bg-emerald-500/10 border border-emerald-500/25 p-2.5 rounded-2xl flex items-center justify-between gap-2 pop-in tabular-nums">
+              <div class="text-xs text-primary min-w-0">
+                <span class="block truncate">體重 {{ currentWeight }}kg × {{ Math.round(activeBwPreset.ratio * 100) }}% = <b class="text-emerald-500">{{ Math.round(currentWeight * activeBwPreset.ratio * 10) / 10 }}kg</b></span>
               </div>
               <div class="flex gap-1 shrink-0">
-                <button type="button" @click="addExtraLoad(5)" class="surface-input border text-emerald-500 text-xs font-bold px-2 py-1.5 rounded-xl active:scale-95 transition">+5kg</button>
-                <button type="button" @click="addExtraLoad(10)" class="surface-input border text-emerald-500 text-xs font-bold px-2 py-1.5 rounded-xl active:scale-95 transition">+10kg</button>
+                <button type="button" @click="addExtraLoad(5)" class="surface-input border text-emerald-500 text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap">+5kg</button>
+                <button type="button" @click="addExtraLoad(10)" class="surface-input border text-emerald-500 text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap">+10kg</button>
               </div>
             </div>
 
-            <div v-if="lastRecordForCurrentExercise && !editingLiftId" class="bg-amber-500/10 border border-amber-500/25 p-3 rounded-2xl flex items-center justify-between gap-2 pop-in tabular-nums">
+            <div v-if="lastRecordForCurrentExercise && !editingLiftId" class="bg-amber-500/10 border border-amber-500/25 p-2.5 rounded-2xl flex items-center justify-between gap-2 pop-in tabular-nums">
               <div class="min-w-0">
-                <div class="text-xs font-bold text-amber-500">📌 上次紀錄 ({{ lastRecordForCurrentExercise.date.slice(5) }})</div>
-                <div class="text-xs text-primary mt-0.5">
+                <div class="text-[11px] font-bold text-amber-500">📌 上次 ({{ lastRecordForCurrentExercise.date.slice(5) }})</div>
+                <div class="text-xs text-primary truncate">
                   <b>{{ lastRecordForCurrentExercise.weight }}kg</b> × {{ lastRecordForCurrentExercise.reps }}次 × {{ lastRecordForCurrentExercise.sets }}組
                 </div>
               </div>
               <div class="flex gap-1.5 shrink-0">
-                <button type="button" @click="applyLastLift(0)" class="surface-input border text-primary text-xs font-bold px-2.5 py-1.5 rounded-xl active:scale-95 transition">帶入</button>
-                <button type="button" @click="applyLastLift(2.5)" class="bg-amber-500 text-white text-xs font-bold px-2.5 py-1.5 rounded-xl shadow-sm active:scale-95 transition">+2.5kg</button>
+                <button type="button" @click="applyLastLift(0)" class="surface-input border text-primary text-xs font-bold px-2.5 py-1 rounded-xl whitespace-nowrap">帶入</button>
+                <button type="button" @click="applyLastLift(2.5)" class="bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-xl whitespace-nowrap">+2.5kg</button>
               </div>
             </div>
 
+            <!-- Strictly Aligned 3-Column Numeric Inputs -->
             <form @submit.prevent="addLiftRecord" class="space-y-3">
-              <div class="grid grid-cols-3 gap-2.5">
-                <div class="surface-subtle p-2.5 rounded-2xl border text-center">
-                  <div class="flex items-center justify-center gap-1">
-                    <label class="text-xs font-semibold text-secondary">{{ activeBwPreset ? '等效(kg)' : '重量(kg)' }}</label>
-                    <button v-if="!activeBwPreset" type="button" @click="doublePlateWeight" title="掛片式單邊乘二" class="text-[10px] font-black bg-indigo-500/15 text-indigo-500 px-1.5 rounded">×2</button>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
+                  <div class="h-5 flex items-center justify-center gap-1">
+                    <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">{{ activeBwPreset ? '等效 kg' : '重量 kg' }}</span>
+                    <button v-if="!activeBwPreset" type="button" @click="doublePlateWeight" title="單邊掛片乘二" class="text-[10px] font-black bg-indigo-500/15 text-indigo-500 px-1.5 py-0.2 rounded whitespace-nowrap">×2</button>
                   </div>
                   <input v-model.number="liftForm.weight" type="number" step="0.5" inputmode="decimal" placeholder="40" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none mt-1 tabular-nums">
                 </div>
-                <div class="surface-subtle p-2.5 rounded-2xl border text-center">
-                  <label class="text-xs font-semibold text-secondary block">次數(reps)</label>
+
+                <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
+                  <div class="h-5 flex items-center justify-center">
+                    <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">次數</span>
+                  </div>
                   <input v-model.number="liftForm.reps" type="number" inputmode="numeric" placeholder="12" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none mt-1 tabular-nums">
                 </div>
-                <div class="surface-subtle p-2.5 rounded-2xl border text-center">
-                  <label class="text-xs font-semibold text-secondary block">組數(sets)</label>
+
+                <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
+                  <div class="h-5 flex items-center justify-center">
+                    <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">組數</span>
+                  </div>
                   <input v-model.number="liftForm.sets" type="number" inputmode="numeric" placeholder="4" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none mt-1 tabular-nums">
                 </div>
               </div>
 
               <div class="flex gap-2">
-                <button v-if="editingLiftId" type="button" @click="editingLiftId = null" class="px-4 surface-subtle border text-secondary font-bold py-3 rounded-2xl text-sm">取消</button>
-                <button type="submit" :disabled="!liftForm.exercise || !liftForm.reps || !liftForm.sets" class="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-3 rounded-2xl text-base shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35 tabular-nums">
+                <button v-if="editingLiftId" type="button" @click="editingLiftId = null" class="px-4 surface-subtle border text-secondary font-bold py-3 rounded-2xl text-sm whitespace-nowrap">取消</button>
+                <button type="submit" :disabled="!liftForm.exercise || !liftForm.reps || !liftForm.sets" class="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35 tabular-nums">
                   {{ editingLiftId ? '儲存修改' : '+ 新增訓練紀錄' }} ({{ previewLiftVolume.toLocaleString() }} kg)
                 </button>
               </div>
@@ -806,143 +783,136 @@
           </section>
         </div>
 
-        <!-- Right Column: Logged Lifts (With PR Crowns) + 7-Day Volume + AI Coach -->
-        <div class="md:col-span-6 space-y-4">
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-secondary">已紀錄訓練項目 ({{ dateLifts.length }})</span>
-              <button v-if="dateLifts.length === 0 && lastWorkoutDate" @click="copyLastWorkoutSession" class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-3 py-1 rounded-full active:scale-95 transition">
-                📋 複製上次課表 ({{ lastWorkoutDate.slice(5) }})
+        <div class="md:col-span-6 space-y-3.5">
+          <section class="glass-card rounded-[26px] p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-secondary whitespace-nowrap">已紀錄項目 ({{ dateLifts.length }})</span>
+              <button v-if="dateLifts.length === 0 && lastWorkoutDate" @click="copyLastWorkoutSession" class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-3 py-1 rounded-full whitespace-nowrap active:scale-95 transition">
+                📋 複製上次 ({{ lastWorkoutDate.slice(5) }})
               </button>
             </div>
 
             <div v-if="dateLifts.length === 0" class="text-center py-6 text-secondary text-xs surface-subtle rounded-2xl border">
-              尚無訓練紀錄，選擇器材開始記錄吧
+              尚無訓練紀錄
             </div>
 
-            <div v-else class="space-y-2.5">
-              <div v-for="item in dateLifts" :key="item.id" class="flex items-center justify-between p-3 surface-subtle rounded-2xl border hover:border-indigo-400/50 transition gap-2">
+            <div v-else class="space-y-2">
+              <div v-for="item in dateLifts" :key="item.id" class="flex items-center justify-between p-2.5 surface-subtle rounded-2xl border hover:border-indigo-400/50 transition gap-2">
                 <div @click="startEditLift(item)" class="min-w-0 flex-1 cursor-pointer">
                   <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-bold px-2 py-0.5 rounded shrink-0"
+                    <span class="text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap"
                       :class="item.muscle === '徒手' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-indigo-500/15 text-indigo-500'">
                       {{ item.muscle }}
                     </span>
-                    <span class="font-bold text-primary text-sm truncate">{{ item.exercise }}</span>
-                    <span v-if="item.isPR" class="text-[10px] font-black bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-full shrink-0">👑 PR</span>
+                    <span class="font-bold text-primary text-xs sm:text-sm truncate">{{ item.exercise }}</span>
+                    <span v-if="item.isPR" class="text-[10px] font-black bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">👑 PR</span>
                   </div>
-                  <div class="text-xs text-secondary mt-1 tabular-nums">
+                  <div class="text-[11px] text-secondary mt-0.5 tabular-nums">
                     <b class="text-primary">{{ item.weight }} kg</b> × {{ item.reps }} 次 × {{ item.sets }} 組
                   </div>
                 </div>
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <span class="font-extrabold text-indigo-500 bg-indigo-500/15 px-2.5 py-1 rounded-xl text-xs tabular-nums">{{ item.volume.toLocaleString() }} kg</span>
-                  <button @click="addExtraSet(item)" title="加一組並啟動90秒休息" class="w-8 h-7 rounded-xl surface-input border hover:border-indigo-400 text-secondary hover:text-indigo-500 text-xs font-bold active:scale-90 transition">+1組</button>
-                  <button @click="removeLift(item.id)" class="w-7 h-7 rounded-xl text-secondary hover:text-rose-500 text-xs">✕</button>
+                <div class="flex items-center gap-1 shrink-0">
+                  <span class="font-bold text-indigo-500 bg-indigo-500/15 px-2 py-1 rounded-xl text-xs whitespace-nowrap tabular-nums">{{ item.volume.toLocaleString() }}</span>
+                  <button @click="addExtraSet(item)" class="px-2 h-7 rounded-xl surface-input border text-secondary hover:text-indigo-500 text-xs font-bold whitespace-nowrap active:scale-90 transition">+1組</button>
+                  <button @click="removeLift(item.id)" class="w-6 h-7 rounded-xl text-secondary hover:text-rose-500 text-xs">✕</button>
                 </div>
               </div>
             </div>
           </section>
 
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-secondary">近 7 日訓練容量趨勢</span>
-              <span class="text-xs font-semibold text-indigo-500 tabular-nums">週均 {{ weeklyAvgVolume.toLocaleString() }} kg</span>
+          <section class="glass-card rounded-[26px] p-4 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-secondary">近 7 日容量趨勢</span>
+              <span class="text-xs font-semibold text-indigo-500 whitespace-nowrap tabular-nums">週均 {{ weeklyAvgVolume.toLocaleString() }} kg</span>
             </div>
-            <div class="grid grid-cols-7 gap-1.5 items-end h-24 pt-2">
+            <div class="grid grid-cols-7 gap-1.5 items-end h-20 pt-2">
               <div v-for="day in last7DaysLiftBars" :key="day.date" @click="selectedDate = day.date" class="flex flex-col items-center gap-1 h-full justify-end cursor-pointer">
-                <div class="w-full rounded-t-lg transition-all duration-300"
+                <div class="w-full rounded-t-md transition-all duration-300"
                   :class="day.val > 0 ? 'bg-indigo-500' : 'bg-slate-400/20'"
                   :style="{ height: Math.max(8, Math.min(100, (day.val / max7DaysLiftVol) * 100)) + '%' }">
                 </div>
-                <span class="text-xs font-semibold tabular-nums" :class="day.date === selectedDate ? 'text-indigo-500 font-extrabold' : 'text-secondary'">{{ day.label }}</span>
+                <span class="text-[11px] font-semibold whitespace-nowrap tabular-nums" :class="day.date === selectedDate ? 'text-indigo-500 font-extrabold' : 'text-secondary'">{{ day.label }}</span>
               </div>
             </div>
           </section>
 
-          <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3.5">
+          <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <div>
-                <h3 class="font-extrabold text-primary text-sm">🧠 AI 週期化訓練顧問</h3>
-                <p class="text-xs text-secondary">結合器材訓練容量與飲食狀態給出規劃</p>
-              </div>
-              <button @click="generateAiTrainingAdvice" :disabled="isGeneratingAdvice" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm active:scale-95 transition disabled:opacity-40 shrink-0">
-                {{ isGeneratingAdvice ? '分析中...' : '✨ 生成 AI 建議' }}
+              <span class="font-bold text-primary text-sm whitespace-nowrap">🧠 AI 訓練週期建議</span>
+              <button @click="generateAiTrainingAdvice" :disabled="isGeneratingAdvice" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm whitespace-nowrap active:scale-95 transition disabled:opacity-40 shrink-0">
+                {{ isGeneratingAdvice ? '分析中...' : '✨ 生成建議' }}
               </button>
             </div>
 
-            <div v-if="state.aiTrainingPlan" class="space-y-2.5 pt-1">
-              <div class="bg-emerald-500/10 border border-emerald-500/25 p-3.5 rounded-2xl space-y-1">
-                <div class="text-xs font-extrabold text-emerald-500">⚡ 短期建議 (1～2 週 · 下次課表微調)</div>
+            <div v-if="state.aiTrainingPlan" class="space-y-2 pt-0.5">
+              <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-2xl space-y-0.5">
+                <div class="text-xs font-bold text-emerald-500">⚡ 短期 (1～2 週)</div>
                 <p class="text-xs text-primary leading-relaxed">{{ state.aiTrainingPlan.shortTerm }}</p>
               </div>
-              <div class="bg-sky-500/10 border border-sky-500/25 p-3.5 rounded-2xl space-y-1">
-                <div class="text-xs font-extrabold text-sky-500">📈 中期建議 (1～2 個月 · 肌群與容量週期)</div>
+              <div class="bg-sky-500/10 border border-sky-500/20 p-3 rounded-2xl space-y-0.5">
+                <div class="text-xs font-bold text-sky-500">📈 中期 (1～2 個月)</div>
                 <p class="text-xs text-primary leading-relaxed">{{ state.aiTrainingPlan.mediumTerm }}</p>
               </div>
-              <div class="bg-indigo-500/10 border border-indigo-500/25 p-3.5 rounded-2xl space-y-1">
-                <div class="text-xs font-extrabold text-indigo-400">🏆 長期建議 (3～6 個月 · 體態重組與減量)</div>
+              <div class="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-2xl space-y-0.5">
+                <div class="text-xs font-bold text-indigo-400">🏆 長期 (3～6 個月)</div>
                 <p class="text-xs text-primary leading-relaxed">{{ state.aiTrainingPlan.longTerm }}</p>
-              </div>
-              <div v-if="state.aiTrainingPlan.updatedAt" class="text-right text-xs text-secondary tabular-nums">
-                更新時間：{{ state.aiTrainingPlan.updatedAt }}
               </div>
             </div>
             <div v-else class="text-center py-4 text-xs text-secondary surface-subtle border rounded-2xl">
-              記錄幾筆訓練後點擊右上角「生成 AI 建議」，獲取短中長期課表分析
+              紀錄訓練後點擊右上角「生成建議」
             </div>
           </section>
         </div>
       </div>
 
       <!-- TAB 3: BODY METRICS -->
-      <div v-if="activeTab === 'body'" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-        <div class="md:col-span-6 space-y-4">
-          <section v-if="state.profile.hasGoal && (state.profile.targetWeight || state.profile.targetBodyFat)" class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 text-white rounded-3xl p-5 space-y-3 shadow-lg shadow-blue-500/20 tabular-nums">
-            <div class="flex items-center justify-between text-xs text-blue-100 font-semibold">
-              <span>🎯 目標進度</span>
-              <span class="bg-white/20 px-2.5 py-0.5 rounded-full text-white">BMI {{ currentBMI }} ({{ bmiLabel }})</span>
+      <div v-if="activeTab === 'body'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
+        <div class="md:col-span-6 space-y-3.5">
+          <section v-if="state.profile.hasGoal && (state.profile.targetWeight || state.profile.targetBodyFat)" class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 text-white rounded-[26px] p-4 sm:p-5 space-y-3 shadow-lg shadow-blue-500/20 tabular-nums">
+            <div class="flex items-center justify-between text-xs text-blue-100 font-semibold gap-2">
+              <span class="whitespace-nowrap">🎯 目標進度</span>
+              <span class="bg-white/20 px-2.5 py-0.5 rounded-full text-white whitespace-nowrap">BMI {{ currentBMI }} ({{ bmiLabel }})</span>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div v-if="state.profile.targetWeight" class="bg-white/15 backdrop-blur-md rounded-2xl p-3">
-                <div class="text-xs text-blue-100">體重</div>
-                <div class="text-base font-extrabold mt-0.5">{{ currentWeight }} → {{ state.profile.targetWeight }} kg</div>
-                <div class="text-xs text-amber-200 font-bold mt-0.5">差 {{ Math.abs(currentWeight - state.profile.targetWeight).toFixed(1) }} kg</div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div v-if="state.profile.targetWeight" class="bg-white/15 backdrop-blur-md rounded-2xl p-3 flex flex-col justify-between">
+                <div class="text-xs text-blue-100">體重目標</div>
+                <div class="text-base font-extrabold mt-0.5 whitespace-nowrap">{{ currentWeight }} → {{ state.profile.targetWeight }} kg</div>
+                <div class="text-[11px] text-amber-200 font-bold mt-0.5">差 {{ Math.abs(currentWeight - state.profile.targetWeight).toFixed(1) }} kg</div>
               </div>
-              <div v-if="state.profile.targetBodyFat" class="bg-white/15 backdrop-blur-md rounded-2xl p-3">
-                <div class="text-xs text-blue-100">體脂</div>
-                <div class="text-base font-extrabold mt-0.5">{{ currentBodyFat || '--' }}% → {{ state.profile.targetBodyFat }}%</div>
-                <div v-if="currentBodyFat" class="text-xs text-amber-200 font-bold mt-0.5">差 {{ Math.abs(currentBodyFat - state.profile.targetBodyFat).toFixed(1) }}%</div>
+              <div v-if="state.profile.targetBodyFat" class="bg-white/15 backdrop-blur-md rounded-2xl p-3 flex flex-col justify-between">
+                <div class="text-xs text-blue-100">體脂目標</div>
+                <div class="text-base font-extrabold mt-0.5 whitespace-nowrap">{{ currentBodyFat || '--' }}% → {{ state.profile.targetBodyFat }}%</div>
+                <div class="text-[11px] text-amber-200 font-bold mt-0.5">{{ currentBodyFat ? `差 ${Math.abs(currentBodyFat - state.profile.targetBodyFat).toFixed(1)}%` : '待紀錄體脂' }}</div>
               </div>
             </div>
           </section>
 
-          <section class="glass-card rounded-3xl p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-primary text-sm">體重與體脂打卡</span>
-              <span class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-2.5 py-0.5 rounded-full tabular-nums">BMI {{ currentBMI }}</span>
+          <section class="glass-card rounded-[26px] p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-primary text-sm whitespace-nowrap">體重與體脂打卡</span>
+              <span class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-2.5 py-0.5 rounded-full whitespace-nowrap tabular-nums">BMI {{ currentBMI }}</span>
             </div>
 
             <form @submit.prevent="logBodyMetric" class="space-y-3">
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label class="text-xs font-semibold text-secondary block mb-1">體重 (kg)</label>
-                  <input v-model.number="bodyForm.weight" type="number" step="0.1" inputmode="decimal" placeholder="65.0" class="w-full surface-input border rounded-2xl px-4 py-3 text-base font-bold focus:outline-none focus:border-indigo-400 tabular-nums">
+                  <label class="text-[11px] font-semibold text-secondary block mb-1">體重 (kg)</label>
+                  <input v-model.number="bodyForm.weight" type="number" step="0.1" inputmode="decimal" placeholder="65.0" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base font-bold focus:outline-none focus:border-indigo-400 tabular-nums">
                 </div>
                 <div>
-                  <label class="text-xs font-semibold text-secondary block mb-1">體脂率 (%)</label>
-                  <input v-model.number="bodyForm.fat" type="number" step="0.1" inputmode="decimal" placeholder="20.5" class="w-full surface-input border rounded-2xl px-4 py-3 text-base font-bold focus:outline-none focus:border-indigo-400 tabular-nums">
+                  <label class="text-[11px] font-semibold text-secondary block mb-1">體脂率 (%)</label>
+                  <input v-model.number="bodyForm.fat" type="number" step="0.1" inputmode="decimal" placeholder="20.5" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base font-bold focus:outline-none focus:border-indigo-400 tabular-nums">
                 </div>
               </div>
-              <button type="submit" :disabled="!bodyForm.weight" class="w-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 rounded-2xl text-base shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35">
+              <button type="submit" :disabled="!bodyForm.weight" class="w-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35">
                 儲存紀錄
               </button>
             </form>
           </section>
         </div>
 
-        <div class="md:col-span-6 space-y-4">
-          <section v-if="recentBodyLogs.length >= 2" class="glass-card rounded-3xl p-5">
+        <div class="md:col-span-6 space-y-3.5">
+          <section v-if="recentBodyLogs.length >= 2" class="glass-card rounded-[26px] p-4 sm:p-5">
             <div class="text-xs font-bold text-secondary mb-3">近期體重趨勢</div>
             <svg viewBox="0 0 300 90" class="w-full h-24 overflow-visible">
               <defs>
@@ -962,11 +932,11 @@
             </div>
           </section>
 
-          <section v-if="state.bodyLogs.length > 0" class="glass-card rounded-3xl p-5 space-y-2">
+          <section v-if="state.bodyLogs.length > 0" class="glass-card rounded-[26px] p-4 sm:p-5 space-y-2">
             <div class="text-xs font-bold text-secondary">歷史紀錄</div>
-            <div v-for="log in [...state.bodyLogs].reverse().slice(0, 7)" :key="log.date" class="flex justify-between items-center py-2.5 border-b surface-header last:border-none text-sm tabular-nums">
-              <span class="text-secondary">{{ log.date }}</span>
-              <div class="flex gap-3">
+            <div v-for="log in [...state.bodyLogs].reverse().slice(0, 7)" :key="log.date" class="flex justify-between items-center py-2 border-b surface-header last:border-none text-sm tabular-nums">
+              <span class="text-secondary text-xs">{{ log.date }}</span>
+              <div class="flex items-center gap-2.5">
                 <span class="font-bold text-primary">{{ log.weight }} kg</span>
                 <span v-if="log.fat" class="text-indigo-500 font-semibold bg-indigo-500/15 px-2 py-0.5 rounded-lg text-xs">{{ log.fat }}%</span>
               </div>
@@ -976,41 +946,35 @@
       </div>
 
       <!-- TAB 4: SETTINGS -->
-      <div v-if="activeTab === 'settings'" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
-        <div class="md:col-span-6 space-y-4">
-          <section class="glass-card rounded-3xl p-5 space-y-3.5">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-primary text-sm">AI 辨識與教練引擎設定</span>
-              <button @click="testAllAiEngines" :disabled="isTestingAi || activeEngineCount === 0" class="text-xs font-bold bg-emerald-600 text-white px-3 py-1 rounded-full active:scale-95 transition disabled:opacity-40">
+      <div v-if="activeTab === 'settings'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
+        <div class="md:col-span-6 space-y-3.5">
+          <section class="glass-card rounded-[26px] p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-primary text-sm whitespace-nowrap">AI 核心設定</span>
+              <button @click="testAllAiEngines" :disabled="isTestingAi || activeEngineCount === 0" class="text-xs font-bold bg-emerald-600 text-white px-3 py-1 rounded-full whitespace-nowrap shrink-0 active:scale-95 transition disabled:opacity-40">
                 {{ isTestingAi ? '測試中...' : '⚡ 測試連線' }}
               </button>
             </div>
 
-            <select v-model="state.aiProvider" class="custom-select w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
-              <option value="gemini">首選：Google Gemini 3.8 Flash (最準確·支援拍照)</option>
-              <option value="openrouter">首選：OpenRouter 智慧免費路由 (支援拍照)</option>
-              <option value="groq">首選：Groq LPU 極速引擎 (GPT-OSS 120B)</option>
-            </select>
-
-            <div class="space-y-2.5">
+            <div class="space-y-2">
               <div class="space-y-1">
-                <input v-model.trim="state.apiKey" type="password" placeholder="1. Gemini API Key (AIzaSy... 最推薦)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.apiKey" type="password" placeholder="1. Gemini API Key (主力核心)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.gemini" class="text-xs px-2 font-medium" :class="engineTestStatus.gemini.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.gemini.msg }}</div>
               </div>
               <div class="space-y-1">
-                <input v-model.trim="state.openrouterKey" type="password" placeholder="2. OpenRouter API Key (sk-or-v1-... 備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.openrouterKey" type="password" placeholder="2. OpenRouter API Key (備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.openrouter" class="text-xs px-2 font-medium" :class="engineTestStatus.openrouter.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.openrouter.msg }}</div>
               </div>
               <div class="space-y-1">
-                <input v-model.trim="state.groqKey" type="password" placeholder="3. Groq API Key (gsk_... 文字極速備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.groqKey" type="password" placeholder="3. Groq API Key (純文字備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.groq" class="text-xs px-2 font-medium" :class="engineTestStatus.groq.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.groq.msg }}</div>
               </div>
             </div>
 
             <div class="pt-2 border-t surface-header flex items-center justify-between gap-2">
-              <span class="text-xs font-bold text-primary">每日換日時間點 (夜貓族適用)</span>
-              <select v-model.number="state.dayResetHour" class="custom-select surface-input border rounded-xl pl-3 py-1.5 text-base">
-                <option :value="0">00:00 (標準午夜)</option>
+              <span class="text-xs font-bold text-primary whitespace-nowrap">每日換日時間</span>
+              <select v-model.number="state.dayResetHour" class="custom-select surface-input border rounded-xl pl-3 py-1.5 text-base shrink-0">
+                <option :value="0">00:00 (午夜)</option>
                 <option :value="2">02:00 (凌晨兩點)</option>
                 <option :value="4">04:00 (凌晨四點)</option>
               </select>
@@ -1018,43 +982,40 @@
           </section>
         </div>
 
-        <div class="md:col-span-6 space-y-4">
-          <section class="glass-card rounded-3xl p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-primary text-sm">☁️ Supabase 雲端跨裝置同步 (選填)</span>
-              <button type="button" @click="showSupabaseSql = !showSupabaseSql" class="text-xs font-bold text-sky-500 bg-sky-500/15 px-2.5 py-1 rounded-full">
-                {{ showSupabaseSql ? '收起建表語法' : '建表 SQL' }}
+        <div class="md:col-span-6 space-y-3.5">
+          <section class="glass-card rounded-[26px] p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-primary text-sm whitespace-nowrap">☁️ 雲端同步 (Supabase)</span>
+              <button type="button" @click="showSupabaseSql = !showSupabaseSql" class="text-xs font-bold text-sky-500 bg-sky-500/15 px-3 py-1 rounded-full whitespace-nowrap shrink-0">
+                {{ showSupabaseSql ? '收起 SQL' : '建表 SQL' }}
               </button>
             </div>
-            <p class="text-xs text-secondary leading-relaxed">
-              填入 Supabase Project URL 與 Anon Public Key 即可跨裝置雙向同步（免費版超過 7 天未開啟會自動休眠）。
-            </p>
             <div v-if="showSupabaseSql" class="bg-slate-950 text-emerald-300 p-3 rounded-xl text-xs font-mono select-all overflow-x-auto">
               create table fitquest_sync (id text primary key, payload jsonb, updated_at timestamptz default now());
             </div>
             <div class="space-y-2">
-              <input v-model.trim="state.supabaseUrl" type="text" placeholder="Supabase Project URL (https://xxx.supabase.co)" class="w-full surface-input border rounded-2xl px-3.5 py-2 text-base">
-              <input v-model.trim="state.supabaseKey" type="password" placeholder="Supabase Anon Public Key" class="w-full surface-input border rounded-2xl px-3.5 py-2 text-base">
+              <input v-model.trim="state.supabaseUrl" type="text" placeholder="Project URL (https://xxx.supabase.co)" class="w-full surface-input border rounded-2xl px-3.5 py-2 text-base">
+              <input v-model.trim="state.supabaseKey" type="password" placeholder="Anon Public Key" class="w-full surface-input border rounded-2xl px-3.5 py-2 text-base">
             </div>
-            <div v-if="state.supabaseUrl && state.supabaseKey" class="grid grid-cols-2 gap-2.5 pt-1">
-              <button @click="pushToSupabase" :disabled="isSyncingCloud" class="bg-sky-600 text-white py-2.5 rounded-2xl text-xs font-bold active:scale-95 transition disabled:opacity-40">
-                ⬆️ 上傳備份至雲端
+            <div v-if="state.supabaseUrl && state.supabaseKey" class="grid grid-cols-2 gap-2 pt-1">
+              <button @click="pushToSupabase" :disabled="isSyncingCloud" class="bg-sky-600 text-white py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap active:scale-95 transition disabled:opacity-40">
+                ⬆️ 上傳雲端
               </button>
-              <button @click="pullFromSupabase" :disabled="isSyncingCloud" class="bg-indigo-600 text-white py-2.5 rounded-2xl text-xs font-bold active:scale-95 transition disabled:opacity-40">
-                ⬇️ 從雲端拉取還原
+              <button @click="pullFromSupabase" :disabled="isSyncingCloud" class="bg-indigo-600 text-white py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap active:scale-95 transition disabled:opacity-40">
+                ⬇️ 拉取還原
               </button>
             </div>
           </section>
 
-          <section class="glass-card rounded-3xl p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="font-extrabold text-primary text-sm">本機備份與報表匯出</span>
-              <span class="text-xs text-secondary">已自動遮罩金鑰</span>
+          <section class="glass-card rounded-[26px] p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-primary text-sm whitespace-nowrap">本機備份與匯出</span>
+              <span class="text-[11px] text-secondary whitespace-nowrap">自動遮罩金鑰</span>
             </div>
             <div class="grid grid-cols-3 gap-2">
-              <button @click="exportCsvReport" class="bg-emerald-600 text-white py-3 rounded-2xl text-xs font-bold active:scale-95 transition">匯出 CSV</button>
-              <button @click="exportData" class="bg-slate-900 text-white py-3 rounded-2xl text-xs font-bold active:scale-95 transition">JSON 備份</button>
-              <label class="surface-input border text-primary py-3 rounded-2xl text-xs font-bold text-center cursor-pointer active:scale-95 transition">
+              <button @click="exportCsvReport" class="bg-emerald-600 text-white py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap active:scale-95 transition">匯出 CSV</button>
+              <button @click="exportData" class="bg-slate-800 text-white py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap active:scale-95 transition">JSON 備份</button>
+              <label class="surface-input border text-primary py-2.5 rounded-2xl text-xs font-bold text-center whitespace-nowrap cursor-pointer active:scale-95 transition">
                 匯入還原
                 <input type="file" accept=".json" @change="importData" class="hidden">
               </label>
@@ -1066,11 +1027,11 @@
     </main>
 
     <!-- Mobile 4-Tab Bottom Navigation Bar -->
-    <nav class="md:hidden surface-header backdrop-blur-xl border-t px-6 pt-2.5 safe-bottom flex justify-between items-center shrink-0 z-30">
-      <button v-for="t in navTabs" :key="t.id" @click="activeTab = t.id" class="flex flex-col items-center gap-1 relative transition" :class="activeTab === t.id ? t.activeClass : 'text-secondary'">
+    <nav class="md:hidden surface-header backdrop-blur-xl border-t px-6 pt-2 safe-bottom flex justify-between items-center shrink-0 z-30">
+      <button v-for="t in navTabs" :key="t.id" @click="activeTab = t.id" class="flex flex-col items-center gap-0.5 relative transition whitespace-nowrap" :class="activeTab === t.id ? t.activeClass : 'text-secondary'">
         <span v-if="t.id === 'body' && !hasLoggedBodyToday" class="w-2 h-2 bg-rose-500 rounded-full absolute top-0 right-1"></span>
-        <span class="text-xl">{{ t.icon }}</span>
-        <span class="text-xs">{{ t.label }}</span>
+        <span class="text-lg">{{ t.icon }}</span>
+        <span class="text-[11px]">{{ t.label }}</span>
       </button>
     </nav>
 
@@ -1113,19 +1074,20 @@
       { name: '徒手弓箭步蹲', ratio: 0.65 }, { name: '捲腹/仰臥起坐', ratio: 0.45 }
     ];
 
+    // Concise, non-truncating equipment names for mobile dropdowns (All 23 gym machines preserved)
     const EXERCISE_CATALOG = {
       '腿臀': [
-        '掛片式45度倒蹬腿推機', '掛片式哈克深蹲機', '掛片式V型深蹲機',
-        '掛片式深蹲臀推訓練機', '掛片式跪姿後踢臀推機', '掛片式站姿提踵深蹲機',
-        '掛片式坐姿腿屈伸機', '插銷式坐姿腿屈伸機', '插銷式坐姿腿彎舉機',
-        '插銷式坐姿腿推舉機', '掛片式髖外展/內收夾腿機', '插銷式髖外展/內收夾腿機',
+        '45度倒蹬腿推機', '哈克深蹲機', 'V型深蹲機',
+        '深蹲臀推機', '跪姿後踢臀推機', '站姿提踵深蹲機',
+        '坐姿腿屈伸(掛片)', '坐姿腿屈伸(插銷)', '坐姿腿彎舉機',
+        '坐姿腿推舉機', '髖外展/內收(掛片)', '髖外展/內收(插銷)',
         '槓鈴深蹲', '羅馬尼亞硬舉'
       ],
-      '胸': ['插銷式坐姿推胸機', '蝴蝶機夾胸', '輔助雙槓臂屈伸機', '槓鈴平板臥推', '啞鈴上斜臥推'],
-      '背': ['插銷式坐姿划船機', '雙軸下拉背肌訓練機', '掛片式高位下拉背肌機', '輔助引體向上機', '滑輪下拉', '槓鈴划船'],
-      '肩': ['掛片式坐姿肩推機', '反向飛鳥機(後三角)', '啞鈴肩推', '啞鈴側平舉', '繩索面拉'],
-      '手': ['插銷式坐姿二頭彎舉機', '插銷式坐姿三頭下壓機', '啞鈴二頭彎舉', '繩索三頭下壓', '槓鈴彎舉'],
-      '核心': ['插銷式坐姿下背伸展機', '插銷式軀幹旋轉機', '懸垂抬腿', '繩索捲腹', '棒式支撐'],
+      '胸': ['坐姿推胸機', '蝴蝶機夾胸', '輔助雙槓臂屈伸', '槓鈴平板臥推', '啞鈴上斜臥推'],
+      '背': ['坐姿划船機', '雙軸下拉背肌機', '高位下拉(掛片)', '輔助引體向上', '滑輪下拉', '槓鈴划船'],
+      '肩': ['坐姿肩推機', '反向飛鳥機(後三角)', '啞鈴肩推', '啞鈴側平舉', '繩索面拉'],
+      '手': ['坐姿二頭彎舉機', '坐姿三頭下壓機', '啞鈴二頭彎舉', '繩索三頭下壓', '槓鈴彎舉'],
+      '核心': ['坐姿下背伸展機', '軀幹旋轉機', '懸垂抬腿', '繩索捲腹', '棒式支撐'],
       '徒手': BODYWEIGHT_CATALOG.map(b => b.name)
     };
 
@@ -1144,10 +1106,32 @@
       return (h >= 5 && h < 11) ? '早餐' : (h >= 11 && h < 15) ? '午餐' : (h >= 17 && h < 21) ? '晚餐' : '點心';
     };
 
+    const sleepWithJitter = (baseMs) => new Promise(r => setTimeout(r, baseMs + Math.floor(Math.random() * 420)));
+
+    const safeNum = (val, fallback = 0) => {
+      if (typeof val === 'number' && Number.isFinite(val)) return val;
+      const cleaned = parseFloat(String(val ?? '').replace(/[^\d.-]/g, ''));
+      return Number.isFinite(cleaned) ? cleaned : fallback;
+    };
+
+    const safeExtractJson = (rawText) => {
+      if (!rawText) return null;
+      const stripped = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const match = stripped.match(/\{[\s\S]*\}/);
+      if (!match) return null;
+      try {
+        return JSON.parse(match[0]);
+      } catch {
+        try { return JSON.parse(match[0].replace(/,\s*([}\]])/g, '$1')); }
+        catch { return null; }
+      }
+    };
+
     createApp({
       setup() {
         const STORAGE_KEY = 'fitquest_app_data_v1';
         const EXT_DB_KEY = 'fitquest_ext_food_db_v1';
+        const AI_CACHE_KEY = 'fitquest_ai_query_cache_v1';
 
         const navTabs = [
           { id: 'diet', icon: '🥗', label: '飲食', activeClass: 'text-emerald-500 font-bold scale-105' },
@@ -1164,21 +1148,23 @@
         const isSyncingCloud = ref(false);
         const dbSearchQuery = ref('');
         const dbSelectedCat = ref('全部');
-        const externalDbStatus = ref('內建標準庫 + 個人自動學習庫');
+        const externalDbStatus = ref('內建標準庫 + 個人記憶庫');
         const foodLibrary = ref([...CORE_FALLBACK_FOODS]);
 
         const foodInput = ref('');
         const foodImagePreview = ref('');
         const isEstimating = ref(false);
+        const estimatingStatus = ref('🔮 Gemini 精算中...');
         const isRefining = ref(false);
+        const refiningStatus = ref('重算中...');
         const refinePromptInput = ref('');
         const isTestingAi = ref(false);
         const engineTestStatus = reactive({ groq: null, openrouter: null, gemini: null });
         const toast = reactive({ show: false, msg: '', icon: '✨' });
         const nowTick = ref(Date.now());
         let clockTimer = null;
+        let cachedGroqModels = null;
 
-        // Rest Timer State
         const restTimer = reactive({ active: false, remaining: 0, total: 90 });
         let restInterval = null;
 
@@ -1187,9 +1173,9 @@
         const bodyForm = reactive({ weight: null, fat: null });
 
         const selectedMuscleGroup = ref('腿臀');
-        const selectedDropdownExercise = ref('掛片式45度倒蹬腿推機');
+        const selectedDropdownExercise = ref('45度倒蹬腿推機');
         const editingLiftId = ref(null);
-        const liftForm = reactive({ muscle: '腿臀', exercise: '掛片式45度倒蹬腿推機', weight: 40, reps: 12, sets: 4 });
+        const liftForm = reactive({ muscle: '腿臀', exercise: '45度倒蹬腿推機', weight: 40, reps: 12, sets: 4 });
         const isGeneratingAdvice = ref(false);
 
         const defaultProfile = {
@@ -1231,6 +1217,10 @@
           document.body.classList.toggle('body-dark', isDark);
         }, { immediate: true });
 
+        watch(() => state.groqKey, () => {
+          cachedGroqModels = null;
+        });
+
         watch(state, (val) => {
           try { localStorage.setItem(STORAGE_KEY, JSON.stringify(val)); }
           catch { showToast('儲存空間已滿，請匯出備份', '⚠️'); }
@@ -1243,7 +1233,22 @@
           toastTimer = setTimeout(() => { toast.show = false; }, 3200);
         };
 
-        // Rest Timer Audio & Vibration
+        const getCachedAiQuery = (key) => {
+          try {
+            const map = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
+            return map[key] || null;
+          } catch { return null; }
+        };
+        const setCachedAiQuery = (key, data) => {
+          try {
+            const map = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
+            const keys = Object.keys(map);
+            if (keys.length >= 50) delete map[keys[0]];
+            map[key] = data;
+            localStorage.setItem(AI_CACHE_KEY, JSON.stringify(map));
+          } catch {}
+        };
+
         const playRestCompleteChime = () => {
           try {
             if (navigator.vibrate) navigator.vibrate([220, 100, 220]);
@@ -1272,7 +1277,7 @@
               clearInterval(restInterval);
               restTimer.active = false;
               playRestCompleteChime();
-              showToast('組間休息結束！準備開始下一組', '🔥');
+              showToast('組間休息結束！準備下一組', '🔥');
             }
           }, 1000);
         };
@@ -1324,7 +1329,7 @@
                 foodLibrary.value = parsed;
                 externalDbStatus.value = `已匯入食物庫 (${parsed.length}筆)`;
                 try { localStorage.setItem(EXT_DB_KEY, JSON.stringify(parsed)); } catch {}
-                showToast(`成功載入 ${parsed.length} 筆外置食物庫！`, '📚');
+                showToast(`成功載入 ${parsed.length} 筆食物庫！`, '📚');
               } else showToast('JSON 格式不符，請使用標準 foods.json', '❌');
             } catch { showToast('檔案解析失敗', '❌'); }
           };
@@ -1349,7 +1354,6 @@
           return arr;
         };
 
-        // Combined Food Library (Personal Learned Foods + External Standard DB)
         const combinedFoodLibrary = computed(() => [...state.customFoods, ...foodLibrary.value]);
         const dbCategories = computed(() => ['全部', ...(state.customFoods.length ? ['⭐個人記憶'] : []), ...new Set(foodLibrary.value.map(i => i.cat || '其他'))]);
         const filteredOfflineDb = computed(() => {
@@ -1378,21 +1382,20 @@
           openPortionModal({
             name: item.name, baseGrams: g, actualGrams: g,
             cal100: Number(item.cal100) || 0, p100: Number(item.p100) || 0, c100: Number(item.c100) || 0, f100: Number(item.f100) || 0,
-            tip: `每100g: ${item.cal100}卡 · 來源：${item.cook || '標準'}`,
+            tip: `每100g: ${item.cal100}卡 · ${item.cook || '標準'}`,
             items: [{ name: item.name, grams: g, cooking: item.cook || '', cal: Math.round((item.cal100 * g) / 100) }]
-          }, false, item.cat === '⭐個人記憶' ? '個人記憶庫' : '標準食物庫', false);
+          }, false, item.cat === '⭐個人記憶' ? '個人記憶' : '食物庫', false);
         };
 
         const tdeeReport = computed(() => {
           const p = state.profile;
           const w = Number(p.weight) || 65, h = Number(p.height) || 170, a = Number(p.age) || 30, bf = Number(p.bodyFat);
-          let bmr = 0, formulaUsed = 'Mifflin-St Jeor 公式', lbm = null, fatMass = null;
+          let bmr = 0, lbm = null, fatMass = null;
 
           if (bf && bf > 3 && bf < 60) {
             lbm = Number((w * (1 - bf / 100)).toFixed(1));
             fatMass = Number((w - lbm).toFixed(1));
             bmr = Math.round(370 + 21.6 * lbm);
-            formulaUsed = 'Katch-McArdle 除脂體重公式';
           } else {
             bmr = Math.round(10 * w + 6.25 * h - 5 * a + (p.gender === 'male' ? 5 : -161));
           }
@@ -1403,9 +1406,7 @@
           const tdee = Math.round(bmr * (workMult + freqBonus) * sleepAdj);
 
           const delta = p.hasGoal ? (Number(p.deficitStrategy) || 0) : 0;
-          const rawTarget = tdee + delta;
-          const recommendedCal = Math.max(bmr, rawTarget);
-          const belowBmrWarning = p.hasGoal && rawTarget < bmr;
+          const recommendedCal = Math.max(bmr, tdee + delta);
 
           let estimatedWeeks = null, targetDateStr = '';
           if (p.hasGoal && p.targetWeight && p.targetWeight !== w) {
@@ -1416,7 +1417,7 @@
               targetDateStr = `${dt.getFullYear()}/${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')}`;
             }
           }
-          return { bmr, formulaUsed, lbm, fatMass, tdee, recommendedCal, belowBmrWarning, estimatedWeeks, targetDateStr };
+          return { bmr, lbm, fatMass, tdee, recommendedCal, estimatedWeeks, targetDateStr };
         });
 
         const applyTdeePlan = () => {
@@ -1429,7 +1430,6 @@
           showToast(`目標已設定為 ${state.targetCal} kcal`, '🎯');
         };
 
-        // Diet Computations & Meal Grouping
         const dateMeals = computed(() => state.meals.filter(m => m.date === selectedDate.value));
         const groupedDateMeals = computed(() => {
           const order = [
@@ -1452,7 +1452,7 @@
           const others = dateMeals.value.filter(m => !order.some(o => o.type === m.mealType));
           if (others.length > 0) {
             groups.push({
-              type: '其他正餐', icon: '🍽️', items: others,
+              type: '其他', icon: '🍽️', items: others,
               totalCal: others.reduce((s, x) => s + (Number(x.cal) || 0), 0),
               totalP: others.reduce((s, x) => s + (Number(x.p) || 0), 0)
             });
@@ -1490,11 +1490,45 @@
 
         const proteinPerKg = computed(() => (dateMacros.value.p / (currentWeight.value || 65)).toFixed(1));
 
-        const macroDisplayList = computed(() => [
-          { label: '蛋白質', badge: `${proteinPerKg.value}g/kg`, cur: dateMacros.value.p, tar: targetMacros.value.p, boxClass: 'bg-sky-500/10 border-sky-500/20', textClass: 'text-sky-500', trackClass: 'bg-sky-500/20', barClass: 'bg-gradient-to-r from-sky-400 to-blue-500' },
-          { label: '碳水', badge: '', cur: dateMacros.value.c, tar: targetMacros.value.c, boxClass: 'bg-amber-500/10 border-amber-500/20', textClass: 'text-amber-500', trackClass: 'bg-amber-500/20', barClass: 'bg-gradient-to-r from-amber-400 to-orange-500' },
-          { label: '脂肪', badge: '', cur: dateMacros.value.f, tar: targetMacros.value.f, boxClass: 'bg-purple-500/10 border-purple-500/20', textClass: 'text-purple-500', trackClass: 'bg-purple-500/20', barClass: 'bg-gradient-to-r from-purple-400 to-fuchsia-500' }
-        ]);
+        const macroDisplayList = computed(() => {
+          const cPct = Math.min(100, Math.round((dateMacros.value.c / (targetMacros.value.c || 1)) * 100));
+          const fPct = Math.min(100, Math.round((dateMacros.value.f / (targetMacros.value.f || 1)) * 100));
+          return [
+            {
+              label: '蛋白質',
+              cur: dateMacros.value.p,
+              tar: targetMacros.value.p,
+              subText: `${proteinPerKg.value} g/kg`,
+              subClass: Number(proteinPerKg.value) >= 1.6 ? 'bg-emerald-500 text-white' : 'bg-sky-500/15 text-sky-500',
+              boxClass: 'bg-sky-500/10 border-sky-500/20',
+              textClass: 'text-sky-500',
+              trackClass: 'bg-sky-500/20',
+              barClass: 'bg-gradient-to-r from-sky-400 to-blue-500'
+            },
+            {
+              label: '碳水',
+              cur: dateMacros.value.c,
+              tar: targetMacros.value.c,
+              subText: `達成 ${cPct}%`,
+              subClass: 'bg-amber-500/15 text-amber-500',
+              boxClass: 'bg-amber-500/10 border-amber-500/20',
+              textClass: 'text-amber-500',
+              trackClass: 'bg-amber-500/20',
+              barClass: 'bg-gradient-to-r from-amber-400 to-orange-500'
+            },
+            {
+              label: '脂肪',
+              cur: dateMacros.value.f,
+              tar: targetMacros.value.f,
+              subText: `達成 ${fPct}%`,
+              subClass: 'bg-purple-500/15 text-purple-500',
+              boxClass: 'bg-purple-500/10 border-purple-500/20',
+              textClass: 'text-purple-500',
+              trackClass: 'bg-purple-500/20',
+              barClass: 'bg-gradient-to-r from-purple-400 to-fuchsia-500'
+            }
+          ];
+        });
 
         const activeEngineCount = computed(() => [state.apiKey, state.openrouterKey, state.groqKey].filter(Boolean).length);
 
@@ -1519,13 +1553,13 @@
             const img = new Image();
             img.onload = () => {
               const canvas = document.createElement('canvas');
-              const MAX = 1024;
+              const MAX = 800;
               let w = img.width, h = img.height;
               if (w > h && w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
               else if (h > MAX) { w = Math.round((w * MAX) / h); h = MAX; }
               canvas.width = w; canvas.height = h;
               canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-              foodImagePreview.value = canvas.toDataURL('image/jpeg', 0.85);
+              foodImagePreview.value = canvas.toDataURL('image/jpeg', 0.82);
             };
             img.src = ev.target.result;
           };
@@ -1535,19 +1569,19 @@
 
         const openPortionModal = (item, isPhoto = false, sourceLabel = 'AI 辨識', defaultBuffer = true, rawImg = '') => {
           refinePromptInput.value = '';
-          const baseG = Math.max(10, Math.round(Number(item.baseGrams || item.grams) || 100));
-          const actG = Math.max(10, Math.round(Number(item.actualGrams || baseG)));
+          const baseG = Math.max(10, Math.round(safeNum(item.baseGrams || item.grams, 100)));
+          const actG = Math.max(10, Math.round(safeNum(item.actualGrams, baseG)));
           pendingFood.value = {
             editId: null, mealType: detectMealType(), name: item.name,
             baseGrams: baseG, actualGrams: actG,
-            cal100: Number(item.cal100) || Math.round(((Number(item.cal) || 200) / baseG) * 100),
-            p100: Number(item.p100) || Number((((Number(item.p) || 10) / baseG) * 100).toFixed(1)),
-            c100: Number(item.c100) || Number((((Number(item.c) || 20) / baseG) * 100).toFixed(1)),
-            f100: Number(item.f100) || Number((((Number(item.f) || 8) / baseG) * 100).toFixed(1)),
+            cal100: Math.round(safeNum(item.cal100, Math.round((safeNum(item.cal, 200) / baseG) * 100))),
+            p100: Number(safeNum(item.p100, Number(((safeNum(item.p, 10) / baseG) * 100).toFixed(1))).toFixed(1)),
+            c100: Number(safeNum(item.c100, Number(((safeNum(item.c, 20) / baseG) * 100).toFixed(1))).toFixed(1)),
+            f100: Number(safeNum(item.f100, Number(((safeNum(item.f, 8) / baseG) * 100).toFixed(1))).toFixed(1)),
             tip: item.tip || '',
             items: Array.isArray(item.items) ? item.items.map(s => ({
-              name: s.name || '項目', grams: Math.round(Number(s.grams) || 100), cooking: s.cooking || '',
-              cal: Math.round(Number(s.cal) || 0), p: Number(s.p) || 0, c: Number(s.c) || 0, f: Number(s.f) || 0, checked: true
+              name: s.name || '項目', grams: Math.round(safeNum(s.grams, 100)), cooking: s.cooking || '',
+              cal: Math.round(safeNum(s.cal, 0)), p: safeNum(s.p, 0), c: safeNum(s.c, 0), f: safeNum(s.f, 0), checked: true
             })) : null,
             useBuffer: defaultBuffer, isPhoto, rawImg, sourceLabel
           };
@@ -1657,7 +1691,7 @@
             return {
               name: clean.replace(/(\d+)\s*(g|克)/gi, '').trim() || clean, baseGrams: totalG, actualGrams: totalG,
               cal100, p100: Number(((sum('p') / totalG) * 100).toFixed(1)), c100: Number(((sum('c') / totalG) * 100).toFixed(1)), f100: Number(((sum('f') / totalG) * 100).toFixed(1)),
-              tip: `已對照標準食物庫 (每100g約 ${cal100} 卡)`, items
+              tip: `已對照食物庫 (每100g約 ${cal100} 卡)`, items
             };
           }
           const g = explicitGrams || 150;
@@ -1665,114 +1699,228 @@
           return {
             name: clean.replace(/(\d+)\s*(g|克)/gi, '').trim() || clean, baseGrams: g, actualGrams: g,
             cal100: 150 + cookObj.addCal100, p100: 8 + cookObj.addP100, c100: 16 + cookObj.addC100, f100: 6 + cookObj.addF100,
-            tip: '可點擊右上角「食物庫」挑選或匯入 foods.json'
+            tip: '可點擊「食物庫」挑選或匯入 foods.json'
           };
         };
 
-        const fetchWithTimeout = async (url, options, ms = 14000) => {
+        const fetchWithTimeout = async (url, options, ms = 16000) => {
           const ctrl = new AbortController();
           const timer = setTimeout(() => ctrl.abort(), ms);
           try { const r = await fetch(url, { ...options, signal: ctrl.signal }); clearTimeout(timer); return r; }
           catch (e) { clearTimeout(timer); throw e; }
         };
 
-        const callSingleProvider = async (provider, prompt, imgData) => {
-          if (provider === 'gemini') {
-            const parts = [{ text: prompt }];
-            if (imgData) parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgData.split(',')[1] } });
-            let err = '';
-            for (const gm of ['gemini-3.8-flash', 'gemini-3.5-flash-lite']) {
+        const callGeminiWithCascade = async (prompt, imgData, onStatus, isTest = false) => {
+          const parts = [{ text: prompt }];
+          if (imgData) parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgData.split(',')[1] } });
+          const timeoutMs = isTest ? 6500 : (imgData ? 16000 : 9500);
+
+          const tiers = [
+            { model: 'gemini-3.8-flash', label: 'Gemini 3.8', retries: isTest ? 1 : 2 },
+            { model: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Lite', retries: isTest ? 1 : 2 },
+            { model: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Lite', retries: 1 }
+          ];
+
+          let lastErr = '';
+          for (const tier of tiers) {
+            for (let attempt = 1; attempt <= tier.retries; attempt++) {
               try {
-                const res = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent?key=${state.apiKey}`, {
-                  method: 'POST', headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } })
-                });
-                if (!res.ok) { err = `Gemini ${res.status}`; continue; }
-                const txt = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
-                if (txt) return txt;
-              } catch (e) { err = e.message; }
+                if (onStatus) {
+                  onStatus(attempt === 1
+                    ? `🔮 ${tier.label} 精算中...`
+                    : `⏳ ${tier.label} 尖峰重試 (${attempt}/${tier.retries})...`);
+                }
+                const res = await fetchWithTimeout(
+                  `https://generativelanguage.googleapis.com/v1beta/models/${tier.model}:generateContent?key=${state.apiKey}`,
+                  {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      contents: [{ parts }],
+                      generationConfig: { responseMimeType: 'application/json', temperature: 0.1, maxOutputTokens: isTest ? 64 : 1024 }
+                    })
+                  },
+                  timeoutMs
+                );
+
+                if (res.ok) {
+                  const data = await res.json();
+                  const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                  if (txt) return { raw: txt, engineLabel: tier.label };
+                  lastErr = `${tier.label} 空回傳`;
+                  break;
+                }
+
+                if (res.status === 400 || res.status === 401 || res.status === 403) {
+                  throw Object.assign(new Error(`Gemini 金鑰錯誤 (${res.status})`), { fatalKey: true });
+                }
+                if (res.status === 404 || res.status === 429) {
+                  lastErr = `${tier.label} (${res.status})`;
+                  break;
+                }
+                lastErr = `${tier.label} 擁塞 (${res.status})`;
+                if (attempt < tier.retries) {
+                  await sleepWithJitter(650 * Math.pow(2, attempt - 1));
+                }
+              } catch (e) {
+                if (e.fatalKey) throw e;
+                lastErr = e.name === 'AbortError' ? `${tier.label} 逾時` : e.message;
+                if (attempt < tier.retries) {
+                  await sleepWithJitter(500);
+                }
+              }
             }
-            throw new Error(err || 'Gemini Error');
           }
+          throw new Error(lastErr || 'Gemini 機房滿載');
+        };
+
+        const getGroqChatModels = async () => {
+          if (Array.isArray(cachedGroqModels) && cachedGroqModels.length > 0) return cachedGroqModels;
+          const res = await fetchWithTimeout('https://api.groq.com/openai/v1/models', {
+            headers: { 'Authorization': `Bearer ${state.groqKey}` }
+          }, 7000);
+          if (!res.ok) {
+            if (res.status === 401 || res.status === 403) throw new Error(`Groq 金鑰無效 (${res.status})`);
+            throw new Error(`Groq 連線錯誤 (${res.status})`);
+          }
+          const list = (await res.json())?.data || [];
+          const chatModels = list
+            .map(m => m.id)
+            .filter(id => id && !/whisper|guard|orpheus|tts|embed|vision-preview/i.test(id));
+          if (chatModels.length === 0) throw new Error('Groq 帳號無可用模型');
+          const preferred = ['qwen/qwen3.8-27b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound-mini'];
+          const sorted = [
+            ...preferred.filter(p => chatModels.includes(p)),
+            ...chatModels.filter(c => !preferred.includes(c))
+          ];
+          cachedGroqModels = sorted;
+          return sorted;
+        };
+
+        const callBackupProvider = async (provider, prompt, imgData, onStatus) => {
           if (provider === 'openrouter') {
+            if (onStatus) onStatus('🔄 啟動 OpenRouter 備援...');
             const content = [{ type: 'text', text: prompt }];
             if (imgData) content.push({ type: 'image_url', image_url: { url: imgData } });
             const res = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
               method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.openrouterKey}` },
               body: JSON.stringify({ model: 'openrouter/free', messages: [{ role: 'user', content }], temperature: 0.1 })
-            });
-            if (!res.ok) throw new Error(`OpenRouter ${res.status}`);
-            return (await res.json()).choices?.[0]?.message?.content || '';
+            }, 15000);
+            if (!res.ok) throw new Error(`OpenRouter (${res.status})`);
+            return { raw: (await res.json()).choices?.[0]?.message?.content || '', engineLabel: 'OpenRouter' };
           }
           if (provider === 'groq') {
-            if (imgData) throw new Error('Groq 轉交視覺引擎');
-            let err = '';
-            for (const gm of ['openai/gpt-oss-120b', 'openai/gpt-oss-20b']) {
+            if (imgData) throw new Error('Groq 僅支援純文字');
+            if (onStatus) onStatus('⚡ 啟動 Groq 備援...');
+            const models = await getGroqChatModels();
+            let lastGroqErr = '';
+            for (const gm of models.slice(0, 3)) {
               try {
                 const res = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
                   method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.groqKey}` },
-                  body: JSON.stringify({ model: gm, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, temperature: 0.1 })
-                });
-                if (!res.ok) { err = `Groq ${res.status}`; continue; }
+                  body: JSON.stringify({ model: gm, messages: [{ role: 'user', content: prompt }], temperature: 0.1 })
+                }, 11000);
+                if (!res.ok) {
+                  lastGroqErr = `Groq ${gm} (${res.status})`;
+                  if (res.status === 401 || res.status === 403) break;
+                  continue;
+                }
                 const txt = (await res.json()).choices?.[0]?.message?.content || '';
-                if (txt) return txt;
-              } catch (e) { err = e.message; }
+                if (txt) return { raw: txt, engineLabel: `Groq (${gm.split('/').pop()})` };
+              } catch (e) {
+                lastGroqErr = e.message;
+              }
             }
-            throw new Error(err || 'Groq Error');
+            throw new Error(lastGroqErr || 'Groq 連線受限');
           }
           throw new Error('Unknown');
         };
 
-        const runAiNutritionEngine = async (prompt, imgData) => {
-          const all = [
-            { id: 'gemini', name: 'Gemini 3.8', key: state.apiKey },
-            { id: 'openrouter', name: 'OpenRouter AI', key: state.openrouterKey },
-            { id: 'groq', name: 'Groq GPT-OSS', key: state.groqKey }
-          ].filter(p => p.key);
-          const queue = [...all.filter(p => p.id === state.aiProvider), ...all.filter(p => p.id !== state.aiProvider)];
-          let successParsed = null, usedEngineName = '', lastErr = '';
-          for (const eng of queue) {
+        const runAiNutritionEngine = async (prompt, imgData, onStatus, isTest = false) => {
+          let lastErr = '';
+          const hasAnyKey = Boolean(state.apiKey || state.openrouterKey || state.groqKey);
+
+          if (state.apiKey) {
             try {
-              const raw = await callSingleProvider(eng.id, prompt, imgData);
-              const match = raw.match(/\{[\s\S]*\}/);
-              if (match) { successParsed = JSON.parse(match[0]); usedEngineName = eng.name; break; }
-            } catch (e) { lastErr = e.message; }
+              const { raw, engineLabel } = await callGeminiWithCascade(prompt, imgData, onStatus, isTest);
+              const parsed = safeExtractJson(raw);
+              if (parsed) return { successParsed: parsed, usedEngineName: engineLabel, lastErr: '', hasKeys: true };
+            } catch (e) {
+              lastErr = e.message;
+            }
           }
-          return { successParsed, usedEngineName, lastErr, hasKeys: queue.length > 0 };
+
+          const backups = [
+            { id: 'openrouter', key: state.openrouterKey },
+            { id: 'groq', key: state.groqKey }
+          ].filter(b => b.key);
+
+          for (const bk of backups) {
+            try {
+              const { raw, engineLabel } = await callBackupProvider(bk.id, prompt, imgData, onStatus);
+              const parsed = safeExtractJson(raw);
+              if (parsed) return { successParsed: parsed, usedEngineName: engineLabel, lastErr: '', hasKeys: true };
+            } catch (e) {
+              lastErr = e.message;
+            }
+          }
+
+          return { successParsed: null, usedEngineName: '', lastErr, hasKeys: hasAnyKey };
         };
 
         const buildDietitianPrompt = (query, hasImg, prev = '') => {
           let anchor = '';
           if (query) {
-            const hits = combinedFoodLibrary.value.filter(i => query.includes(i.name) || i.name.includes(query)).slice(0, 5);
-            if (hits.length) anchor = `\n【台灣標準食物庫參考錨點（每100g基準）】：\n` + hits.map(a => `- ${a.name}(${a.cook}): 預設${a.grams}g, 每100g=${a.cal100}kcal (蛋白${a.p100}g, 碳水${a.c100}g, 脂肪${a.f100}g)`).join('\n');
+            const hits = combinedFoodLibrary.value.filter(i => query.includes(i.name) || i.name.includes(query)).slice(0, 4);
+            if (hits.length) anchor = `\n台灣食物庫參考(每100g)：` + hits.map(a => `${a.name}(${a.cook})預設${a.grams}g,每100g=${a.cal100}卡/蛋${a.p100}g/碳${a.c100}g/脂${a.f100}g`).join('；');
           }
-          return `你是台灣資深臨床營養師（嚴格對齊台灣衛福部食品營養成分資料庫）。請分析${hasImg ? '這張照片（若是餐點請逐一辨識盤中主食、配菜、烹調用油、醬汁與飲料，並以餐具推估真實克數；若是包裝營養標示表請精準 OCR 讀取每100g數值）' : ''}${query ? `並結合文字「${query}」` : ''}${anchor}${prev ? `\n使用者修正：「${prev}」，請重新精算！` : ''}。
-規則：1.非食物回傳{"notFood":true}。2.精算總克數(grams)與每100g密度(cal100,p100,c100,f100)並符合4P+4C+9F。3.只輸出純JSON：
-{"name":"餐點名稱","grams":整數,"cal100":整數,"p100":小數,"c100":小數,"f100":小數,"tip":"18字內建議","items":[{"name":"單品","grams":克數,"cooking":"烹調法","cal":總大卡,"p":蛋白,"c":碳水,"f":脂肪}]}`;
+          return `你是台灣臨床營養師(對齊衛福部資料庫)。分析${hasImg ? '照片(逐一辨識盤中主食、配菜、烹調用油、飲料並推估克數；若為營養標示表直接讀取每100g數值)' : ''}${query ? `「${query}」` : ''}${anchor}${prev ? `\n修正條件：「${prev}」` : ''}。
+非食物回傳{"notFood":true}。精算總克數(grams)與每100g密度(cal100,p100,c100,f100)並拆解明細(items)。只輸出純JSON：
+{"name":"餐點名稱","grams":整數,"cal100":整數,"p100":小數,"c100":小數,"f100":小數,"tip":"18字內建議","items":[{"name":"單品","grams":克數,"cooking":"烹調法","cal":總卡,"p":蛋白,"c":碳水,"f":脂肪}]}`;
         };
 
         const analyzeAndAddFood = async () => {
           if ((!foodInput.value && !foodImagePreview.value) || isEstimating.value) return;
           const query = foodInput.value, hasImg = !!foodImagePreview.value, imgData = foodImagePreview.value;
+
+          if (!hasImg && query) {
+            const cached = getCachedAiQuery(query.toLowerCase());
+            if (cached) {
+              openPortionModal({ ...cached }, false, `${cached._engine || 'Gemini'} 快取`, true, '');
+              foodInput.value = '';
+              return;
+            }
+          }
+
           isEstimating.value = true;
-          const { successParsed, usedEngineName, lastErr, hasKeys } = await runAiNutritionEngine(buildDietitianPrompt(query, hasImg), imgData);
+          estimatingStatus.value = '🔮 Gemini 精算中...';
+          const { successParsed, usedEngineName, lastErr, hasKeys } = await runAiNutritionEngine(
+            buildDietitianPrompt(query, hasImg),
+            imgData,
+            (st) => { estimatingStatus.value = st; }
+          );
 
           if (successParsed) {
             if (successParsed.notFood) {
               showToast('未偵測到食物或營養標示，請重新輸入', '🧐');
               foodInput.value = ''; foodImagePreview.value = ''; isEstimating.value = false; return;
             }
-            const g = Math.max(10, Number(successParsed.grams) || 150);
-            openPortionModal({
+            const g = Math.max(10, Math.round(safeNum(successParsed.grams, 150)));
+            const payload = {
               name: successParsed.name || query || 'AI 辨識餐點', baseGrams: g, actualGrams: g,
-              cal100: Number(successParsed.cal100) || Math.round(((Number(successParsed.cal) || 250) / g) * 100),
-              p100: Number(successParsed.p100) || 10, c100: Number(successParsed.c100) || 15, f100: Number(successParsed.f100) || 8,
-              tip: successParsed.tip || '', items: Array.isArray(successParsed.items) ? successParsed.items : null
-            }, hasImg, usedEngineName, true, imgData);
+              cal100: Math.round(safeNum(successParsed.cal100, Math.round((safeNum(successParsed.cal, 250) / g) * 100))),
+              p100: Number(safeNum(successParsed.p100, 10).toFixed(1)),
+              c100: Number(safeNum(successParsed.c100, 15).toFixed(1)),
+              f100: Number(safeNum(successParsed.f100, 8).toFixed(1)),
+              tip: successParsed.tip || '',
+              items: Array.isArray(successParsed.items) ? successParsed.items : null,
+              _engine: usedEngineName
+            };
+            if (!hasImg && query) setCachedAiQuery(query.toLowerCase(), payload);
+            openPortionModal(payload, hasImg, usedEngineName, true, imgData);
           } else {
-            showToast(hasKeys ? `雲端連線異常 (${lastErr})，改用標準食物庫` : '已使用標準食物庫精算', hasKeys ? '⚠️' : '📚');
-            openPortionModal(localSmartEstimate(query), hasImg, '標準食物庫', true, imgData);
+            showToast(hasKeys ? `${lastErr}，改用標準食物庫` : '已使用標準食物庫精算', hasKeys ? '⚠️' : '📚');
+            openPortionModal(localSmartEstimate(query), hasImg, '食物庫', true, imgData);
           }
           foodInput.value = ''; foodImagePreview.value = ''; isEstimating.value = false;
         };
@@ -1780,21 +1928,26 @@
         const refinePendingWithAI = async () => {
           if (!pendingFood.value || !refinePromptInput.value || isRefining.value) return;
           isRefining.value = true;
+          refiningStatus.value = '重算中...';
           const baseName = pendingFood.value.name, correction = refinePromptInput.value, rawImg = pendingFood.value.rawImg;
-          const { successParsed, usedEngineName, hasKeys } = await runAiNutritionEngine(buildDietitianPrompt(baseName, !!rawImg, correction), rawImg);
-          if (successParsed && (Number(successParsed.cal100) > 0 || Number(successParsed.cal) > 0)) {
-            const g = Math.max(10, Number(successParsed.grams) || pendingFood.value.actualGrams);
+          const { successParsed, usedEngineName, hasKeys } = await runAiNutritionEngine(
+            buildDietitianPrompt(baseName, !!rawImg, correction),
+            rawImg,
+            (st) => { refiningStatus.value = st.replace(/🔮|⏳|🔄|⚡/g, '').trim(); }
+          );
+          if (successParsed && (safeNum(successParsed.cal100) > 0 || safeNum(successParsed.cal) > 0)) {
+            const g = Math.max(10, Math.round(safeNum(successParsed.grams, pendingFood.value.actualGrams)));
             Object.assign(pendingFood.value, {
               name: successParsed.name || `${baseName} (${correction})`, baseGrams: g, actualGrams: g,
-              cal100: Number(successParsed.cal100) || Math.round((Number(successParsed.cal) / g) * 100),
-              p100: Number(successParsed.p100) || pendingFood.value.p100,
-              c100: Number(successParsed.c100) || pendingFood.value.c100,
-              f100: Number(successParsed.f100) || pendingFood.value.f100,
+              cal100: Math.round(safeNum(successParsed.cal100, Math.round((safeNum(successParsed.cal) / g) * 100))),
+              p100: Number(safeNum(successParsed.p100, pendingFood.value.p100).toFixed(1)),
+              c100: Number(safeNum(successParsed.c100, pendingFood.value.c100).toFixed(1)),
+              f100: Number(safeNum(successParsed.f100, pendingFood.value.f100).toFixed(1)),
               tip: successParsed.tip || pendingFood.value.tip, sourceLabel: `${usedEngineName} 重算`,
               items: Array.isArray(successParsed.items) ? successParsed.items.map(s => ({ ...s, checked: true })) : pendingFood.value.items
             });
             showToast('AI 已重新精算完成！', '✨');
-          } else showToast(hasKeys ? '重算連線繁忙，請直接修改克數' : '請先填入 API Key 啟用 AI 重算', '💡');
+          } else showToast(hasKeys ? '重算繁忙，請直接修改數值' : '請先填入 API Key', '💡');
           refinePromptInput.value = ''; isRefining.value = false;
         };
 
@@ -1846,7 +1999,7 @@
           const cur = Number(liftForm.weight) || 0;
           if (cur <= 0) return;
           liftForm.weight = Number((cur * 2).toFixed(1));
-          showToast(`已換算雙邊掛片總重：${liftForm.weight} kg`, '⚖️');
+          showToast(`雙邊掛片總重：${liftForm.weight} kg`, '⚖️');
         };
 
         const lastRecordForCurrentExercise = computed(() => {
@@ -1858,7 +2011,7 @@
           const prev = lastRecordForCurrentExercise.value;
           if (!prev) return;
           Object.assign(liftForm, { weight: Number((Number(prev.weight) + extra).toFixed(1)), reps: prev.reps, sets: prev.sets });
-          showToast(extra > 0 ? `已套用漸進超負荷 +${extra}kg！` : '已帶入上次訓練數據', '💪');
+          showToast(extra > 0 ? `漸進超負荷 +${extra}kg！` : '已帶入上次數據', '💪');
         };
 
         const previewLiftVolume = computed(() => Math.round((Number(liftForm.weight) || 0) * (Number(liftForm.reps) || 0) * (Number(liftForm.sets) || 0)));
@@ -1867,7 +2020,6 @@
           if (!liftForm.exercise || !liftForm.reps || !liftForm.sets) return;
           const w = Math.max(0, Number(liftForm.weight) || 0), r = Math.max(1, Math.round(Number(liftForm.reps) || 1)), s = Math.max(1, Math.round(Number(liftForm.sets) || 1)), vol = Math.round(w * r * s);
 
-          // Check Personal Record (PR) against historical lifts of same exercise
           const pastSame = state.lifts.filter(l => l.exercise === liftForm.exercise && l.id !== editingLiftId.value);
           const prevMaxW = pastSame.length ? Math.max(...pastSame.map(l => Number(l.weight) || 0)) : 0;
           const prevMaxVol = pastSame.length ? Math.max(...pastSame.map(l => Number(l.volume) || 0)) : 0;
@@ -1880,7 +2032,7 @@
             showToast('已更新訓練紀錄', '✅');
           } else {
             state.lifts.push({ id: Date.now() + Math.random(), date: selectedDate.value, muscle: liftForm.muscle || selectedMuscleGroup.value, exercise: liftForm.exercise, weight: w, reps: r, sets: s, volume: vol, isPR });
-            showToast(isPR ? `👑 恭喜打破「${liftForm.exercise}」個人新紀錄 (PR)！` : `已紀錄 ${liftForm.exercise} (訓練量 ${vol.toLocaleString()} kg)`, isPR ? '👑' : '🏋️');
+            showToast(isPR ? `👑 打破「${liftForm.exercise}」新紀錄 (PR)！` : `已紀錄 ${liftForm.exercise}`, isPR ? '👑' : '🏋️');
           }
         };
 
@@ -1896,7 +2048,7 @@
           item.sets += 1;
           item.volume = Math.round(item.weight * item.reps * item.sets);
           startRestTimer(90);
-          showToast(`${item.exercise} 第 ${item.sets} 組完成！已啟動 90 秒組間休息`, '⏱️');
+          showToast(`${item.exercise} 第 ${item.sets} 組！已啟動 90 秒休息`, '⏱️');
         };
 
         const removeLift = (id) => { state.lifts = state.lifts.filter(l => l.id !== id); };
@@ -1930,17 +2082,17 @@
           const recent = state.lifts.slice(-25);
           const summary = recent.length ? recent.map(l => `${l.date} [${l.muscle}] ${l.exercise}: ${l.weight}kg x ${l.reps}次 x ${l.sets}組 (量${l.volume}kg)`).join('\n') : '尚無歷史紀錄';
           const prompt = `你是專業肌力與體能教練 (NSCA-CSCS)。使用者體重 ${currentWeight.value}kg，目標熱量 ${state.targetCal}kcal，7日均攝取 ${weeklyAvgIntake.value}kcal。近期訓練：\n${summary}\n只回傳純JSON（繁體中文，每項55-85字）：{"shortTerm":"短期(1-2週)建議","mediumTerm":"中期(1-2個月)建議","longTerm":"長期(3-6個月)建議"}`;
-          const { successParsed, usedEngineName } = await runAiNutritionEngine(prompt, '');
+          const { successParsed, usedEngineName } = await runAiNutritionEngine(prompt, '', null);
           if (successParsed?.shortTerm && successParsed?.mediumTerm && successParsed?.longTerm) {
             state.aiTrainingPlan = { ...successParsed, updatedAt: `${todayStr.value} ${getTimeHHMM()} (${usedEngineName})` };
-            showToast('AI 週期化訓練建議已生成！', '🧠');
+            showToast('AI 訓練週期建議已生成！', '🧠');
           } else {
             const top = recent[recent.length - 1];
             state.aiTrainingPlan = {
               shortTerm: top ? `針對「${top.exercise} (${top.weight}kg×${top.reps}次)」，下週嘗試維持組數並增加 1～2 次反覆次數；達 12～15 次後即可上調重量達成漸進超負荷。` : `本週建議從45度倒蹬腿推、坐姿推胸與坐姿划船機起步，每動作採 10～12 次 × 3～4 組，建立神經肌肉控制。`,
               mediumTerm: `未來 4～8 週可採「腿臀、上肢推（胸肩）、上肢拉（背手）」三分化循環，每週將單一肌群總訓練量提升 5%～10%。`,
               longTerm: `每連續訓練 6～8 週安排 1 週「減量週 (Deload，組數減半)」讓關節恢復；配合每日吃足 ${targetMacros.value.p}g 蛋白質，穩步提升基礎代謝。`,
-              updatedAt: `${todayStr.value} ${getTimeHHMM()} (離線教練分析)`
+              updatedAt: `${todayStr.value} ${getTimeHHMM()} (離線分析)`
             };
             showToast('已根據訓練量生成三階段建議', '📊');
           }
@@ -1961,7 +2113,7 @@
               body: JSON.stringify({ id: 'default_user', payload: safePayload, updated_at: new Date().toISOString() })
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            showToast('已成功同步備份至 Supabase 雲端！', '☁️');
+            showToast('已成功上傳至 Supabase 雲端！', '☁️');
           } catch (e) { showToast(`雲端上傳失敗 (${e.message})`, '❌'); }
           finally { isSyncingCloud.value = false; }
         };
@@ -1984,7 +2136,7 @@
               if (Array.isArray(remote.lifts)) state.lifts = remote.lifts;
               if (remote.aiTrainingPlan) state.aiTrainingPlan = remote.aiTrainingPlan;
               if (Array.isArray(remote.bodyLogs)) state.bodyLogs = remote.bodyLogs;
-              showToast('已從 Supabase 雲端還原最新紀錄！', '🎉');
+              showToast('已從雲端還原最新紀錄！', '🎉');
             } else showToast('雲端尚無備份資料', '💡');
           } catch (e) { showToast(`雲端拉取失敗 (${e.message})`, '❌'); }
           finally { isSyncingCloud.value = false; }
@@ -1993,15 +2145,35 @@
         const testAllAiEngines = async () => {
           if (isTestingAi.value) return;
           isTestingAi.value = true;
+          cachedGroqModels = null;
           Object.assign(engineTestStatus, { groq: null, openrouter: null, gemini: null });
-          for (const t of [{ id: 'gemini', key: state.apiKey }, { id: 'openrouter', key: state.openrouterKey }, { id: 'groq', key: state.groqKey }]) {
-            if (!t.key) continue;
+
+          if (state.apiKey) {
             const start = performance.now();
             try {
-              const res = await callSingleProvider(t.id, '只回傳純JSON：{"ok":true,"cal100":100}', '');
-              engineTestStatus[t.id] = res.includes('{') ? { ok: true, msg: `✅ 連線正常 (${Math.round(performance.now() - start)} ms)` } : { ok: false, msg: '⚠️ 回傳格式異常' };
-            } catch (e) { engineTestStatus[t.id] = { ok: false, msg: `❌ 連線失敗 (${e.message})` }; }
+              const { raw, engineLabel } = await callGeminiWithCascade('只回傳純JSON：{"ok":true}', '', null, true);
+              engineTestStatus.gemini = raw.includes('{')
+                ? { ok: true, msg: `✅ ${engineLabel} 連線正常 (${Math.round(performance.now() - start)} ms)` }
+                : { ok: false, msg: '⚠️ 回傳格式異常' };
+            } catch (e) {
+              engineTestStatus.gemini = { ok: false, msg: `❌ ${e.message}` };
+            }
           }
+
+          for (const id of ['openrouter', 'groq']) {
+            const key = id === 'openrouter' ? state.openrouterKey : state.groqKey;
+            if (!key) continue;
+            const start = performance.now();
+            try {
+              const { raw, engineLabel } = await callBackupProvider(id, '只回傳純JSON：{"ok":true}', '', null);
+              engineTestStatus[id] = raw.includes('{')
+                ? { ok: true, msg: `✅ ${engineLabel} 就緒 (${Math.round(performance.now() - start)} ms)` }
+                : { ok: false, msg: '⚠️ 回傳格式異常' };
+            } catch (e) {
+              engineTestStatus[id] = { ok: false, msg: `❌ ${e.message}` };
+            }
+          }
+
           isTestingAi.value = false;
           showToast('AI 引擎診斷完成', '⚡');
         };
@@ -2069,7 +2241,7 @@
               if (p && typeof p === 'object') {
                 state.targetCal = Number(p.targetCal) || 1800;
                 if (p.dayResetHour !== undefined) state.dayResetHour = Number(p.dayResetHour) || 0;
-                state.aiProvider = p.aiProvider || 'gemini';
+                if (p.darkMode !== undefined) state.darkMode = Boolean(p.darkMode);
                 if (p.groqKey) state.groqKey = p.groqKey;
                 if (p.openrouterKey) state.openrouterKey = p.openrouterKey;
                 if (p.apiKey) state.apiKey = p.apiKey;
@@ -2108,10 +2280,10 @@
           activeEngineCount, isTestingAi, engineTestStatus, testAllAiEngines,
           dateMeals, groupedDateMeals, dateIntake, remainingCal, calPercent, dateDeficit, proteinPerKg, macroDisplayList,
           last7DaysCalBars, weeklyAvgIntake, yesterdayMealsCount, copyYesterdayMeals,
-          foodInput, foodImagePreview, handleFoodPhoto, isEstimating, foodPresets, appendModifier,
+          foodInput, foodImagePreview, handleFoodPhoto, isEstimating, estimatingStatus, foodPresets, appendModifier,
           manualForm, submitManualFood,
           pendingFood, adjustGrams, openPortionModal, editExistingMeal, recalcPendingFromItems, finalPendingPreview, confirmPendingFood,
-          refinePromptInput, isRefining, refinePendingWithAI,
+          refinePromptInput, isRefining, refiningStatus, refinePendingWithAI,
           analyzeAndAddFood, repeatMeal, removeMeal,
           selectedMuscleGroup, selectedDropdownExercise, currentGroupOptions, onMuscleGroupChange, onExerciseDropdownChange,
           activeBwPreset, addExtraLoad, doublePlateWeight, editingLiftId, liftForm, lastRecordForCurrentExercise, applyLastLift,

@@ -136,7 +136,7 @@
       <span class="truncate">{{ toast.msg }}</span>
     </div>
 
-    <!-- Floating Rest Timer Pill -->
+    <!-- Floating Rest Timer Pill (Visible during gym rest countdown) -->
     <div v-if="restTimer.active" class="fixed timer-offset md:bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white px-4 py-2.5 rounded-full shadow-2xl border border-indigo-400/40 flex items-center gap-3 backdrop-blur-md pop-in">
       <div class="flex items-center gap-1.5">
         <span class="text-base animate-pulse">⏱️</span>
@@ -287,7 +287,7 @@
             <div class="flex gap-2">
               <input v-model.trim="refinePromptInput" type="text" placeholder="例：這是炸的、去皮、白飯吃一半..." class="flex-1 surface-input border rounded-xl px-3 py-2 text-base focus:outline-none">
               <button type="submit" :disabled="isRefining || !refinePromptInput" class="bg-indigo-600 text-white text-xs font-bold px-3.5 rounded-xl shrink-0 active:scale-95 transition disabled:opacity-40">
-                {{ isRefining ? refiningStatus : '重算' }}
+                {{ isRefining ? '重算中...' : '重算' }}
               </button>
             </div>
           </form>
@@ -493,6 +493,7 @@
       <!-- TAB 1: DIET -->
       <div v-if="activeTab === 'diet'" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
         <div class="md:col-span-6 space-y-4">
+          <!-- Summary Ring + Protein g/kg Badge -->
           <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
             <div class="flex items-center justify-between gap-3 sm:gap-4">
               <div class="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex items-center justify-center">
@@ -595,8 +596,8 @@
               </div>
 
               <button type="submit" :disabled="isEstimating || (!foodInput && !foodImagePreview)" class="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white font-bold py-3 rounded-2xl text-base shadow-md shadow-emerald-500/20 active:scale-[0.99] transition disabled:opacity-35">
-                <span v-if="isEstimating">{{ estimatingStatus }}</span>
-                <span v-else>{{ foodImagePreview ? 'Gemini 辨識照片並精算克數' : 'Gemini 估算並精算克數' }}</span>
+                <span v-if="isEstimating">🔮 AI 結合標準庫精算中...</span>
+                <span v-else>{{ foodImagePreview ? 'AI 辨識照片並精算克數' : 'AI 估算並精算克數' }}</span>
               </button>
             </form>
 
@@ -644,6 +645,7 @@
 
             <div v-else class="space-y-3.5">
               <div v-for="grp in groupedDateMeals" :key="grp.type" class="space-y-2">
+                <!-- Meal Group Header with Subtotal -->
                 <div class="flex items-center justify-between px-1 text-xs">
                   <span class="font-extrabold text-primary">{{ grp.icon }} {{ grp.type }}</span>
                   <span class="text-secondary font-semibold tabular-nums">
@@ -712,6 +714,7 @@
                 {{ dateLifts.length }} 動作 · {{ dateTotalSets }} 組
               </div>
             </div>
+            <!-- Quick Rest Timer Bar -->
             <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
               <span class="text-xs text-slate-300">⏱️ 組間休息倒數：</span>
               <div class="flex gap-1.5">
@@ -803,6 +806,7 @@
           </section>
         </div>
 
+        <!-- Right Column: Logged Lifts (With PR Crowns) + 7-Day Volume + AI Coach -->
         <div class="md:col-span-6 space-y-4">
           <section class="glass-card rounded-3xl p-4 sm:p-5 space-y-3">
             <div class="flex items-center justify-between">
@@ -863,7 +867,7 @@
                 <p class="text-xs text-secondary">結合器材訓練容量與飲食狀態給出規劃</p>
               </div>
               <button @click="generateAiTrainingAdvice" :disabled="isGeneratingAdvice" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm active:scale-95 transition disabled:opacity-40 shrink-0">
-                {{ isGeneratingAdvice ? 'Gemini 分析中...' : '✨ 生成 AI 建議' }}
+                {{ isGeneratingAdvice ? '分析中...' : '✨ 生成 AI 建議' }}
               </button>
             </div>
 
@@ -976,23 +980,25 @@
         <div class="md:col-span-6 space-y-4">
           <section class="glass-card rounded-3xl p-5 space-y-3.5">
             <div class="flex items-center justify-between">
-              <span class="font-extrabold text-primary text-sm">AI 核心設定 (Gemini 三階防擁塞架構)</span>
+              <span class="font-extrabold text-primary text-sm">AI 辨識與教練引擎設定</span>
               <button @click="testAllAiEngines" :disabled="isTestingAi || activeEngineCount === 0" class="text-xs font-bold bg-emerald-600 text-white px-3 py-1 rounded-full active:scale-95 transition disabled:opacity-40">
                 {{ isTestingAi ? '測試中...' : '⚡ 測試連線' }}
               </button>
             </div>
 
-            <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-2xl text-xs text-secondary leading-relaxed">
-              🛡️ 系統已預設鎖定 <b class="text-emerald-500">Gemini 3.8 ➔ 3.5 Lite ➔ 2.5 Lite</b> 三階段自動重試分流，遇 Google 尖峰擁塞會自動抖動重連，全部忙線時才啟用 OpenRouter / Groq 備援。
-            </div>
+            <select v-model="state.aiProvider" class="custom-select w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+              <option value="gemini">首選：Google Gemini 3.8 Flash (最準確·支援拍照)</option>
+              <option value="openrouter">首選：OpenRouter 智慧免費路由 (支援拍照)</option>
+              <option value="groq">首選：Groq LPU 極速引擎 (GPT-OSS 120B)</option>
+            </select>
 
             <div class="space-y-2.5">
               <div class="space-y-1">
-                <input v-model.trim="state.apiKey" type="password" placeholder="1. Gemini API Key (AIzaSy... 絕對主力核心)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.apiKey" type="password" placeholder="1. Gemini API Key (AIzaSy... 最推薦)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.gemini" class="text-xs px-2 font-medium" :class="engineTestStatus.gemini.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.gemini.msg }}</div>
               </div>
               <div class="space-y-1">
-                <input v-model.trim="state.openrouterKey" type="password" placeholder="2. OpenRouter API Key (sk-or-v1-... 第一備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.openrouterKey" type="password" placeholder="2. OpenRouter API Key (sk-or-v1-... 備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.openrouter" class="text-xs px-2 font-medium" :class="engineTestStatus.openrouter.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.openrouter.msg }}</div>
               </div>
               <div class="space-y-1">
@@ -1047,7 +1053,7 @@
             </div>
             <div class="grid grid-cols-3 gap-2">
               <button @click="exportCsvReport" class="bg-emerald-600 text-white py-3 rounded-2xl text-xs font-bold active:scale-95 transition">匯出 CSV</button>
-              <button @click="exportData" class="bg-slate-800 text-white py-3 rounded-2xl text-xs font-bold active:scale-95 transition">JSON 備份</button>
+              <button @click="exportData" class="bg-slate-900 text-white py-3 rounded-2xl text-xs font-bold active:scale-95 transition">JSON 備份</button>
               <label class="surface-input border text-primary py-3 rounded-2xl text-xs font-bold text-center cursor-pointer active:scale-95 transition">
                 匯入還原
                 <input type="file" accept=".json" @change="importData" class="hidden">
@@ -1138,33 +1144,10 @@
       return (h >= 5 && h < 11) ? '早餐' : (h >= 11 && h < 15) ? '午餐' : (h >= 17 && h < 21) ? '晚餐' : '點心';
     };
 
-    const sleepWithJitter = (baseMs) => new Promise(r => setTimeout(r, baseMs + Math.floor(Math.random() * 420)));
-
-    const safeNum = (val, fallback = 0) => {
-      if (typeof val === 'number' && Number.isFinite(val)) return val;
-      const cleaned = parseFloat(String(val ?? '').replace(/[^\d.-]/g, ''));
-      return Number.isFinite(cleaned) ? cleaned : fallback;
-    };
-
-    const safeExtractJson = (rawText) => {
-      if (!rawText) return null;
-      const stripped = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-      const match = stripped.match(/\{[\s\S]*\}/);
-      if (!match) return null;
-      try {
-        return JSON.parse(match[0]);
-      } catch {
-        // Attempt trailing comma recovery
-        try { return JSON.parse(match[0].replace(/,\s*([}\]])/g, '$1')); }
-        catch { return null; }
-      }
-    };
-
     createApp({
       setup() {
         const STORAGE_KEY = 'fitquest_app_data_v1';
         const EXT_DB_KEY = 'fitquest_ext_food_db_v1';
-        const AI_CACHE_KEY = 'fitquest_ai_query_cache_v1';
 
         const navTabs = [
           { id: 'diet', icon: '🥗', label: '飲食', activeClass: 'text-emerald-500 font-bold scale-105' },
@@ -1187,9 +1170,7 @@
         const foodInput = ref('');
         const foodImagePreview = ref('');
         const isEstimating = ref(false);
-        const estimatingStatus = ref('🔮 Gemini 精算中...');
         const isRefining = ref(false);
-        const refiningStatus = ref('重算中...');
         const refinePromptInput = ref('');
         const isTestingAi = ref(false);
         const engineTestStatus = reactive({ groq: null, openrouter: null, gemini: null });
@@ -1260,23 +1241,6 @@
           toast.msg = msg; toast.icon = icon; toast.show = true;
           clearTimeout(toastTimer);
           toastTimer = setTimeout(() => { toast.show = false; }, 3200);
-        };
-
-        // Session LRU Cache for Text Queries (0ms instant response & saves Gemini RPM quota)
-        const getCachedAiQuery = (key) => {
-          try {
-            const map = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
-            return map[key] || null;
-          } catch { return null; }
-        };
-        const setCachedAiQuery = (key, data) => {
-          try {
-            const map = JSON.parse(localStorage.getItem(AI_CACHE_KEY) || '{}');
-            const keys = Object.keys(map);
-            if (keys.length >= 50) delete map[keys[0]];
-            map[key] = data;
-            localStorage.setItem(AI_CACHE_KEY, JSON.stringify(map));
-          } catch {}
         };
 
         // Rest Timer Audio & Vibration
@@ -1385,6 +1349,7 @@
           return arr;
         };
 
+        // Combined Food Library (Personal Learned Foods + External Standard DB)
         const combinedFoodLibrary = computed(() => [...state.customFoods, ...foodLibrary.value]);
         const dbCategories = computed(() => ['全部', ...(state.customFoods.length ? ['⭐個人記憶'] : []), ...new Set(foodLibrary.value.map(i => i.cat || '其他'))]);
         const filteredOfflineDb = computed(() => {
@@ -1546,7 +1511,6 @@
           else if (!foodInput.value.includes(mod)) foodInput.value = `${foodInput.value} (${mod})`;
         };
 
-        // Optimized 800px Image Compression (45% smaller payload for faster Gemini Vision response)
         const handleFoodPhoto = (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
@@ -1555,13 +1519,13 @@
             const img = new Image();
             img.onload = () => {
               const canvas = document.createElement('canvas');
-              const MAX = 800;
+              const MAX = 1024;
               let w = img.width, h = img.height;
               if (w > h && w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
               else if (h > MAX) { w = Math.round((w * MAX) / h); h = MAX; }
               canvas.width = w; canvas.height = h;
               canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-              foodImagePreview.value = canvas.toDataURL('image/jpeg', 0.82);
+              foodImagePreview.value = canvas.toDataURL('image/jpeg', 0.85);
             };
             img.src = ev.target.result;
           };
@@ -1571,19 +1535,19 @@
 
         const openPortionModal = (item, isPhoto = false, sourceLabel = 'AI 辨識', defaultBuffer = true, rawImg = '') => {
           refinePromptInput.value = '';
-          const baseG = Math.max(10, Math.round(safeNum(item.baseGrams || item.grams, 100)));
-          const actG = Math.max(10, Math.round(safeNum(item.actualGrams, baseG)));
+          const baseG = Math.max(10, Math.round(Number(item.baseGrams || item.grams) || 100));
+          const actG = Math.max(10, Math.round(Number(item.actualGrams || baseG)));
           pendingFood.value = {
             editId: null, mealType: detectMealType(), name: item.name,
             baseGrams: baseG, actualGrams: actG,
-            cal100: Math.round(safeNum(item.cal100, Math.round((safeNum(item.cal, 200) / baseG) * 100))),
-            p100: Number(safeNum(item.p100, Number(((safeNum(item.p, 10) / baseG) * 100).toFixed(1))).toFixed(1)),
-            c100: Number(safeNum(item.c100, Number(((safeNum(item.c, 20) / baseG) * 100).toFixed(1))).toFixed(1)),
-            f100: Number(safeNum(item.f100, Number(((safeNum(item.f, 8) / baseG) * 100).toFixed(1))).toFixed(1)),
+            cal100: Number(item.cal100) || Math.round(((Number(item.cal) || 200) / baseG) * 100),
+            p100: Number(item.p100) || Number((((Number(item.p) || 10) / baseG) * 100).toFixed(1)),
+            c100: Number(item.c100) || Number((((Number(item.c) || 20) / baseG) * 100).toFixed(1)),
+            f100: Number(item.f100) || Number((((Number(item.f) || 8) / baseG) * 100).toFixed(1)),
             tip: item.tip || '',
             items: Array.isArray(item.items) ? item.items.map(s => ({
-              name: s.name || '項目', grams: Math.round(safeNum(s.grams, 100)), cooking: s.cooking || '',
-              cal: Math.round(safeNum(s.cal, 0)), p: safeNum(s.p, 0), c: safeNum(s.c, 0), f: safeNum(s.f, 0), checked: true
+              name: s.name || '項目', grams: Math.round(Number(s.grams) || 100), cooking: s.cooking || '',
+              cal: Math.round(Number(s.cal) || 0), p: Number(s.p) || 0, c: Number(s.c) || 0, f: Number(s.f) || 0, checked: true
             })) : null,
             useBuffer: defaultBuffer, isPhoto, rawImg, sourceLabel
           };
@@ -1705,200 +1669,109 @@
           };
         };
 
-        const fetchWithTimeout = async (url, options, ms = 16000) => {
+        const fetchWithTimeout = async (url, options, ms = 14000) => {
           const ctrl = new AbortController();
           const timer = setTimeout(() => ctrl.abort(), ms);
           try { const r = await fetch(url, { ...options, signal: ctrl.signal }); clearTimeout(timer); return r; }
           catch (e) { clearTimeout(timer); throw e; }
         };
 
-        // Gemini-First 3-Tier Cascade with Exponential Backoff + Random Jitter & Error Classification
-        const callGeminiWithCascade = async (prompt, imgData, onStatus) => {
-          const parts = [{ text: prompt }];
-          if (imgData) parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgData.split(',')[1] } });
-          const timeoutMs = imgData ? 18000 : 12000;
-
-          const tiers = [
-            { model: 'gemini-3.8-flash', label: 'Gemini 3.8', retries: 2 },
-            { model: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Lite', retries: 2 },
-            { model: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Lite', retries: 1 }
-          ];
-
-          let lastErr = '';
-          for (const tier of tiers) {
-            for (let attempt = 1; attempt <= tier.retries; attempt++) {
+        const callSingleProvider = async (provider, prompt, imgData) => {
+          if (provider === 'gemini') {
+            const parts = [{ text: prompt }];
+            if (imgData) parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgData.split(',')[1] } });
+            let err = '';
+            for (const gm of ['gemini-3.8-flash', 'gemini-3.5-flash-lite']) {
               try {
-                if (onStatus) {
-                  onStatus(attempt === 1
-                    ? `🔮 ${tier.label} 精算中...`
-                    : `⏳ ${tier.label} 尖峰排隊，自動重試 (${attempt}/${tier.retries})...`);
-                }
-                const res = await fetchWithTimeout(
-                  `https://generativelanguage.googleapis.com/v1beta/models/${tier.model}:generateContent?key=${state.apiKey}`,
-                  {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      contents: [{ parts }],
-                      generationConfig: { responseMimeType: 'application/json', temperature: 0.1, maxOutputTokens: 1024 }
-                    })
-                  },
-                  timeoutMs
-                );
-
-                if (res.ok) {
-                  const data = await res.json();
-                  const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                  if (txt) return { raw: txt, engineLabel: tier.label };
-                  lastErr = `${tier.label} 空回傳`;
-                  break;
-                }
-
-                // Error Classification: 400/401/403 = Key/Param error (abort Gemini immediately)
-                if (res.status === 400 || res.status === 401 || res.status === 403) {
-                  throw Object.assign(new Error(`Gemini 金鑰或權限錯誤 (${res.status})`), { fatalKey: true });
-                }
-                // 429 = Personal RPM limit on this specific model -> immediately step down to next Gemini model
-                if (res.status === 429) {
-                  lastErr = `${tier.label} 頻率上限 (429)`;
-                  break;
-                }
-                // 503 / 500 / 504 = Transient server overload -> Exponential Backoff + Random Jitter
-                lastErr = `${tier.label} 機房高負載 (${res.status})`;
-                if (attempt < tier.retries) {
-                  await sleepWithJitter(750 * Math.pow(2, attempt - 1));
-                }
-              } catch (e) {
-                if (e.fatalKey) throw e;
-                lastErr = e.name === 'AbortError' ? `${tier.label} 連線逾時` : e.message;
-                if (attempt < tier.retries) {
-                  await sleepWithJitter(600);
-                }
-              }
+                const res = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent?key=${state.apiKey}`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json', temperature: 0.1 } })
+                });
+                if (!res.ok) { err = `Gemini ${res.status}`; continue; }
+                const txt = (await res.json()).candidates?.[0]?.content?.parts?.[0]?.text || '';
+                if (txt) return txt;
+              } catch (e) { err = e.message; }
             }
+            throw new Error(err || 'Gemini Error');
           }
-          throw new Error(lastErr || 'Gemini 機房滿載');
-        };
-
-        const callBackupProvider = async (provider, prompt, imgData, onStatus) => {
           if (provider === 'openrouter') {
-            if (onStatus) onStatus('🔄 啟動 OpenRouter 備援中...');
             const content = [{ type: 'text', text: prompt }];
             if (imgData) content.push({ type: 'image_url', image_url: { url: imgData } });
             const res = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
               method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.openrouterKey}` },
               body: JSON.stringify({ model: 'openrouter/free', messages: [{ role: 'user', content }], temperature: 0.1 })
-            }, 16000);
+            });
             if (!res.ok) throw new Error(`OpenRouter ${res.status}`);
-            return { raw: (await res.json()).choices?.[0]?.message?.content || '', engineLabel: 'OpenRouter 備援' };
+            return (await res.json()).choices?.[0]?.message?.content || '';
           }
           if (provider === 'groq') {
-            if (imgData) throw new Error('Groq 僅支援純文字');
-            if (onStatus) onStatus('⚡ 啟動 Groq 極速備援中...');
+            if (imgData) throw new Error('Groq 轉交視覺引擎');
+            let err = '';
             for (const gm of ['openai/gpt-oss-120b', 'openai/gpt-oss-20b']) {
               try {
                 const res = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
                   method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.groqKey}` },
                   body: JSON.stringify({ model: gm, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, temperature: 0.1 })
-                }, 12000);
-                if (!res.ok) continue;
+                });
+                if (!res.ok) { err = `Groq ${res.status}`; continue; }
                 const txt = (await res.json()).choices?.[0]?.message?.content || '';
-                if (txt) return { raw: txt, engineLabel: 'Groq 備援' };
-              } catch {}
+                if (txt) return txt;
+              } catch (e) { err = e.message; }
             }
-            throw new Error('Groq 備援繁忙');
+            throw new Error(err || 'Groq Error');
           }
           throw new Error('Unknown');
         };
 
-        // Always prioritizes Gemini first; only uses OpenRouter / Groq if Gemini fails
-        const runAiNutritionEngine = async (prompt, imgData, onStatus) => {
-          let lastErr = '';
-          const hasAnyKey = Boolean(state.apiKey || state.openrouterKey || state.groqKey);
-
-          // 1. Primary Core: Google Gemini (3.8 Flash -> 3.5 Flash Lite -> 2.5 Flash Lite)
-          if (state.apiKey) {
+        const runAiNutritionEngine = async (prompt, imgData) => {
+          const all = [
+            { id: 'gemini', name: 'Gemini 3.8', key: state.apiKey },
+            { id: 'openrouter', name: 'OpenRouter AI', key: state.openrouterKey },
+            { id: 'groq', name: 'Groq GPT-OSS', key: state.groqKey }
+          ].filter(p => p.key);
+          const queue = [...all.filter(p => p.id === state.aiProvider), ...all.filter(p => p.id !== state.aiProvider)];
+          let successParsed = null, usedEngineName = '', lastErr = '';
+          for (const eng of queue) {
             try {
-              const { raw, engineLabel } = await callGeminiWithCascade(prompt, imgData, onStatus);
-              const parsed = safeExtractJson(raw);
-              if (parsed) return { successParsed: parsed, usedEngineName: engineLabel, lastErr: '', hasKeys: true };
-            } catch (e) {
-              lastErr = e.message;
-            }
+              const raw = await callSingleProvider(eng.id, prompt, imgData);
+              const match = raw.match(/\{[\s\S]*\}/);
+              if (match) { successParsed = JSON.parse(match[0]); usedEngineName = eng.name; break; }
+            } catch (e) { lastErr = e.message; }
           }
-
-          // 2. Fallback Core: OpenRouter -> Groq
-          const backups = [
-            { id: 'openrouter', key: state.openrouterKey },
-            { id: 'groq', key: state.groqKey }
-          ].filter(b => b.key);
-
-          for (const bk of backups) {
-            try {
-              const { raw, engineLabel } = await callBackupProvider(bk.id, prompt, imgData, onStatus);
-              const parsed = safeExtractJson(raw);
-              if (parsed) return { successParsed: parsed, usedEngineName: engineLabel, lastErr: '', hasKeys: true };
-            } catch (e) {
-              lastErr = e.message;
-            }
-          }
-
-          return { successParsed: null, usedEngineName: '', lastErr, hasKeys: hasAnyKey };
+          return { successParsed, usedEngineName, lastErr, hasKeys: queue.length > 0 };
         };
 
         const buildDietitianPrompt = (query, hasImg, prev = '') => {
           let anchor = '';
           if (query) {
-            const hits = combinedFoodLibrary.value.filter(i => query.includes(i.name) || i.name.includes(query)).slice(0, 4);
-            if (hits.length) anchor = `\n台灣食物庫參考(每100g)：` + hits.map(a => `${a.name}(${a.cook})預設${a.grams}g,每100g=${a.cal100}卡/蛋${a.p100}g/碳${a.c100}g/脂${a.f100}g`).join('；');
+            const hits = combinedFoodLibrary.value.filter(i => query.includes(i.name) || i.name.includes(query)).slice(0, 5);
+            if (hits.length) anchor = `\n【台灣標準食物庫參考錨點（每100g基準）】：\n` + hits.map(a => `- ${a.name}(${a.cook}): 預設${a.grams}g, 每100g=${a.cal100}kcal (蛋白${a.p100}g, 碳水${a.c100}g, 脂肪${a.f100}g)`).join('\n');
           }
-          return `你是台灣臨床營養師(對齊衛福部資料庫)。分析${hasImg ? '照片(逐一辨識盤中主食、配菜、烹調用油、飲料並推估克數；若為營養標示表直接讀取每100g數值)' : ''}${query ? `「${query}」` : ''}${anchor}${prev ? `\n修正條件：「${prev}」` : ''}。
-非食物回傳{"notFood":true}。精算總克數(grams)與每100g密度(cal100,p100,c100,f100)並拆解明細(items)。只輸出純JSON：
-{"name":"餐點名稱","grams":整數,"cal100":整數,"p100":小數,"c100":小數,"f100":小數,"tip":"18字內建議","items":[{"name":"單品","grams":克數,"cooking":"烹調法","cal":總卡,"p":蛋白,"c":碳水,"f":脂肪}]}`;
+          return `你是台灣資深臨床營養師（嚴格對齊台灣衛福部食品營養成分資料庫）。請分析${hasImg ? '這張照片（若是餐點請逐一辨識盤中主食、配菜、烹調用油、醬汁與飲料，並以餐具推估真實克數；若是包裝營養標示表請精準 OCR 讀取每100g數值）' : ''}${query ? `並結合文字「${query}」` : ''}${anchor}${prev ? `\n使用者修正：「${prev}」，請重新精算！` : ''}。
+規則：1.非食物回傳{"notFood":true}。2.精算總克數(grams)與每100g密度(cal100,p100,c100,f100)並符合4P+4C+9F。3.只輸出純JSON：
+{"name":"餐點名稱","grams":整數,"cal100":整數,"p100":小數,"c100":小數,"f100":小數,"tip":"18字內建議","items":[{"name":"單品","grams":克數,"cooking":"烹調法","cal":總大卡,"p":蛋白,"c":碳水,"f":脂肪}]}`;
         };
 
         const analyzeAndAddFood = async () => {
           if ((!foodInput.value && !foodImagePreview.value) || isEstimating.value) return;
           const query = foodInput.value, hasImg = !!foodImagePreview.value, imgData = foodImagePreview.value;
-
-          // Check 0ms local cache for pure text queries
-          if (!hasImg && query) {
-            const cached = getCachedAiQuery(query.toLowerCase());
-            if (cached) {
-              openPortionModal({ ...cached }, false, `${cached._engine || 'Gemini'} 快取`, true, '');
-              foodInput.value = '';
-              return;
-            }
-          }
-
           isEstimating.value = true;
-          estimatingStatus.value = '🔮 Gemini 3.8 精算中...';
-          const { successParsed, usedEngineName, lastErr, hasKeys } = await runAiNutritionEngine(
-            buildDietitianPrompt(query, hasImg),
-            imgData,
-            (st) => { estimatingStatus.value = st; }
-          );
+          const { successParsed, usedEngineName, lastErr, hasKeys } = await runAiNutritionEngine(buildDietitianPrompt(query, hasImg), imgData);
 
           if (successParsed) {
             if (successParsed.notFood) {
               showToast('未偵測到食物或營養標示，請重新輸入', '🧐');
               foodInput.value = ''; foodImagePreview.value = ''; isEstimating.value = false; return;
             }
-            const g = Math.max(10, Math.round(safeNum(successParsed.grams, 150)));
-            const payload = {
+            const g = Math.max(10, Number(successParsed.grams) || 150);
+            openPortionModal({
               name: successParsed.name || query || 'AI 辨識餐點', baseGrams: g, actualGrams: g,
-              cal100: Math.round(safeNum(successParsed.cal100, Math.round((safeNum(successParsed.cal, 250) / g) * 100))),
-              p100: Number(safeNum(successParsed.p100, 10).toFixed(1)),
-              c100: Number(safeNum(successParsed.c100, 15).toFixed(1)),
-              f100: Number(safeNum(successParsed.f100, 8).toFixed(1)),
-              tip: successParsed.tip || '',
-              items: Array.isArray(successParsed.items) ? successParsed.items : null,
-              _engine: usedEngineName
-            };
-            if (!hasImg && query) setCachedAiQuery(query.toLowerCase(), payload);
-            openPortionModal(payload, hasImg, usedEngineName, true, imgData);
+              cal100: Number(successParsed.cal100) || Math.round(((Number(successParsed.cal) || 250) / g) * 100),
+              p100: Number(successParsed.p100) || 10, c100: Number(successParsed.c100) || 15, f100: Number(successParsed.f100) || 8,
+              tip: successParsed.tip || '', items: Array.isArray(successParsed.items) ? successParsed.items : null
+            }, hasImg, usedEngineName, true, imgData);
           } else {
-            showToast(hasKeys ? `${lastErr}，已自動切換標準食物庫` : '已使用標準食物庫精算', hasKeys ? '⚠️' : '📚');
+            showToast(hasKeys ? `雲端連線異常 (${lastErr})，改用標準食物庫` : '已使用標準食物庫精算', hasKeys ? '⚠️' : '📚');
             openPortionModal(localSmartEstimate(query), hasImg, '標準食物庫', true, imgData);
           }
           foodInput.value = ''; foodImagePreview.value = ''; isEstimating.value = false;
@@ -1907,21 +1780,16 @@
         const refinePendingWithAI = async () => {
           if (!pendingFood.value || !refinePromptInput.value || isRefining.value) return;
           isRefining.value = true;
-          refiningStatus.value = '重算中...';
           const baseName = pendingFood.value.name, correction = refinePromptInput.value, rawImg = pendingFood.value.rawImg;
-          const { successParsed, usedEngineName, hasKeys } = await runAiNutritionEngine(
-            buildDietitianPrompt(baseName, !!rawImg, correction),
-            rawImg,
-            (st) => { refiningStatus.value = st.replace(/🔮|⏳|🔄|⚡/g, '').trim(); }
-          );
-          if (successParsed && (safeNum(successParsed.cal100) > 0 || safeNum(successParsed.cal) > 0)) {
-            const g = Math.max(10, Math.round(safeNum(successParsed.grams, pendingFood.value.actualGrams)));
+          const { successParsed, usedEngineName, hasKeys } = await runAiNutritionEngine(buildDietitianPrompt(baseName, !!rawImg, correction), rawImg);
+          if (successParsed && (Number(successParsed.cal100) > 0 || Number(successParsed.cal) > 0)) {
+            const g = Math.max(10, Number(successParsed.grams) || pendingFood.value.actualGrams);
             Object.assign(pendingFood.value, {
               name: successParsed.name || `${baseName} (${correction})`, baseGrams: g, actualGrams: g,
-              cal100: Math.round(safeNum(successParsed.cal100, Math.round((safeNum(successParsed.cal) / g) * 100))),
-              p100: Number(safeNum(successParsed.p100, pendingFood.value.p100).toFixed(1)),
-              c100: Number(safeNum(successParsed.c100, pendingFood.value.c100).toFixed(1)),
-              f100: Number(safeNum(successParsed.f100, pendingFood.value.f100).toFixed(1)),
+              cal100: Number(successParsed.cal100) || Math.round((Number(successParsed.cal) / g) * 100),
+              p100: Number(successParsed.p100) || pendingFood.value.p100,
+              c100: Number(successParsed.c100) || pendingFood.value.c100,
+              f100: Number(successParsed.f100) || pendingFood.value.f100,
               tip: successParsed.tip || pendingFood.value.tip, sourceLabel: `${usedEngineName} 重算`,
               items: Array.isArray(successParsed.items) ? successParsed.items.map(s => ({ ...s, checked: true })) : pendingFood.value.items
             });
@@ -1999,6 +1867,7 @@
           if (!liftForm.exercise || !liftForm.reps || !liftForm.sets) return;
           const w = Math.max(0, Number(liftForm.weight) || 0), r = Math.max(1, Math.round(Number(liftForm.reps) || 1)), s = Math.max(1, Math.round(Number(liftForm.sets) || 1)), vol = Math.round(w * r * s);
 
+          // Check Personal Record (PR) against historical lifts of same exercise
           const pastSame = state.lifts.filter(l => l.exercise === liftForm.exercise && l.id !== editingLiftId.value);
           const prevMaxW = pastSame.length ? Math.max(...pastSame.map(l => Number(l.weight) || 0)) : 0;
           const prevMaxVol = pastSame.length ? Math.max(...pastSame.map(l => Number(l.volume) || 0)) : 0;
@@ -2061,7 +1930,7 @@
           const recent = state.lifts.slice(-25);
           const summary = recent.length ? recent.map(l => `${l.date} [${l.muscle}] ${l.exercise}: ${l.weight}kg x ${l.reps}次 x ${l.sets}組 (量${l.volume}kg)`).join('\n') : '尚無歷史紀錄';
           const prompt = `你是專業肌力與體能教練 (NSCA-CSCS)。使用者體重 ${currentWeight.value}kg，目標熱量 ${state.targetCal}kcal，7日均攝取 ${weeklyAvgIntake.value}kcal。近期訓練：\n${summary}\n只回傳純JSON（繁體中文，每項55-85字）：{"shortTerm":"短期(1-2週)建議","mediumTerm":"中期(1-2個月)建議","longTerm":"長期(3-6個月)建議"}`;
-          const { successParsed, usedEngineName } = await runAiNutritionEngine(prompt, '', null);
+          const { successParsed, usedEngineName } = await runAiNutritionEngine(prompt, '');
           if (successParsed?.shortTerm && successParsed?.mediumTerm && successParsed?.longTerm) {
             state.aiTrainingPlan = { ...successParsed, updatedAt: `${todayStr.value} ${getTimeHHMM()} (${usedEngineName})` };
             showToast('AI 週期化訓練建議已生成！', '🧠');
@@ -2125,33 +1994,14 @@
           if (isTestingAi.value) return;
           isTestingAi.value = true;
           Object.assign(engineTestStatus, { groq: null, openrouter: null, gemini: null });
-
-          if (state.apiKey) {
+          for (const t of [{ id: 'gemini', key: state.apiKey }, { id: 'openrouter', key: state.openrouterKey }, { id: 'groq', key: state.groqKey }]) {
+            if (!t.key) continue;
             const start = performance.now();
             try {
-              const { raw, engineLabel } = await callGeminiWithCascade('只回傳純JSON：{"ok":true}', '', null);
-              engineTestStatus.gemini = raw.includes('{')
-                ? { ok: true, msg: `✅ ${engineLabel} 連線正常 (${Math.round(performance.now() - start)} ms)` }
-                : { ok: false, msg: '⚠️ 回傳格式異常' };
-            } catch (e) {
-              engineTestStatus.gemini = { ok: false, msg: `❌ ${e.message}` };
-            }
+              const res = await callSingleProvider(t.id, '只回傳純JSON：{"ok":true,"cal100":100}', '');
+              engineTestStatus[t.id] = res.includes('{') ? { ok: true, msg: `✅ 連線正常 (${Math.round(performance.now() - start)} ms)` } : { ok: false, msg: '⚠️ 回傳格式異常' };
+            } catch (e) { engineTestStatus[t.id] = { ok: false, msg: `❌ 連線失敗 (${e.message})` }; }
           }
-
-          for (const id of ['openrouter', 'groq']) {
-            const key = id === 'openrouter' ? state.openrouterKey : state.groqKey;
-            if (!key) continue;
-            const start = performance.now();
-            try {
-              const { raw } = await callBackupProvider(id, '只回傳純JSON：{"ok":true}', '', null);
-              engineTestStatus[id] = raw.includes('{')
-                ? { ok: true, msg: `✅ 備援就緒 (${Math.round(performance.now() - start)} ms)` }
-                : { ok: false, msg: '⚠️ 回傳格式異常' };
-            } catch (e) {
-              engineTestStatus[id] = { ok: false, msg: `❌ ${e.message}` };
-            }
-          }
-
           isTestingAi.value = false;
           showToast('AI 引擎診斷完成', '⚡');
         };
@@ -2219,7 +2069,7 @@
               if (p && typeof p === 'object') {
                 state.targetCal = Number(p.targetCal) || 1800;
                 if (p.dayResetHour !== undefined) state.dayResetHour = Number(p.dayResetHour) || 0;
-                if (p.darkMode !== undefined) state.darkMode = Boolean(p.darkMode);
+                state.aiProvider = p.aiProvider || 'gemini';
                 if (p.groqKey) state.groqKey = p.groqKey;
                 if (p.openrouterKey) state.openrouterKey = p.openrouterKey;
                 if (p.apiKey) state.apiKey = p.apiKey;
@@ -2258,10 +2108,10 @@
           activeEngineCount, isTestingAi, engineTestStatus, testAllAiEngines,
           dateMeals, groupedDateMeals, dateIntake, remainingCal, calPercent, dateDeficit, proteinPerKg, macroDisplayList,
           last7DaysCalBars, weeklyAvgIntake, yesterdayMealsCount, copyYesterdayMeals,
-          foodInput, foodImagePreview, handleFoodPhoto, isEstimating, estimatingStatus, foodPresets, appendModifier,
+          foodInput, foodImagePreview, handleFoodPhoto, isEstimating, foodPresets, appendModifier,
           manualForm, submitManualFood,
           pendingFood, adjustGrams, openPortionModal, editExistingMeal, recalcPendingFromItems, finalPendingPreview, confirmPendingFood,
-          refinePromptInput, isRefining, refiningStatus, refinePendingWithAI,
+          refinePromptInput, isRefining, refinePendingWithAI,
           analyzeAndAddFood, repeatMeal, removeMeal,
           selectedMuscleGroup, selectedDropdownExercise, currentGroupOptions, onMuscleGroupChange, onExerciseDropdownChange,
           activeBwPreset, addExtraLoad, doublePlateWeight, editingLiftId, liftForm, lastRecordForCurrentExercise, applyLastLift,

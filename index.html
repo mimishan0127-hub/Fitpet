@@ -470,7 +470,6 @@
       <!-- TAB 1: DIET -->
       <div v-if="activeTab === 'diet'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <div class="md:col-span-6 space-y-3.5">
-          <!-- Calorie Ring & Symmetrical Macro Cards -->
           <section class="glass-card rounded-[26px] p-4 space-y-3.5">
             <div class="flex items-center justify-between gap-3">
               <div class="relative w-28 h-28 shrink-0 flex items-center justify-center">
@@ -527,7 +526,6 @@
             </div>
           </section>
 
-          <!-- Clean Food Logger -->
           <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <div class="flex surface-subtle border p-0.5 rounded-xl shrink-0">
@@ -599,7 +597,6 @@
           </section>
         </div>
 
-        <!-- Right Column: Grouped Meals + 7-Day Trend -->
         <div class="md:col-span-6 space-y-3.5">
           <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
@@ -667,7 +664,6 @@
       <!-- TAB 2: WEIGHT TRAINING & BODYWEIGHT CALISTHENICS -->
       <div v-if="activeTab === 'lift'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <div class="md:col-span-6 space-y-3.5">
-          <!-- Sleek Minimalist Volume Card -->
           <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-[26px] p-4 sm:p-5 shadow-lg space-y-3 tabular-nums">
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-semibold text-indigo-300 whitespace-nowrap">🏋️ 今日訓練總容量</span>
@@ -695,7 +691,6 @@
             </div>
           </section>
 
-          <!-- Ultra-Compact Equipment Selection & Single-Line Last Record Bar -->
           <section class="glass-card rounded-[26px] p-4 space-y-2.5">
             <div class="flex items-center justify-between gap-2">
               <span class="font-bold text-primary text-sm whitespace-nowrap">{{ editingLiftId ? '編輯訓練' : '選擇器材 / 動作' }}</span>
@@ -723,7 +718,6 @@
 
             <input v-if="selectedDropdownExercise === '__custom__'" v-model.trim="liftForm.exercise" type="text" placeholder="請輸入自訂器材或動作..." class="w-full surface-input border border-indigo-400 rounded-2xl px-3.5 py-2.5 text-base focus:outline-none">
 
-            <!-- Slim Single-Line Bodyweight Equivalent Bar -->
             <div v-if="activeBwPreset" class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl flex items-center justify-between gap-2 pop-in tabular-nums">
               <span class="text-xs text-primary truncate">
                 體重 {{ currentWeight }}×{{ Math.round(activeBwPreset.ratio * 100) }}% = <b class="text-emerald-500">{{ Math.round(currentWeight * activeBwPreset.ratio * 10) / 10 }}kg</b>
@@ -734,7 +728,6 @@
               </div>
             </div>
 
-            <!-- Slim Single-Line Last Record Bar (Only tracks single latest record) -->
             <div v-if="lastRecordForCurrentExercise && !editingLiftId" class="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl flex items-center justify-between gap-2 pop-in tabular-nums">
               <span class="text-xs text-primary truncate">
                 <b class="text-amber-500">📌 上次</b> {{ lastRecordForCurrentExercise.weight }}kg×{{ lastRecordForCurrentExercise.reps }}×{{ lastRecordForCurrentExercise.sets }}
@@ -745,7 +738,6 @@
               </div>
             </div>
 
-            <!-- Strictly Aligned 3-Column Numeric Inputs -->
             <form @submit.prevent="addLiftRecord" class="space-y-2.5 pt-0.5">
               <div class="grid grid-cols-3 gap-2">
                 <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
@@ -863,7 +855,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: BODY METRICS (With Editable & Deletable History Records) -->
+      <!-- TAB 3: BODY METRICS -->
       <div v-if="activeTab === 'body'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <div class="md:col-span-6 space-y-3.5">
           <section v-if="state.profile.hasGoal && (state.profile.targetWeight || state.profile.targetBodyFat)" class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 text-white rounded-[26px] p-4 sm:p-5 space-y-3 shadow-lg shadow-blue-500/20 tabular-nums">
@@ -906,7 +898,7 @@
               </div>
               <div class="flex gap-2">
                 <button v-if="editingBodyDate" type="button" @click="cancelEditBody" class="px-4 surface-subtle border text-secondary font-bold py-3 rounded-2xl text-sm whitespace-nowrap">取消</button>
-                <button type="submit" :disabled="!bodyForm.weight" class="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35">
+                <button type="submit" :disabled="!bodyForm.weight || Number(bodyForm.weight) <= 0" class="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35">
                   {{ editingBodyDate ? '更新此筆紀錄' : '儲存紀錄' }}
                 </button>
               </div>
@@ -957,28 +949,32 @@
         </div>
       </div>
 
-      <!-- TAB 4: SETTINGS -->
+      <!-- TAB 4: SETTINGS (Shows Auto-Discovered Latest AI Core Lineup) -->
       <div v-if="activeTab === 'settings'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <div class="md:col-span-6 space-y-3.5">
           <section class="glass-card rounded-[26px] p-4 sm:p-5 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <span class="font-bold text-primary text-sm whitespace-nowrap">AI 核心設定</span>
+              <span class="font-bold text-primary text-sm whitespace-nowrap">AI 自動進化核心</span>
               <button @click="testAllAiEngines" :disabled="isTestingAi || activeEngineCount === 0" class="text-xs font-bold bg-emerald-600 text-white px-3 py-1 rounded-full whitespace-nowrap shrink-0 active:scale-95 transition disabled:opacity-40">
-                {{ isTestingAi ? '測試中...' : '⚡ 測試連線' }}
+                {{ isTestingAi ? '偵測中...' : '⚡ 刷新並測試' }}
               </button>
+            </div>
+
+            <div v-if="discoveredGeminiSummary" class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-[11px] text-secondary truncate">
+              🤖 已自動鎖定最新核心：<b class="text-emerald-500">{{ discoveredGeminiSummary }}</b>
             </div>
 
             <div class="space-y-2">
               <div class="space-y-1">
-                <input v-model.trim="state.apiKey" type="password" placeholder="1. Gemini API Key (主力核心)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.apiKey" type="password" placeholder="1. Gemini API Key (自動抓取最新可用版本)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.gemini" class="text-xs px-2 font-medium" :class="engineTestStatus.gemini.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.gemini.msg }}</div>
               </div>
               <div class="space-y-1">
-                <input v-model.trim="state.openrouterKey" type="password" placeholder="2. OpenRouter API Key (備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.openrouterKey" type="password" placeholder="2. OpenRouter API Key (多模態備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.openrouter" class="text-xs px-2 font-medium" :class="engineTestStatus.openrouter.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.openrouter.msg }}</div>
               </div>
               <div class="space-y-1">
-                <input v-model.trim="state.groqKey" type="password" placeholder="3. Groq API Key (純文字備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
+                <input v-model.trim="state.groqKey" type="password" placeholder="3. Groq API Key (自動偵測純文字備援)" class="w-full surface-input border rounded-2xl px-3.5 py-2.5 text-base">
                 <div v-if="engineTestStatus.groq" class="text-xs px-2 font-medium" :class="engineTestStatus.groq.ok ? 'text-emerald-500' : 'text-rose-500'">{{ engineTestStatus.groq.msg }}</div>
               </div>
             </div>
@@ -1117,7 +1113,8 @@
       return (h >= 5 && h < 11) ? '早餐' : (h >= 11 && h < 15) ? '午餐' : (h >= 17 && h < 21) ? '晚餐' : '點心';
     };
 
-    const sleepWithJitter = (baseMs) => new Promise(r => setTimeout(r, baseMs + Math.floor(Math.random() * 420)));
+    const cleanKeyStr = (k) => String(k || '').replace(/^["']|["']$/g, '').trim();
+    const sleepWithJitter = (baseMs) => new Promise(r => setTimeout(r, baseMs + Math.floor(Math.random() * 380)));
 
     const safeNum = (val, fallback = 0) => {
       if (typeof val === 'number' && Number.isFinite(val)) return val;
@@ -1138,11 +1135,25 @@
       }
     };
 
+    // Dynamic Gemini Model Version Scoring (Future-proof for Gemini 3.x, 4.x, 5.x+)
+    const scoreGeminiModel = (id) => {
+      const verMatch = id.match(/gemini-(\d+(?:\.\d+)?)/i);
+      const ver = verMatch ? parseFloat(verMatch[1]) : 1.0;
+      let score = ver * 100;
+      if (/flash/i.test(id) && !/lite|8b/i.test(id)) score += 35;
+      else if (/flash-lite/i.test(id)) score += 28;
+      else if (/pro/i.test(id)) score += 20;
+      if (/preview|exp/i.test(id)) score -= 4;
+      if (/latest/i.test(id)) score -= 2;
+      return score;
+    };
+
     createApp({
       setup() {
         const STORAGE_KEY = 'fitquest_app_data_v1';
         const EXT_DB_KEY = 'fitquest_ext_food_db_v1';
         const AI_CACHE_KEY = 'fitquest_ai_query_cache_v1';
+        const MODEL_DISCOVERY_KEY = 'fitquest_discovered_models_v1';
 
         const navTabs = [
           { id: 'diet', icon: '🥗', label: '飲食', activeClass: 'text-emerald-500 font-bold scale-105' },
@@ -1165,12 +1176,13 @@
         const foodInput = ref('');
         const foodImagePreview = ref('');
         const isEstimating = ref(false);
-        const estimatingStatus = ref('🔮 Gemini 精算中...');
+        const estimatingStatus = ref('🔮 AI 精算中...');
         const isRefining = ref(false);
         const refiningStatus = ref('重算中...');
         const refinePromptInput = ref('');
         const isTestingAi = ref(false);
         const engineTestStatus = reactive({ groq: null, openrouter: null, gemini: null });
+        const discoveredGeminiSummary = ref('');
         const toast = reactive({ show: false, msg: '', icon: '✨' });
         const nowTick = ref(Date.now());
         let clockTimer = null;
@@ -1225,9 +1237,21 @@
         const todayStr = computed(() => getEffectiveDateStr(state.dayResetHour, nowTick.value));
         const selectedDate = ref(todayStr.value);
 
+        // Bug Fix #1: Automatically advance selectedDate when crossing midnight if user was viewing "today"
+        watch(todayStr, (newToday, oldToday) => {
+          if (selectedDate.value === oldToday) {
+            selectedDate.value = newToday;
+          }
+        });
+
         watch(() => state.darkMode, (isDark) => {
           document.body.classList.toggle('body-dark', isDark);
         }, { immediate: true });
+
+        watch(() => state.apiKey, () => {
+          try { localStorage.removeItem(MODEL_DISCOVERY_KEY); } catch {}
+          discoveredGeminiSummary.value = '';
+        });
 
         watch(() => state.groqKey, () => {
           cachedGroqModels = null;
@@ -1314,7 +1338,7 @@
             const cached = JSON.parse(localStorage.getItem(EXT_DB_KEY) || 'null');
             if (Array.isArray(cached) && cached.length > 0) {
               foodLibrary.value = cached;
-              externalDbStatus.value = `快取標準庫 (${cached.length}筆) + 個人記憶 (${state.customFoods.length}筆)`;
+              externalDbStatus.value = `快取標準庫 (${cached.length}筆) + 個人記憶`;
             }
           } catch {}
           try {
@@ -1527,7 +1551,7 @@
           ];
         });
 
-        const activeEngineCount = computed(() => [state.apiKey, state.openrouterKey, state.groqKey].filter(Boolean).length);
+        const activeEngineCount = computed(() => [cleanKeyStr(state.apiKey), cleanKeyStr(state.openrouterKey), cleanKeyStr(state.groqKey)].filter(Boolean).length);
 
         const foodPresets = [
           { icon: '🥩', name: '水煮雞胸肉', cook: '水煮', grams: 150, cal100: 110, p100: 23.3, c100: 0, f100: 1.3 },
@@ -1542,6 +1566,7 @@
           else if (!foodInput.value.includes(mod)) foodInput.value = `${foodInput.value} (${mod})`;
         };
 
+        // Bug Fix #5: Added img.onerror handler for unsupported mobile image formats
         const handleFoodPhoto = (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
@@ -1558,8 +1583,10 @@
               canvas.getContext('2d').drawImage(img, 0, 0, w, h);
               foodImagePreview.value = canvas.toDataURL('image/jpeg', 0.82);
             };
+            img.onerror = () => showToast('照片格式不支援，請重新拍攝', '⚠️');
             img.src = ev.target.result;
           };
+          reader.onerror = () => showToast('讀取照片失敗', '❌');
           reader.readAsDataURL(file);
           e.target.value = '';
         };
@@ -1601,9 +1628,14 @@
           if (pendingFood.value) pendingFood.value.actualGrams = Math.max(10, (Number(pendingFood.value.actualGrams) || 0) + delta);
         };
 
+        // Bug Fix #4: Properly zeroes out actualGrams when all sub-items are unchecked
         const recalcPendingFromItems = () => {
           if (!pendingFood.value?.items) return;
           const active = pendingFood.value.items.filter(i => i.checked);
+          if (active.length === 0) {
+            pendingFood.value.actualGrams = 0;
+            return;
+          }
           const totalG = active.reduce((s, i) => s + (Number(i.grams) || 0), 0) || 100;
           const sum = (k) => active.reduce((s, i) => s + (Number(i[k]) || 0), 0);
           pendingFood.value.baseGrams = totalG;
@@ -1707,28 +1739,102 @@
           catch (e) { clearTimeout(timer); throw e; }
         };
 
-        const callGeminiWithCascade = async (prompt, imgData, onStatus, isTest = false) => {
+        // ============================================================
+        // SELF-EVOLVING AI MODEL AUTO-DISCOVERY ENGINE (Zero Hardcoding)
+        // ============================================================
+        const discoverLatestGeminiTiers = async (forceRefresh = false) => {
+          const key = cleanKeyStr(state.apiKey);
+          const fallbackTiers = [
+            { model: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash' },
+            { model: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Lite' },
+            { model: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Lite' }
+          ];
+          if (!key) return fallbackTiers;
+
+          if (!forceRefresh) {
+            try {
+              const cached = JSON.parse(localStorage.getItem(MODEL_DISCOVERY_KEY) || 'null');
+              if (cached && Array.isArray(cached.tiers) && cached.tiers.length > 0 && (Date.now() - cached.ts) < 6 * 3600 * 1000) {
+                discoveredGeminiSummary.value = cached.tiers.map(t => t.model).join(' → ');
+                return cached.tiers;
+              }
+            } catch {}
+          }
+
+          try {
+            const res = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=100`, {}, 6500);
+            if (!res.ok) {
+              if (res.status === 400 || res.status === 401 || res.status === 403) {
+                throw Object.assign(new Error(`Gemini 金鑰無效 (${res.status})`), { fatalKey: true });
+              }
+              return fallbackTiers;
+            }
+            const data = await res.json();
+            const rawModels = Array.isArray(data.models) ? data.models : [];
+
+            const candidates = rawModels
+              .filter(m =>
+                Array.isArray(m.supportedGenerationMethods) &&
+                m.supportedGenerationMethods.includes('generateContent') &&
+                /^models\/gemini-/i.test(m.name || '') &&
+                !/embedding|aqa|imagen|veo|tts|audio|robotics|computer-use|deep-research|-image/i.test(m.name || '')
+              )
+              .map(m => {
+                const id = m.name.replace(/^models\//i, '');
+                return {
+                  model: id,
+                  label: m.displayName || id,
+                  score: scoreGeminiModel(id)
+                };
+              })
+              .sort((a, b) => b.score - a.score);
+
+            if (candidates.length > 0) {
+              // Pick diverse top 3 tiers (e.g. newest Flash, newest Lite, newest Pro/secondary)
+              const topFlash = candidates.find(c => /flash/i.test(c.model) && !/lite/i.test(c.model));
+              const topLite = candidates.find(c => /flash-lite/i.test(c.model));
+              const topOther = candidates.find(c => c.model !== topFlash?.model && c.model !== topLite?.model);
+              const selected = [topFlash, topLite, topOther, ...candidates]
+                .filter(Boolean)
+                .filter((v, idx, arr) => arr.findIndex(x => x.model === v.model) === idx)
+                .slice(0, 3)
+                .map(({ model, label }) => ({ model, label }));
+
+              try {
+                localStorage.setItem(MODEL_DISCOVERY_KEY, JSON.stringify({ ts: Date.now(), tiers: selected }));
+              } catch {}
+              discoveredGeminiSummary.value = selected.map(t => t.model).join(' → ');
+              return selected;
+            }
+          } catch (e) {
+            if (e.fatalKey) throw e;
+          }
+          discoveredGeminiSummary.value = fallbackTiers.map(t => t.model).join(' → ');
+          return fallbackTiers;
+        };
+
+        const callGeminiWithAutoDiscovery = async (prompt, imgData, onStatus, isTest = false) => {
+          const key = cleanKeyStr(state.apiKey);
           const parts = [{ text: prompt }];
           if (imgData) parts.push({ inline_data: { mime_type: 'image/jpeg', data: imgData.split(',')[1] } });
           const timeoutMs = isTest ? 6500 : (imgData ? 16000 : 9500);
 
-          const tiers = [
-            { model: 'gemini-3.8-flash', label: 'Gemini 3.8', retries: isTest ? 1 : 2 },
-            { model: 'gemini-3.5-flash-lite', label: 'Gemini 3.5 Lite', retries: isTest ? 1 : 2 },
-            { model: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Lite', retries: 1 }
-          ];
-
+          let tiers = await discoverLatestGeminiTiers(isTest);
           let lastErr = '';
-          for (const tier of tiers) {
-            for (let attempt = 1; attempt <= tier.retries; attempt++) {
+          let triggeredRefresh = false;
+
+          for (let i = 0; i < tiers.length; i++) {
+            const tier = tiers[i];
+            const maxRetries = isTest ? 1 : 2;
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
               try {
                 if (onStatus) {
                   onStatus(attempt === 1
                     ? `🔮 ${tier.label} 精算中...`
-                    : `⏳ ${tier.label} 尖峰重試 (${attempt}/${tier.retries})...`);
+                    : `⏳ ${tier.label} 尖峰重試 (${attempt}/${maxRetries})...`);
                 }
                 const res = await fetchWithTimeout(
-                  `https://generativelanguage.googleapis.com/v1beta/models/${tier.model}:generateContent?key=${state.apiKey}`,
+                  `https://generativelanguage.googleapis.com/v1beta/models/${tier.model}:generateContent?key=${key}`,
                   {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1751,19 +1857,29 @@
                 if (res.status === 400 || res.status === 401 || res.status === 403) {
                   throw Object.assign(new Error(`Gemini 金鑰錯誤 (${res.status})`), { fatalKey: true });
                 }
+
+                // Self-healing: If a cached model returns 404 (retired by Google), refresh discovery list live once
+                if (res.status === 404 && !triggeredRefresh) {
+                  triggeredRefresh = true;
+                  tiers = await discoverLatestGeminiTiers(true);
+                  i = -1;
+                  break;
+                }
+
                 if (res.status === 404 || res.status === 429) {
                   lastErr = `${tier.label} (${res.status})`;
                   break;
                 }
+
                 lastErr = `${tier.label} 擁塞 (${res.status})`;
-                if (attempt < tier.retries) {
-                  await sleepWithJitter(650 * Math.pow(2, attempt - 1));
+                if (attempt < maxRetries) {
+                  await sleepWithJitter(600 * Math.pow(2, attempt - 1));
                 }
               } catch (e) {
                 if (e.fatalKey) throw e;
                 lastErr = e.name === 'AbortError' ? `${tier.label} 逾時` : e.message;
-                if (attempt < tier.retries) {
-                  await sleepWithJitter(500);
+                if (attempt < maxRetries) {
+                  await sleepWithJitter(450);
                 }
               }
             }
@@ -1771,10 +1887,12 @@
           throw new Error(lastErr || 'Gemini 機房滿載');
         };
 
+        // Dynamic Model Discovery for Groq (Version-agnostic regex ranking)
         const getGroqChatModels = async () => {
+          const key = cleanKeyStr(state.groqKey);
           if (Array.isArray(cachedGroqModels) && cachedGroqModels.length > 0) return cachedGroqModels;
           const res = await fetchWithTimeout('https://api.groq.com/openai/v1/models', {
-            headers: { 'Authorization': `Bearer ${state.groqKey}` }
+            headers: { 'Authorization': `Bearer ${key}` }
           }, 7000);
           if (!res.ok) {
             if (res.status === 401 || res.status === 403) throw new Error(`Groq 金鑰無效 (${res.status})`);
@@ -1783,30 +1901,34 @@
           const list = (await res.json())?.data || [];
           const chatModels = list
             .map(m => m.id)
-            .filter(id => id && !/whisper|guard|orpheus|tts|embed|vision-preview/i.test(id));
+            .filter(id => id && !/whisper|guard|orpheus|tts|embed|vision-preview/i.test(id))
+            .sort((a, b) => {
+              const verA = parseFloat((a.match(/(\d+(?:\.\d+)?)/) || [0, 0])[1]);
+              const verB = parseFloat((b.match(/(\d+(?:\.\d+)?)/) || [0, 0])[1]);
+              const sizeA = parseInt((a.match(/(\d+)b/i) || [0, 0])[1], 10);
+              const sizeB = parseInt((b.match(/(\d+)b/i) || [0, 0])[1], 10);
+              return (verB * 10 + sizeB) - (verA * 10 + sizeA);
+            });
           if (chatModels.length === 0) throw new Error('Groq 帳號無可用模型');
-          const preferred = ['qwen/qwen3.8-27b', 'qwen/qwen3.6-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound-mini'];
-          const sorted = [
-            ...preferred.filter(p => chatModels.includes(p)),
-            ...chatModels.filter(c => !preferred.includes(c))
-          ];
-          cachedGroqModels = sorted;
-          return sorted;
+          cachedGroqModels = chatModels;
+          return chatModels;
         };
 
         const callBackupProvider = async (provider, prompt, imgData, onStatus) => {
           if (provider === 'openrouter') {
+            const key = cleanKeyStr(state.openrouterKey);
             if (onStatus) onStatus('🔄 啟動 OpenRouter 備援...');
             const content = [{ type: 'text', text: prompt }];
             if (imgData) content.push({ type: 'image_url', image_url: { url: imgData } });
             const res = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
-              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.openrouterKey}` },
+              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
               body: JSON.stringify({ model: 'openrouter/free', messages: [{ role: 'user', content }], temperature: 0.1 })
             }, 15000);
             if (!res.ok) throw new Error(`OpenRouter (${res.status})`);
             return { raw: (await res.json()).choices?.[0]?.message?.content || '', engineLabel: 'OpenRouter' };
           }
           if (provider === 'groq') {
+            const key = cleanKeyStr(state.groqKey);
             if (imgData) throw new Error('Groq 僅支援純文字');
             if (onStatus) onStatus('⚡ 啟動 Groq 備援...');
             const models = await getGroqChatModels();
@@ -1814,7 +1936,7 @@
             for (const gm of models.slice(0, 3)) {
               try {
                 const res = await fetchWithTimeout('https://api.groq.com/openai/v1/chat/completions', {
-                  method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.groqKey}` },
+                  method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
                   body: JSON.stringify({ model: gm, messages: [{ role: 'user', content: prompt }], temperature: 0.1 })
                 }, 11000);
                 if (!res.ok) {
@@ -1835,11 +1957,14 @@
 
         const runAiNutritionEngine = async (prompt, imgData, onStatus, isTest = false) => {
           let lastErr = '';
-          const hasAnyKey = Boolean(state.apiKey || state.openrouterKey || state.groqKey);
+          const gKey = cleanKeyStr(state.apiKey);
+          const oKey = cleanKeyStr(state.openrouterKey);
+          const qKey = cleanKeyStr(state.groqKey);
+          const hasAnyKey = Boolean(gKey || oKey || qKey);
 
-          if (state.apiKey) {
+          if (gKey) {
             try {
-              const { raw, engineLabel } = await callGeminiWithCascade(prompt, imgData, onStatus, isTest);
+              const { raw, engineLabel } = await callGeminiWithAutoDiscovery(prompt, imgData, onStatus, isTest);
               const parsed = safeExtractJson(raw);
               if (parsed) return { successParsed: parsed, usedEngineName: engineLabel, lastErr: '', hasKeys: true };
             } catch (e) {
@@ -1848,8 +1973,8 @@
           }
 
           const backups = [
-            { id: 'openrouter', key: state.openrouterKey },
-            { id: 'groq', key: state.groqKey }
+            { id: 'openrouter', key: oKey },
+            { id: 'groq', key: qKey }
           ].filter(b => b.key);
 
           for (const bk of backups) {
@@ -1890,7 +2015,7 @@
           }
 
           isEstimating.value = true;
-          estimatingStatus.value = '🔮 Gemini 精算中...';
+          estimatingStatus.value = '🔮 偵測最新核心中...';
           const { successParsed, usedEngineName, lastErr, hasKeys } = await runAiNutritionEngine(
             buildDietitianPrompt(query, hasImg),
             imgData,
@@ -1999,7 +2124,6 @@
           showToast(`雙邊掛片總重：${liftForm.weight} kg`, '⚖️');
         };
 
-        // Strictly retrieves ONLY the single most recent record for the selected exercise
         const lastRecordForCurrentExercise = computed(() => {
           const name = (liftForm.exercise || '').trim();
           if (!name) return null;
@@ -2016,16 +2140,20 @@
 
         const previewLiftVolume = computed(() => Math.round((Number(liftForm.weight) || 0) * (Number(liftForm.reps) || 0) * (Number(liftForm.sets) || 0)));
 
+        const checkLiftPR = (exerciseName, weight, volume, excludeId = null) => {
+          const pastSame = state.lifts.filter(l => l.exercise === exerciseName && l.id !== excludeId);
+          if (pastSame.length === 0) return false;
+          const prevMaxW = Math.max(...pastSame.map(l => Number(l.weight) || 0));
+          const prevMaxVol = Math.max(...pastSame.map(l => Number(l.volume) || 0));
+          return weight > prevMaxW || volume > prevMaxVol;
+        };
+
         const addLiftRecord = () => {
           if (!liftForm.exercise || !liftForm.reps || !liftForm.sets) return;
           const w = Math.max(0, Number(liftForm.weight) || 0), r = Math.max(1, Math.round(Number(liftForm.reps) || 1)), s = Math.max(1, Math.round(Number(liftForm.sets) || 1)), vol = Math.round(w * r * s);
 
-          const pastSame = state.lifts.filter(l => l.exercise === liftForm.exercise && l.id !== editingLiftId.value);
-          const prevMaxW = pastSame.length ? Math.max(...pastSame.map(l => Number(l.weight) || 0)) : 0;
-          const prevMaxVol = pastSame.length ? Math.max(...pastSame.map(l => Number(l.volume) || 0)) : 0;
-          const isPR = pastSame.length > 0 && (w > prevMaxW || vol > prevMaxVol);
-
           if (editingLiftId.value) {
+            const isPR = checkLiftPR(liftForm.exercise, w, vol, editingLiftId.value);
             const idx = state.lifts.findIndex(l => l.id === editingLiftId.value);
             if (idx >= 0) state.lifts[idx] = { ...state.lifts[idx], muscle: liftForm.muscle, exercise: liftForm.exercise, weight: w, reps: r, sets: s, volume: vol, isPR };
             editingLiftId.value = null;
@@ -2033,8 +2161,10 @@
             return;
           }
 
-          // Keep only 1 record per exercise per day (updates existing entry if logged again today)
           const sameDayIdx = state.lifts.findIndex(l => l.date === selectedDate.value && l.exercise === liftForm.exercise);
+          const excludeId = sameDayIdx >= 0 ? state.lifts[sameDayIdx].id : null;
+          const isPR = checkLiftPR(liftForm.exercise, w, vol, excludeId);
+
           if (sameDayIdx >= 0) {
             state.lifts[sameDayIdx] = {
               ...state.lifts[sameDayIdx],
@@ -2056,11 +2186,14 @@
           Object.assign(liftForm, { muscle: item.muscle, exercise: item.exercise, weight: item.weight, reps: item.reps, sets: item.sets });
         };
 
+        // Bug Fix #2: Re-evaluates PR crown when adding an extra set
         const addExtraSet = (item) => {
           item.sets += 1;
           item.volume = Math.round(item.weight * item.reps * item.sets);
+          const isNewPR = checkLiftPR(item.exercise, item.weight, item.volume, item.id);
+          if (isNewPR) item.isPR = true;
           startRestTimer(90);
-          showToast(`${item.exercise} 第 ${item.sets} 組！已啟動 90 秒休息`, '⏱️');
+          showToast(isNewPR ? `👑 第 ${item.sets} 組破訓練量 PR！已啟動 90 秒休息` : `${item.exercise} 第 ${item.sets} 組！已啟動 90 秒休息`, isNewPR ? '👑' : '⏱️');
         };
 
         const removeLift = (id) => { state.lifts = state.lifts.filter(l => l.id !== id); };
@@ -2160,10 +2293,10 @@
           cachedGroqModels = null;
           Object.assign(engineTestStatus, { groq: null, openrouter: null, gemini: null });
 
-          if (state.apiKey) {
+          if (cleanKeyStr(state.apiKey)) {
             const start = performance.now();
             try {
-              const { raw, engineLabel } = await callGeminiWithCascade('只回傳純JSON：{"ok":true}', '', null, true);
+              const { raw, engineLabel } = await callGeminiWithAutoDiscovery('只回傳純JSON：{"ok":true}', '', null, true);
               engineTestStatus.gemini = raw.includes('{')
                 ? { ok: true, msg: `✅ ${engineLabel} 連線正常 (${Math.round(performance.now() - start)} ms)` }
                 : { ok: false, msg: '⚠️ 回傳格式異常' };
@@ -2173,7 +2306,7 @@
           }
 
           for (const id of ['openrouter', 'groq']) {
-            const key = id === 'openrouter' ? state.openrouterKey : state.groqKey;
+            const key = cleanKeyStr(id === 'openrouter' ? state.openrouterKey : state.groqKey);
             if (!key) continue;
             const start = performance.now();
             try {
@@ -2187,7 +2320,7 @@
           }
 
           isTestingAi.value = false;
-          showToast('AI 引擎診斷完成', '⚡');
+          showToast('已自動偵測最新可用 AI 核心', '⚡');
         };
 
         // Body Metrics (Create, Edit & Delete Historical Records)
@@ -2200,11 +2333,14 @@
         const currentBMI = computed(() => (currentWeight.value / Math.pow((Number(state.profile.height) || 170) / 100, 2)).toFixed(1));
         const bmiLabel = computed(() => { const b = Number(currentBMI.value); return b < 18.5 ? '過輕' : b < 24 ? '標準' : b < 27 ? '過重' : '偏高'; });
 
+        // Bug Fix #3: Validates weight > 0 and properly syncs both weight & bodyFat on edit/delete
         const logBodyMetric = () => {
-          if (!bodyForm.weight) return;
+          const wVal = Number(bodyForm.weight);
+          if (!wVal || wVal <= 0) return;
+          const fVal = (bodyForm.fat !== null && bodyForm.fat !== '' && Number(bodyForm.fat) > 0) ? Number(bodyForm.fat) : null;
           const targetDate = editingBodyDate.value || todayStr.value;
           const idx = state.bodyLogs.findIndex(b => b.date === targetDate);
-          const entry = { date: targetDate, weight: Number(bodyForm.weight), fat: bodyForm.fat ? Number(bodyForm.fat) : null };
+          const entry = { date: targetDate, weight: wVal, fat: fVal };
           if (idx >= 0) state.bodyLogs[idx] = entry;
           else {
             state.bodyLogs.push(entry);
@@ -2239,6 +2375,8 @@
           const newest = state.bodyLogs[state.bodyLogs.length - 1];
           if (newest) {
             state.profile.weight = newest.weight;
+            const latestFatEntry = [...state.bodyLogs].reverse().find(b => b.fat);
+            state.profile.bodyFat = latestFatEntry ? latestFatEntry.fat : null;
           }
           showToast(`已刪除 ${dateStr} 紀錄`, '🗑️');
         };
@@ -2305,6 +2443,9 @@
         onMounted(() => {
           clockTimer = setInterval(() => { nowTick.value = Date.now(); }, 60000);
           loadExternalFoodLibrary();
+          if (cleanKeyStr(state.apiKey)) {
+            discoverLatestGeminiTiers(false).catch(() => {});
+          }
           applyExerciseSelection(selectedDropdownExercise.value);
           if (!state.profile.completed) showTdeeModal.value = true;
           const lastLog = state.bodyLogs[state.bodyLogs.length - 1];
@@ -2321,7 +2462,7 @@
           navTabs, activeTab, inputMode, selectedDate, todayStr, shiftDate, showTdeeModal, toast, state, tdeeReport, applyTdeePlan,
           restTimer, startRestTimer, adjustRestTimer, stopRestTimer, formattedRestTime,
           showFoodDbModal, combinedFoodLibrary, externalDbStatus, importExternalFoodDb, dbCategories, dbSearchQuery, dbSelectedCat, filteredOfflineDb, selectFromLibrary,
-          activeEngineCount, isTestingAi, engineTestStatus, testAllAiEngines,
+          activeEngineCount, isTestingAi, engineTestStatus, discoveredGeminiSummary, testAllAiEngines,
           dateMeals, groupedDateMeals, dateIntake, remainingCal, calPercent, dateDeficit, proteinPerKg, macroDisplayList,
           last7DaysCalBars, weeklyAvgIntake, yesterdayMealsCount, copyYesterdayMeals,
           foodInput, foodImagePreview, handleFoodPhoto, isEstimating, estimatingStatus, foodPresets, appendModifier,

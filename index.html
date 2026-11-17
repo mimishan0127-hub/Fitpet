@@ -21,22 +21,28 @@
       --bg-subtle: #F8FAFC;
       --bg-input: #FFFFFF;
       --border-card: rgba(255, 255, 255, 0.95);
-      --border-line: rgba(226, 232, 240, 0.75);
+      --border-line: rgba(226, 232, 240, 0.78);
       --text-main: #0F172A;
       --text-sub: #64748B;
       --card-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+      --body-base: #E2E8F0;
+      --body-stroke: #CBD5E1;
+      --muscle-idle: rgba(148, 163, 184, 0.28);
     }
     .theme-dark {
       --bg-shell: rgba(9, 13, 22, 0.95);
       --bg-header: rgba(15, 23, 42, 0.9);
       --bg-card: rgba(24, 33, 49, 0.9);
-      --bg-subtle: rgba(15, 23, 42, 0.75);
+      --bg-subtle: rgba(15, 23, 42, 0.78);
       --bg-input: #0F172A;
       --border-card: rgba(51, 65, 85, 0.55);
-      --border-line: rgba(51, 65, 85, 0.7);
+      --border-line: rgba(51, 65, 85, 0.72);
       --text-main: #F8FAFC;
       --text-sub: #94A3B8;
       --card-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.45);
+      --body-base: #1E293B;
+      --body-stroke: #334155;
+      --muscle-idle: rgba(148, 163, 184, 0.16);
     }
     body {
       background: radial-gradient(circle at 12% 12%, #D1FAE5 0%, transparent 42%),
@@ -84,6 +90,11 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.8' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
       background-position: right 0.55rem center; background-repeat: no-repeat; background-size: 1.05em 1.05em; padding-right: 1.85rem;
     }
+    .muscle-path {
+      transition: fill 0.28s ease, opacity 0.28s ease, filter 0.28s ease;
+      cursor: pointer;
+    }
+    .muscle-path:active { opacity: 0.75; }
     @keyframes popIn { 0% { transform: scale(0.96) translateY(6px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
     .pop-in { animation: popIn 0.2s cubic-bezier(0.22, 1, 0.36, 1); }
   </style>
@@ -357,7 +368,7 @@
               <select v-model.number="state.profile.workoutFreq" class="custom-select w-full surface-input border rounded-xl px-3 py-2 text-base">
                 <option :value="0">不運動</option>
                 <option :value="2">1~2 天</option>
-                <option :value="4">3~4 天</option>
+                <option value="4">3~4 天</option>
                 <option :value="6">5~6 天</option>
               </select>
             </div>
@@ -457,11 +468,14 @@
     <!-- Main Scrollable Content -->
     <main class="flex-1 overflow-y-auto px-4 sm:px-6 py-3.5 space-y-3.5 pb-24 md:pb-8 z-10 overscroll-contain">
 
-      <!-- Full-Width Aligned 1-Day Date Stepper -->
+      <!-- Full-Width Aligned 1-Day Date Stepper + Native Calendar Jump -->
       <div v-if="activeTab === 'diet' || activeTab === 'lift'" class="w-full md:max-w-md md:mx-auto flex items-center justify-between glass-card px-2.5 py-1.5 rounded-2xl">
         <button @click="shiftDate(-1)" class="w-8 h-8 rounded-xl hover:bg-emerald-500/10 text-secondary font-bold text-xs flex items-center justify-center active:scale-90 transition shrink-0">◀</button>
         <div class="text-xs font-bold text-primary flex items-center gap-2 whitespace-nowrap tabular-nums">
-          <span>{{ selectedDate === todayStr ? '今天 · ' + selectedDate.slice(5) : selectedDate }}</span>
+          <label class="relative inline-flex items-center gap-1.5 cursor-pointer px-2 py-1 rounded-xl hover:bg-emerald-500/10 transition">
+            <span>📅 {{ selectedDate === todayStr ? '今天 · ' + selectedDate.slice(5) : selectedDate }}</span>
+            <input type="date" v-model="selectedDate" :max="todayStr" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+          </label>
           <button v-if="selectedDate !== todayStr" @click="selectedDate = todayStr" class="text-[11px] bg-emerald-500/15 text-emerald-500 px-2 py-0.5 rounded-full font-bold">回今天</button>
         </div>
         <button @click="shiftDate(1)" :disabled="selectedDate >= todayStr" class="w-8 h-8 rounded-xl hover:bg-emerald-500/10 text-secondary font-bold text-xs flex items-center justify-center active:scale-90 transition shrink-0 disabled:opacity-25">▶</button>
@@ -661,17 +675,23 @@
         </div>
       </div>
 
-      <!-- TAB 2: WEIGHT TRAINING & BODYWEIGHT CALISTHENICS -->
+      <!-- TAB 2: WEIGHT TRAINING & ANATOMICAL MUSCLE HEATMAP -->
       <div v-if="activeTab === 'lift'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <div class="md:col-span-6 space-y-3.5">
-          <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-[26px] p-4 sm:p-5 shadow-lg space-y-3 tabular-nums">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-semibold text-indigo-300 whitespace-nowrap">🏋️ 今日訓練總容量</span>
-              <span class="text-[11px] bg-white/10 px-2.5 py-0.5 rounded-full text-slate-200 whitespace-nowrap">
+          <!-- Hero Volume Card -->
+          <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-[26px] p-4 sm:p-5 shadow-lg space-y-3 tabular-nums relative overflow-hidden">
+            <div class="pointer-events-none absolute -right-10 -top-10 w-36 h-36 rounded-full bg-indigo-500/20 blur-2xl"></div>
+            <div class="flex items-center justify-between gap-2 relative z-10">
+              <span class="text-xs font-semibold text-indigo-300 whitespace-nowrap">🏋️ {{ selectedDate === todayStr ? '今日' : selectedDate.slice(5) }} 訓練總容量</span>
+              <span v-if="volumeVsAvgDelta !== null" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap"
+                :class="volumeVsAvgDelta >= 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/10 text-slate-300'">
+                {{ volumeVsAvgDelta >= 0 ? `▲ 較週均 +${volumeVsAvgDelta}%` : `週均 ${weeklyAvgVolume.toLocaleString()} kg` }}
+              </span>
+              <span v-else class="text-[11px] bg-white/10 px-2.5 py-0.5 rounded-full text-slate-200 whitespace-nowrap">
                 7日均 {{ weeklyAvgVolume.toLocaleString() }} kg
               </span>
             </div>
-            <div class="flex items-baseline justify-between gap-2">
+            <div class="flex items-baseline justify-between gap-2 relative z-10">
               <div>
                 <span class="text-3xl font-black tracking-tight text-amber-300">{{ dateTotalVolume.toLocaleString() }}</span>
                 <span class="text-xs text-slate-300 ml-1">kg</span>
@@ -680,8 +700,12 @@
                 {{ dateLifts.length }} 動作 · {{ dateTotalSets }} 組
               </div>
             </div>
-            <div class="pt-2.5 border-t border-white/10 flex items-center justify-between gap-2">
-              <span class="text-xs text-slate-300 whitespace-nowrap">⏱️ 組間休息</span>
+            <div class="pt-2.5 border-t border-white/10 flex items-center justify-between gap-2 relative z-10">
+              <button type="button" @click="state.autoRestTimer = !state.autoRestTimer"
+                class="text-[11px] font-bold px-2.5 py-1 rounded-xl flex items-center gap-1 whitespace-nowrap transition"
+                :class="state.autoRestTimer ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/30' : 'bg-white/10 text-slate-400'">
+                <span>{{ state.autoRestTimer ? '⏱️ 自動休息:開' : '⏱️ 自動休息:關' }}</span>
+              </button>
               <div class="flex gap-1.5 shrink-0">
                 <button v-for="sec in [60, 90, 120]" :key="sec" type="button" @click="startRestTimer(sec)"
                   class="bg-white/15 hover:bg-indigo-500 text-white text-xs font-bold px-2.5 py-1 rounded-xl whitespace-nowrap active:scale-90 transition">
@@ -691,12 +715,212 @@
             </div>
           </section>
 
-          <section class="glass-card rounded-[26px] p-4 space-y-2.5">
+          <!-- NEW: Interactive Front & Back Anatomical Muscle Heatmap + Date Query -->
+          <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <span class="font-bold text-primary text-sm whitespace-nowrap">{{ editingLiftId ? '編輯訓練' : '選擇器材 / 動作' }}</span>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-primary text-sm whitespace-nowrap">🧬 訓練部位人體圖</span>
+                <span class="text-[11px] font-bold text-indigo-500 bg-indigo-500/15 px-2 py-0.5 rounded-full whitespace-nowrap tabular-nums">
+                  {{ activeMuscleZonesList.length }} 肌群
+                </span>
+              </div>
+              <label class="text-xs font-bold text-secondary hover:text-primary surface-subtle border px-2.5 py-1 rounded-full cursor-pointer whitespace-nowrap relative">
+                🔍 查他日
+                <input type="date" v-model="selectedDate" :max="todayStr" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+              </label>
+            </div>
+
+            <!-- Historical Workout Days Quick-Switch Bar -->
+            <div v-if="workoutHistoryDates.length > 0" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              <span class="text-[11px] font-bold text-secondary shrink-0 whitespace-nowrap">🗓️ 紀錄日</span>
+              <button v-for="hd in workoutHistoryDates" :key="hd.date" type="button" @click="selectedDate = hd.date"
+                class="text-[11px] font-bold px-2.5 py-1 rounded-full border shrink-0 whitespace-nowrap transition tabular-nums"
+                :class="selectedDate === hd.date ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'surface-subtle text-primary hover:border-indigo-400/50'">
+                {{ hd.label }} · {{ hd.tag }}
+              </button>
+            </div>
+
+            <!-- Dual Front & Back Anatomical Vector Diagram -->
+            <div class="grid grid-cols-2 gap-2 surface-subtle rounded-2xl border p-3">
+              <!-- FRONT VIEW (正面) -->
+              <div class="flex flex-col items-center">
+                <span class="text-[11px] font-bold text-secondary mb-1">正面 (FRONT)</span>
+                <svg viewBox="0 0 160 310" class="w-full max-w-[142px] h-auto overflow-visible">
+                  <!-- Base Body Silhouette -->
+                  <g fill="var(--body-base)" stroke="var(--body-stroke)" stroke-width="1.2">
+                    <circle cx="80" cy="24" r="15" />
+                    <path d="M72 38 L88 38 L92 50 L68 50 Z" />
+                    <path d="M46 56 Q80 46 114 56 L108 148 L52 148 Z" />
+                    <path d="M44 58 L26 112 L20 158 L31 160 L40 116 L50 76 Z" />
+                    <path d="M116 58 L134 112 L140 158 L129 160 L120 116 L110 76 Z" />
+                    <path d="M52 148 L108 148 L104 228 L86 228 L80 174 L74 228 L56 228 Z" />
+                    <path d="M56 232 L74 232 L71 296 L59 296 Z" />
+                    <path d="M86 232 L104 232 L101 296 L89 296 Z" />
+                  </g>
+
+                  <!-- Front Shoulders (三角肌) -->
+                  <g @click="inspectMuscleZone('shoulders')" class="muscle-path">
+                    <path d="M45 55 Q36 62 38 78 L50 75 L52 57 Z" :fill="getZoneFill('shoulders')" :stroke="inspectedZoneId === 'shoulders' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M115 55 Q124 62 122 78 L110 75 L108 57 Z" :fill="getZoneFill('shoulders')" :stroke="inspectedZoneId === 'shoulders' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Chest (胸大肌) -->
+                  <g @click="inspectMuscleZone('chest')" class="muscle-path">
+                    <path d="M53 58 L78 60 L78 86 Q63 88 52 79 Z" :fill="getZoneFill('chest')" :stroke="inspectedZoneId === 'chest' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M107 58 L82 60 L82 86 Q97 88 108 79 Z" :fill="getZoneFill('chest')" :stroke="inspectedZoneId === 'chest' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Biceps (肱二頭肌) -->
+                  <g @click="inspectMuscleZone('biceps')" class="muscle-path">
+                    <path d="M38 80 L48 80 L43 112 L31 110 Z" :fill="getZoneFill('biceps')" :stroke="inspectedZoneId === 'biceps' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M122 80 L112 80 L117 112 L129 110 Z" :fill="getZoneFill('biceps')" :stroke="inspectedZoneId === 'biceps' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Abs / Core (腹直肌與側腹核心) -->
+                  <g @click="inspectMuscleZone('abs')" class="muscle-path">
+                    <rect x="67" y="90" width="11" height="14" rx="3" :fill="getZoneFill('abs')" />
+                    <rect x="82" y="90" width="11" height="14" rx="3" :fill="getZoneFill('abs')" />
+                    <rect x="67" y="107" width="11" height="14" rx="3" :fill="getZoneFill('abs')" />
+                    <rect x="82" y="107" width="11" height="14" rx="3" :fill="getZoneFill('abs')" />
+                    <path d="M68 124 L78 124 L78 143 L70 139 Z" :fill="getZoneFill('abs')" />
+                    <path d="M92 124 L82 124 L82 143 L90 139 Z" :fill="getZoneFill('abs')" />
+                    <path d="M55 92 L64 94 L64 136 L55 132 Z" :fill="getZoneFill('abs')" opacity="0.85" />
+                    <path d="M105 92 L96 94 L96 136 L105 132 Z" :fill="getZoneFill('abs')" opacity="0.85" />
+                  </g>
+
+                  <!-- Quads & Hip Adductors (股四頭肌 / 大腿前側) -->
+                  <g @click="inspectMuscleZone('quads')" class="muscle-path">
+                    <path d="M54 152 L77 166 L74 222 L58 222 Z" :fill="getZoneFill('quads')" :stroke="inspectedZoneId === 'quads' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M106 152 L83 166 L86 222 L102 222 Z" :fill="getZoneFill('quads')" :stroke="inspectedZoneId === 'quads' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+                </svg>
+              </div>
+
+              <!-- BACK VIEW (反面) -->
+              <div class="flex flex-col items-center">
+                <span class="text-[11px] font-bold text-secondary mb-1">反面 (BACK)</span>
+                <svg viewBox="0 0 160 310" class="w-full max-w-[142px] h-auto overflow-visible">
+                  <!-- Base Body Silhouette -->
+                  <g fill="var(--body-base)" stroke="var(--body-stroke)" stroke-width="1.2">
+                    <circle cx="80" cy="24" r="15" />
+                    <path d="M72 38 L88 38 L92 50 L68 50 Z" />
+                    <path d="M46 56 Q80 46 114 56 L108 148 L52 148 Z" />
+                    <path d="M44 58 L26 112 L20 158 L31 160 L40 116 L50 76 Z" />
+                    <path d="M116 58 L134 112 L140 158 L129 160 L120 116 L110 76 Z" />
+                    <path d="M52 148 L108 148 L104 228 L86 228 L80 174 L74 228 L56 228 Z" />
+                    <path d="M56 232 L74 232 L71 296 L59 296 Z" />
+                    <path d="M86 232 L104 232 L101 296 L89 296 Z" />
+                  </g>
+
+                  <!-- Rear Delts / Upper Traps (後三角與上斜方) -->
+                  <g @click="inspectMuscleZone('rear_delts')" class="muscle-path">
+                    <path d="M45 55 Q36 62 38 78 L50 75 L54 57 Z" :fill="getZoneFill('rear_delts')" :stroke="inspectedZoneId === 'rear_delts' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M115 55 Q124 62 122 78 L110 75 L106 57 Z" :fill="getZoneFill('rear_delts')" :stroke="inspectedZoneId === 'rear_delts' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M64 48 L96 48 L88 66 L72 66 Z" :fill="getZoneFill('rear_delts')" />
+                  </g>
+
+                  <!-- Lats & Mid Back (背闊肌與中背) -->
+                  <g @click="inspectMuscleZone('back')" class="muscle-path">
+                    <path d="M53 66 L78 68 L78 116 L57 106 Z" :fill="getZoneFill('back')" :stroke="inspectedZoneId === 'back' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M107 66 L82 68 L82 116 L103 106 Z" :fill="getZoneFill('back')" :stroke="inspectedZoneId === 'back' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Triceps (肱三頭肌) -->
+                  <g @click="inspectMuscleZone('triceps')" class="muscle-path">
+                    <path d="M38 80 L48 80 L43 113 L31 110 Z" :fill="getZoneFill('triceps')" :stroke="inspectedZoneId === 'triceps' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M122 80 L112 80 L117 113 L129 110 Z" :fill="getZoneFill('triceps')" :stroke="inspectedZoneId === 'triceps' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Lower Back / Erector Spinae (下背豎脊肌) -->
+                  <g @click="inspectMuscleZone('lower_back')" class="muscle-path">
+                    <path d="M62 114 L78 119 L78 144 L60 144 Z" :fill="getZoneFill('lower_back')" :stroke="inspectedZoneId === 'lower_back' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M98 114 L82 119 L82 144 L100 144 Z" :fill="getZoneFill('lower_back')" :stroke="inspectedZoneId === 'lower_back' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Glutes (臀大肌與臀中肌) -->
+                  <g @click="inspectMuscleZone('glutes')" class="muscle-path">
+                    <path d="M53 147 L79 147 L79 175 Q61 178 53 166 Z" :fill="getZoneFill('glutes')" :stroke="inspectedZoneId === 'glutes' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M107 147 L81 147 L81 175 Q99 178 107 166 Z" :fill="getZoneFill('glutes')" :stroke="inspectedZoneId === 'glutes' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Hamstrings (膕繩肌 / 大腿後側) -->
+                  <g @click="inspectMuscleZone('hamstrings')" class="muscle-path">
+                    <path d="M55 176 L77 178 L74 224 L58 224 Z" :fill="getZoneFill('hamstrings')" :stroke="inspectedZoneId === 'hamstrings' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M105 176 L83 178 L86 224 L102 224 Z" :fill="getZoneFill('hamstrings')" :stroke="inspectedZoneId === 'hamstrings' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+
+                  <!-- Calves (小腿肌群) -->
+                  <g @click="inspectMuscleZone('calves')" class="muscle-path">
+                    <path d="M57 236 Q53 256 59 278 L71 278 Q75 256 73 236 Z" :fill="getZoneFill('calves')" :stroke="inspectedZoneId === 'calves' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                    <path d="M103 236 Q107 256 101 278 L89 278 Q85 256 87 236 Z" :fill="getZoneFill('calves')" :stroke="inspectedZoneId === 'calves' ? '#FFFFFF' : 'none'" stroke-width="1.5" />
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Color Legend Pills of Trained Muscle Zones -->
+            <div v-if="activeMuscleZonesList.length > 0" class="flex flex-wrap gap-1.5">
+              <button v-for="z in activeMuscleZonesList" :key="z.id" type="button" @click="inspectMuscleZone(z.id)"
+                class="text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 border transition active:scale-95 whitespace-nowrap"
+                :class="inspectedZoneId === z.id ? 'surface-input border-indigo-400 shadow-sm text-primary' : 'surface-subtle text-primary'">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: z.color }"></span>
+                <span>{{ z.label }}</span>
+                <span class="text-secondary tabular-nums">{{ z.sets }}組</span>
+              </button>
+            </div>
+            <div v-else class="text-center text-[11px] text-secondary py-1">
+              點擊人體圖部位或切換上方「紀錄日」檢視當日肌肉熱區
+            </div>
+
+            <!-- Interactive Muscle Zone Inspector Card -->
+            <div v-if="inspectedZoneDetail" class="surface-subtle border rounded-2xl p-3 space-y-2 pop-in">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="w-3 h-3 rounded-full shrink-0" :style="{ backgroundColor: inspectedZoneDetail.color }"></span>
+                  <span class="font-bold text-primary text-xs truncate">{{ inspectedZoneDetail.label }} ({{ inspectedZoneDetail.viewLabel }})</span>
+                </div>
+                <button type="button" @click="inspectedZoneId = null" class="text-xs text-secondary hover:text-primary px-1.5">✕</button>
+              </div>
+
+              <div v-if="inspectedZoneDetail.exercises.length > 0" class="space-y-1.5 tabular-nums">
+                <div v-for="(ex, i) in inspectedZoneDetail.exercises" :key="i" class="flex items-center justify-between text-xs surface-input px-2.5 py-1.5 rounded-xl border gap-2">
+                  <span class="font-semibold text-primary truncate">{{ ex.exercise }}</span>
+                  <span class="text-secondary shrink-0 whitespace-nowrap">
+                    <b class="text-primary">{{ ex.weight }}kg</b>×{{ ex.reps }}×{{ ex.sets }} ({{ ex.volume.toLocaleString() }}kg)
+                  </span>
+                </div>
+              </div>
+              <div v-else class="flex items-center justify-between gap-2 pt-0.5">
+                <span class="text-[11px] text-secondary">{{ selectedDate === todayStr ? '今日' : selectedDate.slice(5) }} 尚未訓練此部位</span>
+                <button type="button" @click="jumpToMuscleGroup(inspectedZoneDetail.targetCategory)"
+                  class="text-[11px] font-bold bg-indigo-600 text-white px-2.5 py-1 rounded-lg whitespace-nowrap active:scale-95 transition">
+                  + 去練{{ inspectedZoneDetail.targetCategory }}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="md:col-span-6 space-y-3.5">
+          <!-- Tactile Gym Logger Card -->
+          <section class="glass-card rounded-[26px] p-4 space-y-2.5 transition" :class="editingLiftId && 'ring-2 ring-indigo-500/60'">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-bold text-primary text-sm whitespace-nowrap">
+                {{ editingLiftId ? '✏️ 編輯紀錄' : '選擇器材 / 動作' }}
+              </span>
               <span class="text-xs font-bold text-indigo-500 bg-indigo-500/15 px-2.5 py-0.5 rounded-full whitespace-nowrap tabular-nums">
                 訓練量 {{ previewLiftVolume.toLocaleString() }} kg
               </span>
+            </div>
+
+            <!-- 1-Tap Recent Equipment Quick-Switch Bar -->
+            <div v-if="recentUniqueExercises.length > 0 && !editingLiftId" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              <span class="text-[11px] font-bold text-secondary shrink-0 whitespace-nowrap">⚡ 常練</span>
+              <button v-for="rec in recentUniqueExercises" :key="rec.exercise" type="button" @click="quickSelectRecentExercise(rec)"
+                class="text-[11px] font-bold px-2.5 py-1 rounded-full border shrink-0 whitespace-nowrap transition active:scale-95"
+                :class="liftForm.exercise === rec.exercise ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'surface-subtle text-primary hover:border-indigo-400/50'">
+                {{ rec.exercise }}
+              </button>
             </div>
 
             <div class="grid grid-cols-12 gap-2">
@@ -716,64 +940,80 @@
               </select>
             </div>
 
-            <input v-if="selectedDropdownExercise === '__custom__'" v-model.trim="liftForm.exercise" type="text" placeholder="請輸入自訂器材或動作..." class="w-full surface-input border border-indigo-400 rounded-2xl px-3.5 py-2.5 text-base focus:outline-none">
+            <input v-if="selectedDropdownExercise === '__custom__'" v-model.trim="liftForm.exercise" type="text" placeholder="輸入自訂器材名稱 (將自動記憶)..." class="w-full surface-input border border-indigo-400 rounded-2xl px-3.5 py-2.5 text-base focus:outline-none">
 
             <div v-if="activeBwPreset" class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl flex items-center justify-between gap-2 pop-in tabular-nums">
               <span class="text-xs text-primary truncate">
                 體重 {{ currentWeight }}×{{ Math.round(activeBwPreset.ratio * 100) }}% = <b class="text-emerald-500">{{ Math.round(currentWeight * activeBwPreset.ratio * 10) / 10 }}kg</b>
               </span>
               <div class="flex gap-1 shrink-0">
-                <button type="button" @click="addExtraLoad(5)" class="surface-input border text-emerald-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">+5kg</button>
-                <button type="button" @click="addExtraLoad(10)" class="surface-input border text-emerald-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">+10kg</button>
+                <button type="button" @click="addExtraLoad(5)" class="surface-input border text-emerald-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap active:scale-90 transition">+5kg</button>
+                <button type="button" @click="addExtraLoad(10)" class="surface-input border text-emerald-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap active:scale-90 transition">+10kg</button>
+              </div>
+            </div>
+            <div v-else-if="isPlateLoadedExercise" class="bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-xl flex items-center justify-between gap-2 pop-in tabular-nums">
+              <span class="text-xs text-primary truncate">⚖️ 掛片式雙邊換算</span>
+              <div class="flex gap-1 shrink-0">
+                <button type="button" @click="doublePlateWeight" class="bg-indigo-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap active:scale-90 transition">單邊×2</button>
+                <button type="button" @click="addExtraLoad(5)" class="surface-input border text-indigo-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap active:scale-90 transition">+5kg</button>
+                <button type="button" @click="addExtraLoad(10)" class="surface-input border text-indigo-500 text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap active:scale-90 transition">+10kg</button>
               </div>
             </div>
 
             <div v-if="lastRecordForCurrentExercise && !editingLiftId" class="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl flex items-center justify-between gap-2 pop-in tabular-nums">
-              <span class="text-xs text-primary truncate">
-                <b class="text-amber-500">📌 上次</b> {{ lastRecordForCurrentExercise.weight }}kg×{{ lastRecordForCurrentExercise.reps }}×{{ lastRecordForCurrentExercise.sets }}
-              </span>
+              <div class="min-w-0 flex items-center gap-1.5 text-xs text-primary truncate">
+                <span class="font-bold text-amber-500 shrink-0">📌 上次</span>
+                <span class="truncate">{{ lastRecordForCurrentExercise.weight }}kg×{{ lastRecordForCurrentExercise.reps }}×{{ lastRecordForCurrentExercise.sets }}</span>
+                <span v-if="exerciseEst1RM > 0" class="text-[10px] font-bold text-secondary bg-black/5 dark:bg-white/10 px-1.5 py-0.2 rounded shrink-0">1RM ~{{ exerciseEst1RM }}kg</span>
+              </div>
               <div class="flex gap-1 shrink-0">
-                <button type="button" @click="applyLastLift(0)" class="surface-input border text-primary text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">帶入</button>
-                <button type="button" @click="applyLastLift(2.5)" class="bg-amber-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap">+2.5</button>
+                <button type="button" @click="applyLastLift(0)" class="surface-input border text-primary text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap active:scale-90 transition">帶入</button>
+                <button type="button" @click="applyLastLift(2.5)" class="bg-amber-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-lg whitespace-nowrap active:scale-90 transition">+2.5</button>
               </div>
             </div>
 
             <form @submit.prevent="addLiftRecord" class="space-y-2.5 pt-0.5">
               <div class="grid grid-cols-3 gap-2">
-                <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
-                  <div class="h-5 flex items-center justify-center gap-1">
-                    <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">{{ activeBwPreset ? '等效 kg' : '重量 kg' }}</span>
-                    <button v-if="!activeBwPreset" type="button" @click="doublePlateWeight" title="單邊掛片乘二" class="text-[10px] font-black bg-indigo-500/15 text-indigo-500 px-1.5 py-0.2 rounded whitespace-nowrap">×2</button>
+                <div class="surface-subtle p-2 rounded-2xl border flex flex-col items-center">
+                  <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">{{ activeBwPreset ? '等效 kg' : '重量 kg' }}</span>
+                  <input v-model.number="liftForm.weight" type="number" step="0.5" inputmode="decimal" placeholder="40" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none my-1 tabular-nums">
+                  <div class="grid grid-cols-2 gap-1 w-full">
+                    <button type="button" @click="stepLiftField('weight', -2.5)" class="surface-input border rounded-lg py-1 text-xs font-black text-secondary active:scale-90 transition">−</button>
+                    <button type="button" @click="stepLiftField('weight', 2.5)" class="surface-input border rounded-lg py-1 text-xs font-black text-primary active:scale-90 transition">+</button>
                   </div>
-                  <input v-model.number="liftForm.weight" type="number" step="0.5" inputmode="decimal" placeholder="40" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none mt-1 tabular-nums">
                 </div>
 
-                <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
-                  <div class="h-5 flex items-center justify-center">
-                    <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">次數</span>
+                <div class="surface-subtle p-2 rounded-2xl border flex flex-col items-center">
+                  <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">次數</span>
+                  <input v-model.number="liftForm.reps" type="number" inputmode="numeric" placeholder="12" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none my-1 tabular-nums">
+                  <div class="grid grid-cols-2 gap-1 w-full">
+                    <button type="button" @click="stepLiftField('reps', -1)" class="surface-input border rounded-lg py-1 text-xs font-black text-secondary active:scale-90 transition">−</button>
+                    <button type="button" @click="stepLiftField('reps', 1)" class="surface-input border rounded-lg py-1 text-xs font-black text-primary active:scale-90 transition">+</button>
                   </div>
-                  <input v-model.number="liftForm.reps" type="number" inputmode="numeric" placeholder="12" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none mt-1 tabular-nums">
                 </div>
 
-                <div class="surface-subtle p-2.5 rounded-2xl border flex flex-col items-center">
-                  <div class="h-5 flex items-center justify-center">
-                    <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">組數</span>
+                <div class="surface-subtle p-2 rounded-2xl border flex flex-col items-center">
+                  <span class="text-[11px] font-semibold text-secondary whitespace-nowrap">組數</span>
+                  <input v-model.number="liftForm.sets" type="number" inputmode="numeric" placeholder="4" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none my-1 tabular-nums">
+                  <div class="grid grid-cols-2 gap-1 w-full">
+                    <button type="button" @click="stepLiftField('sets', -1)" class="surface-input border rounded-lg py-1 text-xs font-black text-secondary active:scale-90 transition">−</button>
+                    <button type="button" @click="stepLiftField('sets', 1)" class="surface-input border rounded-lg py-1 text-xs font-black text-primary active:scale-90 transition">+</button>
                   </div>
-                  <input v-model.number="liftForm.sets" type="number" inputmode="numeric" placeholder="4" class="w-full text-center text-base font-black text-primary bg-transparent focus:outline-none mt-1 tabular-nums">
                 </div>
               </div>
 
               <div class="flex gap-2">
                 <button v-if="editingLiftId" type="button" @click="editingLiftId = null" class="px-4 surface-subtle border text-secondary font-bold py-3 rounded-2xl text-sm whitespace-nowrap">取消</button>
-                <button type="submit" :disabled="!liftForm.exercise || !liftForm.reps || !liftForm.sets" class="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-3 rounded-2xl text-sm shadow-md shadow-indigo-500/20 active:scale-[0.99] transition disabled:opacity-35 tabular-nums">
-                  {{ editingLiftId ? '儲存修改' : '+ 新增訓練紀錄' }} ({{ previewLiftVolume.toLocaleString() }} kg)
+                <button type="submit" :disabled="!liftForm.exercise || !liftForm.reps || !liftForm.sets"
+                  class="flex-1 text-white font-bold py-3 rounded-2xl text-sm shadow-md active:scale-[0.99] transition disabled:opacity-35 tabular-nums"
+                  :class="isAlreadyLoggedToday && !editingLiftId ? 'bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/20' : 'bg-gradient-to-r from-indigo-600 to-blue-600 shadow-indigo-500/20'">
+                  {{ editingLiftId ? '儲存修改' : (isAlreadyLoggedToday ? '🔄 更新今日紀錄' : '+ 新增訓練紀錄') }} ({{ previewLiftVolume.toLocaleString() }} kg)
                 </button>
               </div>
             </form>
           </section>
-        </div>
 
-        <div class="md:col-span-6 space-y-3.5">
+          <!-- Logged Exercises List -->
           <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-bold text-secondary whitespace-nowrap">已紀錄項目 ({{ dateLifts.length }})</span>
@@ -798,34 +1038,54 @@
                     <span v-if="item.isPR" class="text-[10px] font-black bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">👑 PR</span>
                   </div>
                   <div class="text-[11px] text-secondary mt-0.5 tabular-nums">
-                    <b class="text-primary">{{ item.weight }} kg</b> × {{ item.reps }} 次 × {{ item.sets }} 組
+                    <b class="text-primary">{{ item.weight }} kg</b> × {{ item.reps }} 次 · <span class="text-indigo-500 font-bold">{{ item.volume.toLocaleString() }} kg</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-1 shrink-0">
-                  <span class="font-bold text-indigo-500 bg-indigo-500/15 px-2 py-1 rounded-xl text-xs whitespace-nowrap tabular-nums">{{ item.volume.toLocaleString() }}</span>
-                  <button @click="addExtraSet(item)" class="px-2 h-7 rounded-xl surface-input border text-secondary hover:text-indigo-500 text-xs font-bold whitespace-nowrap active:scale-90 transition">+1組</button>
+                <div class="flex items-center gap-1 shrink-0 tabular-nums">
+                  <div class="flex items-center surface-input border rounded-xl overflow-hidden">
+                    <button @click="adjustLiftSets(item, -1)" class="w-6 h-7 text-secondary hover:text-primary text-xs font-black active:bg-slate-500/10">−</button>
+                    <span class="px-1.5 text-xs font-extrabold text-primary whitespace-nowrap">{{ item.sets }}組</span>
+                    <button @click="adjustLiftSets(item, 1)" class="w-6 h-7 text-indigo-500 hover:bg-indigo-500/10 text-xs font-black">+</button>
+                  </div>
                   <button @click="removeLift(item.id)" class="w-6 h-7 rounded-xl text-secondary hover:text-rose-500 text-xs">✕</button>
                 </div>
               </div>
             </div>
           </section>
 
-          <section class="glass-card rounded-[26px] p-4 space-y-2.5">
+          <!-- 7-Day Volume Chart + Weekly Muscle Group Split Bar -->
+          <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-bold text-secondary">近 7 日容量趨勢</span>
+              <span class="text-xs font-bold text-secondary">近 7 日容量與肌群分布</span>
               <span class="text-xs font-semibold text-indigo-500 whitespace-nowrap tabular-nums">週均 {{ weeklyAvgVolume.toLocaleString() }} kg</span>
             </div>
-            <div class="grid grid-cols-7 gap-1.5 items-end h-20 pt-2">
+            <div class="grid grid-cols-7 gap-1.5 items-end h-24 pt-3">
               <div v-for="day in last7DaysLiftBars" :key="day.date" @click="selectedDate = day.date" class="flex flex-col items-center gap-1 h-full justify-end cursor-pointer">
+                <span v-if="day.val > 0" class="text-[9px] font-bold text-secondary tabular-nums tracking-tighter">
+                  {{ day.val >= 1000 ? (day.val / 1000).toFixed(1) + 'k' : day.val }}
+                </span>
                 <div class="w-full rounded-t-md transition-all duration-300"
                   :class="day.val > 0 ? 'bg-indigo-500' : 'bg-slate-400/20'"
-                  :style="{ height: Math.max(8, Math.min(100, (day.val / max7DaysLiftVol) * 100)) + '%' }">
+                  :style="{ height: Math.max(8, Math.min(82, (day.val / max7DaysLiftVol) * 82)) + '%' }">
                 </div>
                 <span class="text-[11px] font-semibold whitespace-nowrap tabular-nums" :class="day.date === selectedDate ? 'text-indigo-500 font-extrabold' : 'text-secondary'">{{ day.label }}</span>
               </div>
             </div>
+
+            <div v-if="weeklyMuscleSplit.length > 0" class="pt-2.5 border-t surface-header space-y-2">
+              <div class="w-full h-2 rounded-full overflow-hidden flex gap-0.5 bg-slate-500/10">
+                <div v-for="ms in weeklyMuscleSplit" :key="ms.muscle" :class="ms.barColor" :style="{ width: ms.pct + '%' }" class="h-full transition-all duration-500"></div>
+              </div>
+              <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] tabular-nums">
+                <span v-for="ms in weeklyMuscleSplit" :key="ms.muscle" class="inline-flex items-center gap-1 text-secondary font-medium whitespace-nowrap">
+                  <span class="w-2 h-2 rounded-full" :class="ms.barColor"></span>
+                  <b class="text-primary">{{ ms.muscle }}</b> {{ ms.pct }}%
+                </span>
+              </div>
+            </div>
           </section>
 
+          <!-- AI Periodization Coach -->
           <section class="glass-card rounded-[26px] p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
               <span class="font-bold text-primary text-sm whitespace-nowrap">🧠 AI 訓練週期建議</span>
@@ -949,7 +1209,7 @@
         </div>
       </div>
 
-      <!-- TAB 4: SETTINGS (Shows Auto-Discovered Latest AI Core Lineup) -->
+      <!-- TAB 4: SETTINGS -->
       <div v-if="activeTab === 'settings'" class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <div class="md:col-span-6 space-y-3.5">
           <section class="glass-card rounded-[26px] p-4 sm:p-5 space-y-3">
@@ -1082,7 +1342,7 @@
       { name: '徒手弓箭步蹲', ratio: 0.65 }, { name: '捲腹/仰臥起坐', ratio: 0.45 }
     ];
 
-    const EXERCISE_CATALOG = {
+    const BASE_EXERCISE_CATALOG = {
       '腿臀': [
         '45度倒蹬腿推機', '哈克深蹲機', 'V型深蹲機',
         '深蹲臀推機', '跪姿後踢臀推機', '站姿提踵深蹲機',
@@ -1096,6 +1356,67 @@
       '手': ['坐姿二頭彎舉機', '坐姿三頭下壓機', '啞鈴二頭彎舉', '繩索三頭下壓', '槓鈴彎舉'],
       '核心': ['坐姿下背伸展機', '軀幹旋轉機', '懸垂抬腿', '繩索捲腹', '棒式支撐'],
       '徒手': BODYWEIGHT_CATALOG.map(b => b.name)
+    };
+
+    const MUSCLE_COLORS = {
+      '腿臀': 'bg-indigo-500',
+      '胸': 'bg-amber-500',
+      '背': 'bg-sky-500',
+      '肩': 'bg-purple-500',
+      '手': 'bg-teal-500',
+      '核心': 'bg-rose-500',
+      '徒手': 'bg-emerald-500'
+    };
+
+    // 12 Anatomical Muscle Zones (Front & Back SVG Heatmap Registry)
+    const ANATOMICAL_ZONES = {
+      chest:      { id: 'chest',      label: '胸大肌',     viewLabel: '正面', color: '#F59E0B', targetCategory: '胸' },
+      shoulders:  { id: 'shoulders',  label: '前/中三角肌', viewLabel: '正面', color: '#A855F7', targetCategory: '肩' },
+      biceps:     { id: 'biceps',     label: '肱二頭肌',   viewLabel: '正面', color: '#14B8A6', targetCategory: '手' },
+      abs:        { id: 'abs',        label: '腹肌/核心',  viewLabel: '正面', color: '#F43F5E', targetCategory: '核心' },
+      quads:      { id: 'quads',      label: '股四頭/大腿', viewLabel: '正面', color: '#6366F1', targetCategory: '腿臀' },
+      rear_delts: { id: 'rear_delts', label: '後三角/斜方', viewLabel: '反面', color: '#C084FC', targetCategory: '肩' },
+      back:       { id: 'back',       label: '背闊肌/上背', viewLabel: '反面', color: '#0EA5E9', targetCategory: '背' },
+      triceps:    { id: 'triceps',    label: '肱三頭肌',   viewLabel: '反面', color: '#2DD4BF', targetCategory: '手' },
+      lower_back: { id: 'lower_back', label: '下背/豎脊肌', viewLabel: '反面', color: '#FB7185', targetCategory: '核心' },
+      glutes:     { id: 'glutes',     label: '臀大肌/臀中', viewLabel: '反面', color: '#EC4899', targetCategory: '腿臀' },
+      hamstrings: { id: 'hamstrings', label: '腿後膕繩肌',  viewLabel: '反面', color: '#8B5CF6', targetCategory: '腿臀' },
+      calves:     { id: 'calves',     label: '小腿腓腸肌',  viewLabel: '反面', color: '#3B82F6', targetCategory: '腿臀' }
+    };
+
+    // Maps any logged exercise (equipment, bodyweight, or custom) to exact anatomical zones
+    const resolveExerciseZones = (item) => {
+      const ex = (item.exercise || '').trim();
+      const cat = (item.muscle || '').trim();
+
+      if (/提踵/.test(ex)) return ['calves', 'quads', 'glutes'];
+      if (/腿彎舉/.test(ex)) return ['hamstrings'];
+      if (/硬舉/.test(ex)) return ['hamstrings', 'glutes', 'lower_back'];
+      if (/臀推|後踢|髖外展|內收/.test(ex)) return ['glutes'];
+      if (/腿屈伸/.test(ex)) return ['quads'];
+      if (/深蹲|倒蹬|腿推|分腿蹲|弓箭步/.test(ex)) return ['quads', 'glutes', 'hamstrings'];
+
+      if (/臥推|推胸|夾胸|伏地挺身/.test(ex)) return ['chest', 'shoulders', 'triceps'];
+      if (/臂屈伸/.test(ex)) return ['chest', 'triceps'];
+
+      if (/下拉|划船|引體/.test(ex)) return ['back', 'biceps', 'rear_delts'];
+      if (/反向飛鳥|面拉/.test(ex)) return ['rear_delts'];
+      if (/肩推|側平舉/.test(ex)) return ['shoulders', 'rear_delts', 'triceps'];
+
+      if (/二頭|彎舉/.test(ex)) return ['biceps'];
+      if (/三頭|下壓/.test(ex)) return ['triceps'];
+
+      if (/下背伸展/.test(ex)) return ['lower_back'];
+      if (/旋轉|抬腿|捲腹|棒式|仰臥/.test(ex)) return ['abs'];
+
+      // Category-level fallback for custom exercises
+      if (cat === '胸') return ['chest', 'triceps'];
+      if (cat === '背') return ['back', 'biceps'];
+      if (cat === '肩') return ['shoulders', 'rear_delts'];
+      if (cat === '手') return ['biceps', 'triceps'];
+      if (cat === '核心') return ['abs', 'lower_back'];
+      if (cat === '腿臀') return ['quads', 'glutes', 'hamstrings'];
+      return ['abs', 'quads', 'chest'];
     };
 
     const getEffectiveDateStr = (resetHour = 0, baseMs = Date.now()) => {
@@ -1135,7 +1456,6 @@
       }
     };
 
-    // Dynamic Gemini Model Version Scoring (Future-proof for Gemini 3.x, 4.x, 5.x+)
     const scoreGeminiModel = (id) => {
       const verMatch = id.match(/gemini-(\d+(?:\.\d+)?)/i);
       const ver = verMatch ? parseFloat(verMatch[1]) : 1.0;
@@ -1199,6 +1519,7 @@
         const selectedMuscleGroup = ref('腿臀');
         const selectedDropdownExercise = ref('45度倒蹬腿推機');
         const editingLiftId = ref(null);
+        const inspectedZoneId = ref(null);
         const liftForm = reactive({ muscle: '腿臀', exercise: '45度倒蹬腿推機', weight: 40, reps: 12, sets: 4 });
         const isGeneratingAdvice = ref(false);
 
@@ -1209,9 +1530,9 @@
         };
 
         const defaultState = {
-          darkMode: false, targetCal: 1800, dayResetHour: 0, aiProvider: 'gemini',
+          darkMode: false, autoRestTimer: true, targetCal: 1800, dayResetHour: 0, aiProvider: 'gemini',
           groqKey: '', openrouterKey: '', apiKey: '', supabaseUrl: '', supabaseKey: '',
-          profile: { ...defaultProfile }, meals: [], customFoods: [], lifts: [], aiTrainingPlan: null, bodyLogs: []
+          profile: { ...defaultProfile }, meals: [], customFoods: [], customExercises: {}, lifts: [], aiTrainingPlan: null, bodyLogs: []
         };
 
         const loadState = () => {
@@ -1222,11 +1543,13 @@
             return {
               ...defaultState, ...p,
               darkMode: Boolean(p.darkMode),
+              autoRestTimer: p.autoRestTimer !== undefined ? Boolean(p.autoRestTimer) : true,
               targetCal: Number(p.targetCal) || 1800,
               dayResetHour: Number(p.dayResetHour) || 0,
               profile: { ...defaultProfile, ...(p.profile || {}) },
               meals: Array.isArray(p.meals) ? p.meals : [],
               customFoods: Array.isArray(p.customFoods) ? p.customFoods : [],
+              customExercises: (p.customExercises && typeof p.customExercises === 'object') ? p.customExercises : {},
               lifts: Array.isArray(p.lifts) ? p.lifts : [],
               bodyLogs: Array.isArray(p.bodyLogs) ? p.bodyLogs : []
             };
@@ -1237,7 +1560,6 @@
         const todayStr = computed(() => getEffectiveDateStr(state.dayResetHour, nowTick.value));
         const selectedDate = ref(todayStr.value);
 
-        // Bug Fix #1: Automatically advance selectedDate when crossing midnight if user was viewing "today"
         watch(todayStr, (newToday, oldToday) => {
           if (selectedDate.value === oldToday) {
             selectedDate.value = newToday;
@@ -1566,7 +1888,6 @@
           else if (!foodInput.value.includes(mod)) foodInput.value = `${foodInput.value} (${mod})`;
         };
 
-        // Bug Fix #5: Added img.onerror handler for unsupported mobile image formats
         const handleFoodPhoto = (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
@@ -1628,7 +1949,6 @@
           if (pendingFood.value) pendingFood.value.actualGrams = Math.max(10, (Number(pendingFood.value.actualGrams) || 0) + delta);
         };
 
-        // Bug Fix #4: Properly zeroes out actualGrams when all sub-items are unchecked
         const recalcPendingFromItems = () => {
           if (!pendingFood.value?.items) return;
           const active = pendingFood.value.items.filter(i => i.checked);
@@ -1739,9 +2059,6 @@
           catch (e) { clearTimeout(timer); throw e; }
         };
 
-        // ============================================================
-        // SELF-EVOLVING AI MODEL AUTO-DISCOVERY ENGINE (Zero Hardcoding)
-        // ============================================================
         const discoverLatestGeminiTiers = async (forceRefresh = false) => {
           const key = cleanKeyStr(state.apiKey);
           const fallbackTiers = [
@@ -1790,7 +2107,6 @@
               .sort((a, b) => b.score - a.score);
 
             if (candidates.length > 0) {
-              // Pick diverse top 3 tiers (e.g. newest Flash, newest Lite, newest Pro/secondary)
               const topFlash = candidates.find(c => /flash/i.test(c.model) && !/lite/i.test(c.model));
               const topLite = candidates.find(c => /flash-lite/i.test(c.model));
               const topOther = candidates.find(c => c.model !== topFlash?.model && c.model !== topLite?.model);
@@ -1858,7 +2174,6 @@
                   throw Object.assign(new Error(`Gemini 金鑰錯誤 (${res.status})`), { fatalKey: true });
                 }
 
-                // Self-healing: If a cached model returns 404 (retired by Google), refresh discovery list live once
                 if (res.status === 404 && !triggeredRefresh) {
                   triggeredRefresh = true;
                   tiers = await discoverLatestGeminiTiers(true);
@@ -1887,7 +2202,6 @@
           throw new Error(lastErr || 'Gemini 機房滿載');
         };
 
-        // Dynamic Model Discovery for Groq (Version-agnostic regex ranking)
         const getGroqChatModels = async () => {
           const key = cleanKeyStr(state.groqKey);
           if (Array.isArray(cachedGroqModels) && cachedGroqModels.length > 0) return cachedGroqModels;
@@ -2075,10 +2389,49 @@
 
         const removeMeal = (id) => { state.meals = state.meals.filter(m => m.id !== id); };
 
-        // Weight Training, Plate x2, PR Crown & Single-Record Per Exercise Logic
+        // ============================================================
+        // WEIGHT TRAINING & ANATOMICAL BODY HEATMAP ENGINE
+        // ============================================================
         const bodyweightCatalog = BODYWEIGHT_CATALOG;
-        const currentGroupOptions = computed(() => EXERCISE_CATALOG[selectedMuscleGroup.value] || []);
+
+        const fullExerciseCatalog = computed(() => {
+          const merged = {};
+          for (const key of Object.keys(BASE_EXERCISE_CATALOG)) {
+            const baseList = BASE_EXERCISE_CATALOG[key] || [];
+            const customList = Array.isArray(state.customExercises[key]) ? state.customExercises[key] : [];
+            merged[key] = Array.from(new Set([...baseList, ...customList]));
+          }
+          return merged;
+        });
+
+        const currentGroupOptions = computed(() => fullExerciseCatalog.value[selectedMuscleGroup.value] || []);
         const activeBwPreset = computed(() => bodyweightCatalog.find(b => b.name === liftForm.exercise) || null);
+        const isPlateLoadedExercise = computed(() => {
+          const ex = liftForm.exercise || '';
+          return /掛片|45度倒蹬|哈克深蹲|V型深蹲|深蹲臀推|跪姿後踢|站姿提踵/.test(ex);
+        });
+
+        const recentUniqueExercises = computed(() => {
+          const seen = new Set();
+          const list = [];
+          for (let i = state.lifts.length - 1; i >= 0; i--) {
+            const l = state.lifts[i];
+            if (l && l.exercise && !seen.has(l.exercise)) {
+              seen.add(l.exercise);
+              list.push({ muscle: l.muscle || '腿臀', exercise: l.exercise });
+              if (list.length >= 6) break;
+            }
+          }
+          return list;
+        });
+
+        const quickSelectRecentExercise = (rec) => {
+          editingLiftId.value = null;
+          const grp = fullExerciseCatalog.value[rec.muscle] ? rec.muscle : '腿臀';
+          selectedMuscleGroup.value = grp;
+          selectedDropdownExercise.value = (fullExerciseCatalog.value[grp] || []).includes(rec.exercise) ? rec.exercise : '__custom__';
+          applyExerciseSelection(rec.exercise);
+        };
 
         const applyExerciseSelection = (exName) => {
           liftForm.muscle = selectedMuscleGroup.value;
@@ -2112,6 +2465,16 @@
           }
         };
 
+        const stepLiftField = (field, delta) => {
+          if (field === 'weight') {
+            liftForm.weight = Math.max(0, Number(((Number(liftForm.weight) || 0) + delta).toFixed(1)));
+          } else if (field === 'reps') {
+            liftForm.reps = Math.max(1, Math.round((Number(liftForm.reps) || 1) + delta));
+          } else if (field === 'sets') {
+            liftForm.sets = Math.max(1, Math.round((Number(liftForm.sets) || 1) + delta));
+          }
+        };
+
         const addExtraLoad = (kg) => {
           liftForm.weight = Number(((Number(liftForm.weight) || 0) + kg).toFixed(1));
           showToast(`已疊加額外負重 +${kg}kg`, '🎒');
@@ -2131,6 +2494,20 @@
           return matches.length ? matches[matches.length - 1] : null;
         });
 
+        const exerciseEst1RM = computed(() => {
+          const name = (liftForm.exercise || '').trim();
+          if (!name) return 0;
+          const matches = state.lifts.filter(l => l.exercise === name && Number(l.weight) > 0);
+          if (!matches.length) return 0;
+          const max1RM = Math.max(...matches.map(l => Number(l.weight) * (1 + (Number(l.reps) || 1) / 30)));
+          return Math.round(max1RM);
+        });
+
+        const isAlreadyLoggedToday = computed(() => {
+          const name = (liftForm.exercise || '').trim();
+          return Boolean(name && state.lifts.some(l => l.date === selectedDate.value && l.exercise === name));
+        });
+
         const applyLastLift = (extra = 0) => {
           const prev = lastRecordForCurrentExercise.value;
           if (!prev) return;
@@ -2148,65 +2525,195 @@
           return weight > prevMaxW || volume > prevMaxVol;
         };
 
+        const rememberCustomExercise = (muscle, exName) => {
+          const grp = BASE_EXERCISE_CATALOG[muscle] ? muscle : '腿臀';
+          const existsInBase = (BASE_EXERCISE_CATALOG[grp] || []).includes(exName);
+          if (existsInBase) return;
+          if (!Array.isArray(state.customExercises[grp])) state.customExercises[grp] = [];
+          if (!state.customExercises[grp].includes(exName)) {
+            state.customExercises[grp].push(exName);
+          }
+        };
+
         const addLiftRecord = () => {
-          if (!liftForm.exercise || !liftForm.reps || !liftForm.sets) return;
+          const exName = (liftForm.exercise || '').trim();
+          if (!exName || !liftForm.reps || !liftForm.sets) return;
           const w = Math.max(0, Number(liftForm.weight) || 0), r = Math.max(1, Math.round(Number(liftForm.reps) || 1)), s = Math.max(1, Math.round(Number(liftForm.sets) || 1)), vol = Math.round(w * r * s);
+          const grp = liftForm.muscle || selectedMuscleGroup.value;
+
+          rememberCustomExercise(grp, exName);
+          if (selectedDropdownExercise.value === '__custom__') {
+            selectedDropdownExercise.value = exName;
+          }
 
           if (editingLiftId.value) {
-            const isPR = checkLiftPR(liftForm.exercise, w, vol, editingLiftId.value);
+            const isPR = checkLiftPR(exName, w, vol, editingLiftId.value);
             const idx = state.lifts.findIndex(l => l.id === editingLiftId.value);
-            if (idx >= 0) state.lifts[idx] = { ...state.lifts[idx], muscle: liftForm.muscle, exercise: liftForm.exercise, weight: w, reps: r, sets: s, volume: vol, isPR };
+            if (idx >= 0) state.lifts[idx] = { ...state.lifts[idx], muscle: grp, exercise: exName, weight: w, reps: r, sets: s, volume: vol, isPR };
             editingLiftId.value = null;
             showToast('已更新訓練紀錄', '✅');
             return;
           }
 
-          const sameDayIdx = state.lifts.findIndex(l => l.date === selectedDate.value && l.exercise === liftForm.exercise);
+          const sameDayIdx = state.lifts.findIndex(l => l.date === selectedDate.value && l.exercise === exName);
           const excludeId = sameDayIdx >= 0 ? state.lifts[sameDayIdx].id : null;
-          const isPR = checkLiftPR(liftForm.exercise, w, vol, excludeId);
+          const isPR = checkLiftPR(exName, w, vol, excludeId);
 
           if (sameDayIdx >= 0) {
             state.lifts[sameDayIdx] = {
               ...state.lifts[sameDayIdx],
-              muscle: liftForm.muscle || selectedMuscleGroup.value,
+              muscle: grp,
               weight: w, reps: r, sets: s, volume: vol, isPR
             };
-            showToast(isPR ? `👑 打破「${liftForm.exercise}」新紀錄 (PR)！` : `已更新今日「${liftForm.exercise}」最新紀錄`, isPR ? '👑' : '✅');
+            if (state.autoRestTimer && selectedDate.value === todayStr.value) startRestTimer(90);
+            showToast(isPR ? `👑 打破「${exName}」新紀錄 (PR)！` : `已更新今日「${exName}」紀錄`, isPR ? '👑' : '✅');
           } else {
-            state.lifts.push({ id: Date.now() + Math.random(), date: selectedDate.value, muscle: liftForm.muscle || selectedMuscleGroup.value, exercise: liftForm.exercise, weight: w, reps: r, sets: s, volume: vol, isPR });
-            showToast(isPR ? `👑 打破「${liftForm.exercise}」新紀錄 (PR)！` : `已紀錄 ${liftForm.exercise}`, isPR ? '👑' : '🏋️');
+            state.lifts.push({ id: Date.now() + Math.random(), date: selectedDate.value, muscle: grp, exercise: exName, weight: w, reps: r, sets: s, volume: vol, isPR });
+            if (state.autoRestTimer && selectedDate.value === todayStr.value) startRestTimer(90);
+            showToast(isPR ? `👑 打破「${exName}」新紀錄 (PR)！` : `已紀錄 ${exName}`, isPR ? '👑' : '🏋️');
           }
         };
 
         const startEditLift = (item) => {
           editingLiftId.value = item.id;
-          const grp = EXERCISE_CATALOG[item.muscle] ? item.muscle : '腿臀';
+          const grp = fullExerciseCatalog.value[item.muscle] ? item.muscle : '腿臀';
           selectedMuscleGroup.value = grp;
-          selectedDropdownExercise.value = (EXERCISE_CATALOG[grp] || []).includes(item.exercise) ? item.exercise : '__custom__';
+          selectedDropdownExercise.value = (fullExerciseCatalog.value[grp] || []).includes(item.exercise) ? item.exercise : '__custom__';
           Object.assign(liftForm, { muscle: item.muscle, exercise: item.exercise, weight: item.weight, reps: item.reps, sets: item.sets });
         };
 
-        // Bug Fix #2: Re-evaluates PR crown when adding an extra set
-        const addExtraSet = (item) => {
-          item.sets += 1;
+        const adjustLiftSets = (item, delta) => {
+          const nextSets = item.sets + delta;
+          if (nextSets < 1) {
+            removeLift(item.id);
+            showToast(`已移除 ${item.exercise}`, '🗑️');
+            return;
+          }
+          item.sets = nextSets;
           item.volume = Math.round(item.weight * item.reps * item.sets);
-          const isNewPR = checkLiftPR(item.exercise, item.weight, item.volume, item.id);
-          if (isNewPR) item.isPR = true;
-          startRestTimer(90);
-          showToast(isNewPR ? `👑 第 ${item.sets} 組破訓練量 PR！已啟動 90 秒休息` : `${item.exercise} 第 ${item.sets} 組！已啟動 90 秒休息`, isNewPR ? '👑' : '⏱️');
+          if (delta > 0) {
+            const isNewPR = checkLiftPR(item.exercise, item.weight, item.volume, item.id);
+            if (isNewPR) item.isPR = true;
+            if (state.autoRestTimer && selectedDate.value === todayStr.value) startRestTimer(90);
+            showToast(isNewPR ? `👑 第 ${item.sets} 組破訓練量 PR！` : `${item.exercise} 第 ${item.sets} 組完成`, isNewPR ? '👑' : '⏱️');
+          } else {
+            item.isPR = checkLiftPR(item.exercise, item.weight, item.volume, item.id);
+          }
         };
 
-        const removeLift = (id) => { state.lifts = state.lifts.filter(l => l.id !== id); };
+        const removeLift = (id) => {
+          if (editingLiftId.value === id) editingLiftId.value = null;
+          state.lifts = state.lifts.filter(l => l.id !== id);
+        };
 
         const dateLifts = computed(() => state.lifts.filter(l => l.date === selectedDate.value));
         const dateTotalVolume = computed(() => dateLifts.value.reduce((s, l) => s + (Number(l.volume) || 0), 0));
         const dateTotalSets = computed(() => dateLifts.value.reduce((s, l) => s + (Number(l.sets) || 0), 0));
+
+        // ============================================================
+        // ANATOMICAL BODY HEATMAP COMPUTED ENGINE
+        // ============================================================
+        const dateZoneMap = computed(() => {
+          const map = {};
+          for (const item of dateLifts.value) {
+            const zones = resolveExerciseZones(item);
+            for (const zId of zones) {
+              const meta = ANATOMICAL_ZONES[zId];
+              if (!meta) continue;
+              if (!map[zId]) {
+                map[zId] = { ...meta, sets: 0, totalVolume: 0, exercises: [] };
+              }
+              map[zId].sets += Number(item.sets) || 0;
+              map[zId].totalVolume += Number(item.volume) || 0;
+              map[zId].exercises.push(item);
+            }
+          }
+          return map;
+        });
+
+        const activeMuscleZonesList = computed(() => {
+          return Object.values(dateZoneMap.value).sort((a, b) => b.totalVolume - a.totalVolume);
+        });
+
+        const getZoneFill = (zId) => {
+          return dateZoneMap.value[zId]?.color || 'var(--muscle-idle)';
+        };
+
+        const inspectMuscleZone = (zId) => {
+          inspectedZoneId.value = inspectedZoneId.value === zId ? null : zId;
+        };
+
+        const inspectedZoneDetail = computed(() => {
+          if (!inspectedZoneId.value) return null;
+          const meta = ANATOMICAL_ZONES[inspectedZoneId.value];
+          if (!meta) return null;
+          const active = dateZoneMap.value[inspectedZoneId.value];
+          return {
+            ...meta,
+            exercises: active ? active.exercises : []
+          };
+        });
+
+        const jumpToMuscleGroup = (targetCat) => {
+          const grp = fullExerciseCatalog.value[targetCat] ? targetCat : '腿臀';
+          selectedMuscleGroup.value = grp;
+          onMuscleGroupChange();
+          inspectedZoneId.value = null;
+          showToast(`已切換至「${grp}」器材選單`, '🎯');
+        };
+
+        // Recent Historical Workout Dates Quick-Filter Pills
+        const workoutHistoryDates = computed(() => {
+          const byDate = {};
+          for (const l of state.lifts) {
+            if (!l.date) continue;
+            if (!byDate[l.date]) byDate[l.date] = new Set();
+            byDate[l.date].add(l.muscle || '重訓');
+          }
+          return Object.keys(byDate)
+            .sort((a, b) => b.localeCompare(a))
+            .slice(0, 8)
+            .map(d => {
+              const muscles = Array.from(byDate[d]).slice(0, 2).join('·');
+              return {
+                date: d,
+                label: d === todayStr.value ? '今天' : d.slice(5),
+                tag: muscles
+              };
+            });
+        });
 
         const last7DaysLiftBars = computed(() => build7DaySeries(ds => state.lifts.filter(x => x.date === ds).reduce((s, x) => s + (Number(x.volume) || 0), 0)));
         const max7DaysLiftVol = computed(() => Math.max(2000, ...last7DaysLiftBars.value.map(d => d.val)));
         const weeklyAvgVolume = computed(() => {
           const active = last7DaysLiftBars.value.filter(d => d.val > 0);
           return active.length ? Math.round(active.reduce((s, d) => s + d.val, 0) / active.length) : 0;
+        });
+
+        const volumeVsAvgDelta = computed(() => {
+          if (dateTotalVolume.value <= 0 || weeklyAvgVolume.value <= 0) return null;
+          return Math.round(((dateTotalVolume.value - weeklyAvgVolume.value) / weeklyAvgVolume.value) * 100);
+        });
+
+        const weeklyMuscleSplit = computed(() => {
+          const validDates = new Set(last7DaysLiftBars.value.map(d => d.date));
+          const map = {};
+          let grandTotal = 0;
+          state.lifts.filter(l => validDates.has(l.date)).forEach(l => {
+            const m = l.muscle || '腿臀';
+            const val = Number(l.volume) || 0;
+            map[m] = (map[m] || 0) + val;
+            grandTotal += val;
+          });
+          if (grandTotal <= 0) return [];
+          return Object.entries(map)
+            .map(([muscle, vol]) => ({
+              muscle,
+              vol,
+              pct: Math.max(1, Math.round((vol / grandTotal) * 100)),
+              barColor: MUSCLE_COLORS[muscle] || 'bg-indigo-500'
+            }))
+            .sort((a, b) => b.vol - a.vol);
         });
 
         const lastWorkoutDate = computed(() => {
@@ -2226,7 +2733,8 @@
           isGeneratingAdvice.value = true;
           const recent = state.lifts.slice(-25);
           const summary = recent.length ? recent.map(l => `${l.date} [${l.muscle}] ${l.exercise}: ${l.weight}kg x ${l.reps}次 x ${l.sets}組 (量${l.volume}kg)`).join('\n') : '尚無歷史紀錄';
-          const prompt = `你是專業肌力與體能教練 (NSCA-CSCS)。使用者體重 ${currentWeight.value}kg，目標熱量 ${state.targetCal}kcal，7日均攝取 ${weeklyAvgIntake.value}kcal。近期訓練：\n${summary}\n只回傳純JSON（繁體中文，每項55-85字）：{"shortTerm":"短期(1-2週)建議","mediumTerm":"中期(1-2個月)建議","longTerm":"長期(3-6個月)建議"}`;
+          const splitStr = weeklyMuscleSplit.value.map(s => `${s.muscle}${s.pct}%`).join('、') || '尚無分布';
+          const prompt = `你是專業肌力與體能教練 (NSCA-CSCS)。使用者體重 ${currentWeight.value}kg，目標熱量 ${state.targetCal}kcal，7日均攝取 ${weeklyAvgIntake.value}kcal，本週肌群分布：${splitStr}。近期訓練：\n${summary}\n只回傳純JSON（繁體中文，每項55-85字）：{"shortTerm":"短期(1-2週)建議","mediumTerm":"中期(1-2個月)建議","longTerm":"長期(3-6個月)建議"}`;
           const { successParsed, usedEngineName } = await runAiNutritionEngine(prompt, '', null);
           if (successParsed?.shortTerm && successParsed?.mediumTerm && successParsed?.longTerm) {
             state.aiTrainingPlan = { ...successParsed, updatedAt: `${todayStr.value} ${getTimeHHMM()} (${usedEngineName})` };
@@ -2278,6 +2786,7 @@
               if (remote.profile) state.profile = { ...defaultProfile, ...remote.profile };
               if (Array.isArray(remote.meals)) state.meals = remote.meals;
               if (Array.isArray(remote.customFoods)) state.customFoods = remote.customFoods;
+              if (remote.customExercises && typeof remote.customExercises === 'object') state.customExercises = remote.customExercises;
               if (Array.isArray(remote.lifts)) state.lifts = remote.lifts;
               if (remote.aiTrainingPlan) state.aiTrainingPlan = remote.aiTrainingPlan;
               if (Array.isArray(remote.bodyLogs)) state.bodyLogs = remote.bodyLogs;
@@ -2323,7 +2832,7 @@
           showToast('已自動偵測最新可用 AI 核心', '⚡');
         };
 
-        // Body Metrics (Create, Edit & Delete Historical Records)
+        // Body Metrics
         const hasLoggedBodyToday = computed(() => state.bodyLogs.some(b => b.date === todayStr.value));
         const currentWeight = computed(() => {
           const last = state.bodyLogs[state.bodyLogs.length - 1];
@@ -2333,7 +2842,6 @@
         const currentBMI = computed(() => (currentWeight.value / Math.pow((Number(state.profile.height) || 170) / 100, 2)).toFixed(1));
         const bmiLabel = computed(() => { const b = Number(currentBMI.value); return b < 18.5 ? '過輕' : b < 24 ? '標準' : b < 27 ? '過重' : '偏高'; });
 
-        // Bug Fix #3: Validates weight > 0 and properly syncs both weight & bodyFat on edit/delete
         const logBodyMetric = () => {
           const wVal = Number(bodyForm.weight);
           if (!wVal || wVal <= 0) return;
@@ -2424,12 +2932,14 @@
                 state.targetCal = Number(p.targetCal) || 1800;
                 if (p.dayResetHour !== undefined) state.dayResetHour = Number(p.dayResetHour) || 0;
                 if (p.darkMode !== undefined) state.darkMode = Boolean(p.darkMode);
+                if (p.autoRestTimer !== undefined) state.autoRestTimer = Boolean(p.autoRestTimer);
                 if (p.groqKey) state.groqKey = p.groqKey;
                 if (p.openrouterKey) state.openrouterKey = p.openrouterKey;
                 if (p.apiKey) state.apiKey = p.apiKey;
                 if (p.profile) state.profile = { ...defaultProfile, ...p.profile };
                 state.meals = Array.isArray(p.meals) ? p.meals : [];
                 if (Array.isArray(p.customFoods)) state.customFoods = p.customFoods;
+                if (p.customExercises && typeof p.customExercises === 'object') state.customExercises = p.customExercises;
                 state.lifts = Array.isArray(p.lifts) ? p.lifts : [];
                 if (p.aiTrainingPlan) state.aiTrainingPlan = p.aiTrainingPlan;
                 state.bodyLogs = Array.isArray(p.bodyLogs) ? p.bodyLogs : [];
@@ -2471,9 +2981,12 @@
           refinePromptInput, isRefining, refiningStatus, refinePendingWithAI,
           analyzeAndAddFood, repeatMeal, removeMeal,
           selectedMuscleGroup, selectedDropdownExercise, currentGroupOptions, onMuscleGroupChange, onExerciseDropdownChange,
+          recentUniqueExercises, quickSelectRecentExercise, isPlateLoadedExercise, stepLiftField, exerciseEst1RM, isAlreadyLoggedToday,
           activeBwPreset, addExtraLoad, doublePlateWeight, editingLiftId, liftForm, lastRecordForCurrentExercise, applyLastLift,
-          previewLiftVolume, addLiftRecord, startEditLift, addExtraSet, removeLift, dateLifts, dateTotalVolume, dateTotalSets,
-          last7DaysLiftBars, max7DaysLiftVol, weeklyAvgVolume, lastWorkoutDate, copyLastWorkoutSession, isGeneratingAdvice, generateAiTrainingAdvice,
+          previewLiftVolume, addLiftRecord, startEditLift, adjustLiftSets, removeLift, dateLifts, dateTotalVolume, dateTotalSets,
+          activeMuscleZonesList, getZoneFill, inspectedZoneId, inspectMuscleZone, inspectedZoneDetail, jumpToMuscleGroup, workoutHistoryDates,
+          last7DaysLiftBars, max7DaysLiftVol, weeklyAvgVolume, volumeVsAvgDelta, weeklyMuscleSplit,
+          lastWorkoutDate, copyLastWorkoutSession, isGeneratingAdvice, generateAiTrainingAdvice,
           showSupabaseSql, isSyncingCloud, pushToSupabase, pullFromSupabase,
           editingBodyDate, bodyForm, hasLoggedBodyToday, currentWeight, currentBodyFat, currentBMI, bmiLabel,
           logBodyMetric, startEditBody, cancelEditBody, removeBodyLog,
